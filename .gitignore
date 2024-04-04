@@ -1,0 +1,13 @@
+build-*
+libyuv
+hwy
+build_android.sh
+cmake-*
+filirovska*
+*.jpeg
+*.yuv
+.idea
+*.a
+libyuv.h
+*.png
+jpeg_t_t.jpg
