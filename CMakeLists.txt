@@ -38,7 +38,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif ()
 
-target_include_directories(sparkyuv PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/hwy)
+target_include_directories(sparkyuv PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/hwy ${CMAKE_SOURCE_DIR}/highway ${CMAKE_SOURCE_DIR}/highway/hwy)
 
 if (BUILD_TOOLS)
     add_executable(yuvtools tools/main.cpp tools/JPEGEncoder.cpp)

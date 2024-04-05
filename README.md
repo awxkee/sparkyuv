@@ -47,48 +47,56 @@ CPU Caches:
   L1 Data 64 KiB
   L1 Instruction 128 KiB
   L2 Unified 4096 KiB (x12)
-Load Average: 3.56, 3.63, 3.55
+Load Average: 4.05, 3.49, 3.12
 ---------------------------------------------------------------------
 Benchmark                           Time             CPU   Iterations
 ---------------------------------------------------------------------
-SparkyuvYUV444P10ToRGBA10      591267 ns       587107 ns         1279
-LibYuvYUV444P10ToRGBA8        1443675 ns      1433590 ns          502
-SparkyuvYUV422P10ToRGBA10      622430 ns       615820 ns         1183
-LibYuvYUV422P10ToRGBA8        1188320 ns      1180468 ns          586
-SparkyuvYUV420P10ToRGBA10      604754 ns       597465 ns         1113
-LibYuvYUV420P10ToRGBA8        1108164 ns      1103271 ns          639
-SparkyuvRGBAP10ToYUV420P10     582013 ns       581083 ns         1203
-SparkyuvRGBA10ToYUV422P10      664671 ns       663213 ns         1064
-SparkyuvRGBA10ToYUV444P10      593346 ns       591960 ns         1173
-SparkyuvYUV444ToRGBA8          412952 ns       411853 ns         1704
-LibYuvYUV444ToRGBA8            376012 ns       374945 ns         1869
-SparkyuvYUV422ToRGBA8          480432 ns       478300 ns         1519
-LibYuvYUV422ToRGBA8            479219 ns       477883 ns         1355
-SparkyuvYUV420ToRGBA8          488677 ns       486058 ns         1453
-LibYuvYUV420ToRGBA8            488411 ns       486123 ns         1441
-SparkyuvRGBA8ToYUV420          550135 ns       546927 ns         1337
-LibyuvRGBA8ToYUV420            276986 ns       276331 ns         2495
-SparkyuvRGBA8ToYUV422          726279 ns       724597 ns          961
-LibYuvRGBA8ToYUV422            403467 ns       403144 ns         1733
-SparkyuvRGBA8ToYUV444          604744 ns       603920 ns         1155
-SparkyuvYCgCoR444ToRGBA8       413621 ns       411799 ns         1745
-SparkyuvYCgCoR422ToRGBA8       416174 ns       413427 ns         1744
-SparkyuvYCgCoR420ToRGBA8       419775 ns       418379 ns         1629
-SparkyuvRGBA8ToYCgCoR420       264105 ns       260870 ns         2598
-SparkyuvRGBA8ToYCgCoR422       326052 ns       325486 ns         2138
-SparkyuvRGBA8ToYCgCoR444       265649 ns       264311 ns         2624
-SparkyuvYCgCo444ToRGBA8        473239 ns       472128 ns         1440
-SparkyuvYCgCo422ToRGBA8        528657 ns       527626 ns         1202
-SparkyuvYCgCo420ToRGBA8        519041 ns       518351 ns         1000
-SparkyuvRGBA8ToYCgCo420        406396 ns       404329 ns         1767
-SparkyuvRGBA8ToYCgCo422        602829 ns       600687 ns         1257
-SparkyuvRGBA8ToYCgCo444        403337 ns       401746 ns         1729
-SparkyuvYcCbcCrc444ToRGBA8   16209038 ns     16176341 ns           44
-SparkyuvYcCbcCrc422ToRGBA8   16824628 ns     16749682 ns           44
-SparkyuvYcCbcCrc420ToRGBA8   16397463 ns     16335024 ns           42
-SparkyuvRGBA8ToYcCbcCrc420   19834527 ns     19706974 ns           38
-SparkyuvRGBA8ToYcCbcCrc422   19211038 ns     19161583 ns           36
-SparkyuvRGBA8ToYcCbcCrc444   18733719 ns     18688514 ns           35
+SparkyuvYUV444P10ToRGBA10      551118 ns       550404 ns         1221
+LibYuvYUV444P10ToRGBA8        1306243 ns      1303076 ns          537
+SparkyuvYUV422P10ToRGBA10      553445 ns       552051 ns         1269
+LibYuvYUV422P10ToRGBA8        1101809 ns      1097574 ns          639
+SparkyuvYUV420P10ToRGBA10      554892 ns       552300 ns         1263
+LibYuvYUV420P10ToRGBA8        1103214 ns      1099146 ns          639
+SparkyuvRGBAP10ToYUV420P10     584238 ns       583105 ns         1204
+SparkyuvRGBA10ToYUV422P10      674540 ns       673739 ns         1041
+SparkyuvRGBA10ToYUV444P10      585881 ns       585132 ns         1198
+SparkyuvYUV444ToRGBA8          401705 ns       401151 ns         1744
+LibYuvYUV444ToRGBA8            368429 ns       368086 ns         1902
+SparkyuvYUV422ToRGBA8          455233 ns       454815 ns         1536
+LibYuvYUV422ToRGBA8            463601 ns       462949 ns         1513
+SparkyuvYUV420ToRGBA8          455347 ns       454899 ns         1536
+LibYuvYUV420ToRGBA8            465197 ns       464310 ns         1511
+SparkyuvRGBA8ToYUV420          515248 ns       514565 ns         1355
+LibyuvRGBA8ToYUV420            272279 ns       272076 ns         2562
+SparkyuvRGBA8ToYUV422          726667 ns       725647 ns          962
+LibYuvRGBA8ToYUV422            403226 ns       402867 ns         1734
+SparkyuvRGBA8ToYUV444          620285 ns       616267 ns         1155
+SparkyuvYCgCoR444ToRGBA8       395872 ns       394793 ns         1767
+SparkyuvYCgCoR422ToRGBA8       395195 ns       394794 ns         1770
+SparkyuvYCgCoR420ToRGBA8       395537 ns       395018 ns         1771
+SparkyuvRGBA8ToYCgCoR420       248834 ns       248530 ns         2810
+SparkyuvRGBA8ToYCgCoR422       317993 ns       317633 ns         2201
+SparkyuvRGBA8ToYCgCoR444       250690 ns       250395 ns         2709
+SparkyuvYCgCo444ToRGBA8        456278 ns       455835 ns         1532
+SparkyuvYCgCo422ToRGBA8        471102 ns       470494 ns         1487
+SparkyuvYCgCo420ToRGBA8        470865 ns       470233 ns         1486
+SparkyuvRGBA8ToYCgCo420        360018 ns       359658 ns         1941
+SparkyuvRGBA8ToYCgCo422        541583 ns       540184 ns         1291
+SparkyuvRGBA8ToYCgCo444        366007 ns       365610 ns         1907
+SparkyuvYcCbcCrc444ToRGBA8   16105818 ns     16086000 ns           43
+SparkyuvYcCbcCrc422ToRGBA8   16046212 ns     16024455 ns           44
+SparkyuvYcCbcCrc420ToRGBA8   16073391 ns     16048614 ns           44
+SparkyuvRGBA8ToYcCbcCrc420   18330530 ns     18305684 ns           38
+SparkyuvRGBA8ToYcCbcCrc422   19055117 ns     19029757 ns           37
+SparkyuvRGBA8ToYcCbcCrc444   18423327 ns     18399026 ns           38
+SparkyuvYDzDx444ToRGBA8        719628 ns       718599 ns          975
+SparkyuvYDzDx422ToRGBA8        764828 ns       763778 ns          918
+SparkyuvYDzDx420ToRGBA8        764519 ns       763557 ns          917
+SparkyuvRGBA8ToYDzDx420       1018691 ns      1017451 ns          690
+SparkyuvRGBA8ToYDzDx422       1149731 ns      1148238 ns          609
+SparkyuvRGBA8ToYDzDx444        231984 ns       231768 ns         3004
+LibyuvPremultiply              208437 ns       208235 ns         3344
+SparkyuvPremultiply            307503 ns       306999 ns         2275
 ```
 
 ##### YcCbcCrc 
@@ -160,3 +168,24 @@ Sparkyuv (the same as libhwy) supports 22 targets, listed in alphabetical order 
     - `AVX3_ZEN4` (like AVX3_DL but optimized for AMD Zen4; requires opt-in by
       defining `HWY_WANT_AVX3_ZEN4` if compiling for static dispatch)
     - `AVX3_SPR` (~Sapphire Rapids, includes AVX-512FP16)
+
+### Usage example
+
+```c++
+sparkyuv::YUV444P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                            rgba16Stride,
+                            inWidth, inHeight,
+                            reinterpret_cast<uint16_t *>(yPlane.data()),
+                            yPlaneStride,
+                            reinterpret_cast<uint16_t *>(uPlane.data()),
+                            uvPlaneStride,
+                            reinterpret_cast<uint16_t *>(vPlane.data()),
+                            uvPlaneStride,
+                            0.299f, 0.114f,
+                            sparkyuv::YUV_RANGE_TV);
+
+sparkyuv::YCgCoR420P8ToRGBA8(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             uPlane.data(), uvPlaneStride,
+                             vPlane.data(), uvPlaneStride, sparkyuv::YCGCO_RE);
+```
