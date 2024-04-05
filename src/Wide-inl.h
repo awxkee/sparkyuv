@@ -57,20 +57,7 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
       V8 G8;
       V8 B8;
       V8 A8;
-      switch (PixelType) {
-        case PIXEL_RGB:LoadInterleaved3(du8, source, R8, G8, B8);
-          break;
-        case PIXEL_BGR:LoadInterleaved3(du8, source, B8, G8, R8);
-          break;
-        case PIXEL_RGBA:LoadInterleaved4(du8, source, R8, G8, B8, A8);
-          break;
-        case PIXEL_BGRA:LoadInterleaved4(du8, source, B8, G8, R8, A8);
-          break;
-        case PIXEL_ARGB:LoadInterleaved4(du8, source, A8, R8, G8, B8);
-          break;
-        case PIXEL_ABGR:LoadInterleaved4(du8, source, A8, B8, G8, R8);
-          break;
-      }
+      LoadRGBA<PixelType>(du8, source, R8, G8, B8, A8);
 
       V16 R = PromoteTo(du16, R8);
       V16 G = PromoteTo(du16, G8);
@@ -110,20 +97,7 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
         }
       }
 
-      switch (PixelType) {
-        case PIXEL_RGBA:StoreInterleaved4(R, G, B, A, du16, store);
-          break;
-        case PIXEL_ABGR:StoreInterleaved4(A, B, G, R, du16, store);
-          break;
-        case PIXEL_BGR:StoreInterleaved3(B, G, R, du16, store);
-          break;
-        case PIXEL_RGB:StoreInterleaved3(R, G, B, du16, store);
-          break;
-        case PIXEL_BGRA:StoreInterleaved4(B, G, R, A, du16, store);
-          break;
-        case PIXEL_ARGB:StoreInterleaved4(A, R, G, B, du16, store);
-          break;
-      }
+      StoreRGBA<PixelType>(du16, store, R, G, B, A);
 
       store += lanes * components;
       source += lanes * components;
@@ -135,36 +109,7 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
       uint16_t b;
       uint16_t a;
 
-      switch (PixelType) {
-        case PIXEL_RGB:r = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          b = static_cast<uint16_t>(source[2]);
-          break;
-        case PIXEL_RGBA:r = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          b = static_cast<uint16_t>(source[2]);
-          a = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_BGRA:b = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          r = static_cast<uint16_t>(source[2]);
-          a = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_BGR:b = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          r = static_cast<uint16_t>(source[2]);
-          break;
-        case PIXEL_ARGB:a = static_cast<uint16_t>(source[0]);
-          r = static_cast<uint16_t>(source[1]);
-          g = static_cast<uint16_t>(source[2]);
-          b = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_ABGR:a = static_cast<uint16_t>(source[0]);
-          b = static_cast<uint16_t>(source[1]);
-          g = static_cast<uint16_t>(source[2]);
-          r = static_cast<uint16_t>(source[3]);
-          break;
-      }
+      LoadRGBA<uint8_t, uint16_t, PixelType>(source, r, g, b, a);
 
       r = r << diff;
       g = g << diff;
@@ -173,28 +118,7 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
         a = a << diff;
       }
 
-      switch (PixelType) {
-        case PIXEL_RGBA:store[3] = a;
-        case PIXEL_RGB:store[0] = r;
-          store[1] = g;
-          store[2] = b;
-          break;
-        case PIXEL_BGRA:store[3] = a;
-        case PIXEL_BGR:store[2] = r;
-          store[1] = g;
-          store[0] = b;
-          break;
-        case PIXEL_ABGR:store[0] = a;
-          store[3] = r;
-          store[2] = g;
-          store[1] = b;
-          break;
-        case PIXEL_ARGB:store[0] = a;
-          store[1] = r;
-          store[2] = g;
-          store[3] = b;
-          break;
-      }
+      StoreRGBA<uint16_t, uint16_t, PixelType>(store, r, g, b, a);
 
       store += components;
       source += components;

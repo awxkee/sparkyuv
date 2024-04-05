@@ -22,9 +22,9 @@
 #include "hwy/cache_control.h"
 #include "sparkyuv.h"
 #include "yuv-inl.h"
-#include "YUV420-inl.h"
-#include "YUV422-inl.h"
-#include "YUV444-inl.h"
+#include "YCbCr420-inl.h"
+#include "YCbCr422-inl.h"
+#include "YCbCr444-inl.h"
 
 #if HWY_ONCE
 namespace sparkyuv {

@@ -134,20 +134,8 @@ void Pixel16ToYUV444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
       V16 G;
       V16 B;
       V16 A;
-      switch (PixelType) {
-        case PIXEL_RGB:LoadInterleaved3(d16, reinterpret_cast<const int16_t *>(mSrc), R, G, B);
-          break;
-        case PIXEL_BGR:LoadInterleaved3(d16, reinterpret_cast<const int16_t *>(mSrc), B, G, R);
-          break;
-        case PIXEL_RGBA:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(mSrc), R, G, B, A);
-          break;
-        case PIXEL_BGRA:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(mSrc), B, G, R, A);
-          break;
-        case PIXEL_ARGB:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(mSrc), A, R, G, B);
-          break;
-        case PIXEL_ABGR:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(mSrc), A, B, G, R);
-          break;
-      }
+
+      LoadRGBA<PixelType>(d16, reinterpret_cast<const int16_t *>(mSrc), R, G, B, A);
 
 #if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
       V32 YRh = vBiasY;
@@ -168,20 +156,7 @@ void Pixel16ToYUV444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
           VU16 G1;
           VU16 B1;
           VU16 A1;
-          switch (PixelType) {
-            case PIXEL_RGB:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(nextRow), R1, G1, B1);
-              break;
-            case PIXEL_BGR:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(nextRow), B1, G1, R1);
-              break;
-            case PIXEL_RGBA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), R1, G1, B1, A1);
-              break;
-            case PIXEL_BGRA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), B1, G1, R1, A1);
-              break;
-            case PIXEL_ARGB:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), A1, R1, G1, B1);
-              break;
-            case PIXEL_ABGR:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), A1, B1, G1, R1);
-              break;
-          }
+          LoadRGBA<PixelType>(du16, reinterpret_cast<const uint16_t *>(nextRow), R1, G1, B1, A1);
 
           R = BitCast(d16, ShiftRight<1>(Add(BitCast(du16, R), R1)));
           G = BitCast(d16, ShiftRight<1>(Add(BitCast(du16, G), G1)));
@@ -309,26 +284,7 @@ void Pixel16ToYUV444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
       int g;
       int b;
 
-      switch (PixelType) {
-        case PIXEL_RGB:
-        case PIXEL_RGBA:r = static_cast<int>(mSrc[0]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[2]);
-          break;
-        case PIXEL_BGRA:
-        case PIXEL_BGR:r = static_cast<int>(mSrc[2]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[0]);
-          break;
-        case PIXEL_ARGB:r = static_cast<int>(mSrc[1]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[3]);
-          break;
-        case PIXEL_ABGR:r = static_cast<int>(mSrc[3]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[1]);
-          break;
-      }
+      LoadRGB<uint16_t, int, PixelType>(mSrc, r, g, b);
 
       int Y = ((r * static_cast<int>(YR) + g * static_cast<int>(YG) + b * static_cast<int>(YB) + iBiasY) >> precision);
       yDst[0] = std::clamp(Y, static_cast<int>(biasY), cutOffY);
@@ -339,26 +295,7 @@ void Pixel16ToYUV444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
         if (x + 1 < width) {
           int r1 = r, g1 = g, b1 = b;
 
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r1 = static_cast<int>(mSrc[0]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r1 = static_cast<int>(mSrc[2]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[0]);
-              break;
-            case PIXEL_ARGB:r1 = static_cast<int>(mSrc[1]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[3]);
-              break;
-            case PIXEL_ABGR:r1 = static_cast<int>(mSrc[3]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[1]);
-              break;
-          }
+          LoadRGB<uint16_t, int, PixelType>(mSrc, r1, g1, b1);
 
           r = (r + r1) >> 1;
           g = (g + g1) >> 1;
@@ -381,71 +318,13 @@ void Pixel16ToYUV444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
           int r2 = r, g2 = g, b2 = b;
           int r3 = r, g3 = g, b3 = b;
 
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r2 = static_cast<int>(nextRow[0]);
-              g2 = static_cast<int>(nextRow[1]);
-              b2 = static_cast<int>(nextRow[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r2 = static_cast<int>(nextRow[2]);
-              g2 = static_cast<int>(nextRow[1]);
-              b2 = static_cast<int>(nextRow[0]);
-              break;
-            case PIXEL_ARGB:r2 = static_cast<int>(nextRow[1]);
-              g2 = static_cast<int>(nextRow[2]);
-              b2 = static_cast<int>(nextRow[3]);
-              break;
-            case PIXEL_ABGR:r2 = static_cast<int>(nextRow[3]);
-              g2 = static_cast<int>(nextRow[2]);
-              b2 = static_cast<int>(nextRow[1]);
-              break;
-          }
+          LoadRGB<uint16_t, int, PixelType>(nextRow, r2, g2, b2);
 
           nextRow += components;
 
           if (x + 1 < width) {
-            switch (PixelType) {
-              case PIXEL_RGB:
-              case PIXEL_RGBA:r3 = static_cast<int>(nextRow[0]);
-                g3 = static_cast<int>(nextRow[1]);
-                b3 = static_cast<int>(nextRow[2]);
-                break;
-              case PIXEL_BGRA:
-              case PIXEL_BGR:r3 = static_cast<int>(nextRow[2]);
-                g3 = static_cast<int>(nextRow[1]);
-                b3 = static_cast<int>(nextRow[0]);
-                break;
-              case PIXEL_ARGB:r3 = static_cast<int>(nextRow[1]);
-                g3 = static_cast<int>(nextRow[2]);
-                b3 = static_cast<int>(nextRow[3]);
-                break;
-              case PIXEL_ABGR:r3 = static_cast<int>(nextRow[3]);
-                g3 = static_cast<int>(nextRow[2]);
-                b3 = static_cast<int>(nextRow[1]);
-                break;
-            }
-
-            switch (PixelType) {
-              case PIXEL_RGB:
-              case PIXEL_RGBA:r1 = static_cast<int>(mSrc[0]);
-                g1 = static_cast<int>(mSrc[1]);
-                b1 = static_cast<int>(mSrc[2]);
-                break;
-              case PIXEL_BGRA:
-              case PIXEL_BGR:r1 = static_cast<int>(mSrc[2]);
-                g1 = static_cast<int>(mSrc[1]);
-                b1 = static_cast<int>(mSrc[0]);
-                break;
-              case PIXEL_ARGB:r1 = static_cast<int>(mSrc[1]);
-                g1 = static_cast<int>(mSrc[2]);
-                b1 = static_cast<int>(mSrc[3]);
-                break;
-              case PIXEL_ABGR:r1 = static_cast<int>(mSrc[3]);
-                g1 = static_cast<int>(mSrc[2]);
-                b1 = static_cast<int>(mSrc[1]);
-                break;
-            }
+            LoadRGB<uint16_t, int, PixelType>(nextRow, r3, g3, b3);
+            LoadRGB<uint16_t, int, PixelType>(mSrc, r1, g1, b1);
 
             int Y1 = ((r1 * static_cast<int>(YR) + g1 * static_cast<int>(YG) + b1 * static_cast<int>(YB) + iBiasY)
                 >> precision);
@@ -770,34 +649,8 @@ void YUV444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStr
       int B = (Y + CbCoeff * Cb) >> precision;
       int G = (Y - GCoeff1 * Cr - GCoeff2 * Cb) >> precision;
 
-      R = std::clamp(R, 0, maxColors);
-      B = std::clamp(B, 0, maxColors);
-      G = std::clamp(G, 0, maxColors);
+      SaturatedStoreRGBA<uint16_t, int, PixelType>(store, R, G, B, maxColors, maxColors);
 
-      switch (PixelType) {
-        case PIXEL_RGBA:store[3] = maxColors;
-        case PIXEL_RGB:store[0] = static_cast<uint16_t>(R);
-          store[1] = static_cast<uint16_t>(G);
-          store[2] = static_cast<uint16_t>(B);
-          break;
-        case PIXEL_BGRA:store[3] = maxColors;
-        case PIXEL_BGR:store[2] = static_cast<uint16_t>(R);
-          store[1] = static_cast<uint16_t>(G);
-          store[0] = static_cast<uint16_t>(B);
-          break;
-        case PIXEL_ABGR:store[0] = maxColors;
-          store[3] = static_cast<uint16_t>(R);
-          store[2] = static_cast<uint16_t>(G);
-          store[1] = static_cast<uint16_t>(B);
-          break;
-        case PIXEL_ARGB: {
-          store[0] = maxColors;
-          store[1] = static_cast<uint16_t>(R);
-          store[2] = static_cast<uint16_t>(G);
-          store[3] = static_cast<uint16_t>(B);
-        }
-          break;
-      }
       store += components;
       ySrc += 1;
 
@@ -808,34 +661,7 @@ void YUV444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStr
           int B1 = (Y1 + CbCoeff * Cb) >> precision;
           int G1 = (Y1 - GCoeff1 * Cr - GCoeff2 * Cb) >> precision;
 
-          R1 = std::clamp(R1, 0, maxColors);
-          B1 = std::clamp(B1, 0, maxColors);
-          G1 = std::clamp(G1, 0, maxColors);
-
-          switch (PixelType) {
-            case PIXEL_RGBA:store[3] = maxColors;
-            case PIXEL_RGB:store[0] = static_cast<uint16_t>(R1);
-              store[1] = static_cast<uint16_t>(G1);
-              store[2] = static_cast<uint16_t>(B1);
-              break;
-            case PIXEL_BGRA:store[3] = maxColors;
-            case PIXEL_BGR:store[2] = static_cast<uint16_t>(R1);
-              store[1] = static_cast<uint16_t>(G1);
-              store[0] = static_cast<uint16_t>(B1);
-              break;
-            case PIXEL_ABGR:store[0] = maxColors;
-              store[3] = static_cast<uint16_t>(R1);
-              store[2] = static_cast<uint16_t>(G1);
-              store[1] = static_cast<uint16_t>(B1);
-              break;
-            case PIXEL_ARGB: {
-              store[0] = maxColors;
-              store[1] = static_cast<uint16_t>(R1);
-              store[2] = static_cast<uint16_t>(G1);
-              store[3] = static_cast<uint16_t>(B1);
-            }
-              break;
-          }
+          SaturatedStoreRGBA<uint16_t, int, PixelType>(store, R1, G1, B1, maxColors, maxColors);
           store += components;
           ySrc += 1;
         }

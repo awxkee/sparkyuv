@@ -89,43 +89,12 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
     auto mSrc = reinterpret_cast<const T *>(mSource);
 
     for (; x + lanes < width; x += lanes) {
-      VU16 R, G, B, A;
+      VU16 R, G, B;
       if (std::is_same<T, uint8_t>::value) {
-        const Rebind<uint8_t, decltype(du16)> du8;
-        using V8 = Vec<decltype(du8)>;
-        V8 R8, G8, B8, A8;
-        switch (PixelType) {
-          case PIXEL_RGB:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(mSrc), R8, G8, B8);
-            break;
-          case PIXEL_BGR:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(mSrc), B8, G8, R8);
-            break;
-          case PIXEL_RGBA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), R8, G8, B8, A8);
-            break;
-          case PIXEL_BGRA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), B8, G8, R8, A8);
-            break;
-          case PIXEL_ARGB:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), A8, R8, G8, B8);
-            break;
-          case PIXEL_ABGR:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), A8, B8, G8, R8);
-            break;
-        }
-        R = PromoteTo(du16, R8);
-        G = PromoteTo(du16, G8);
-        B = PromoteTo(du16, B8);
+        const Rebind<uint8_t, decltype(du16)> d8;
+        LoadRGBTo16<PixelType>(d8, reinterpret_cast<const uint8_t *>(mSrc), R, G, B);
       } else if (std::is_same<T, uint16_t>::value) {
-        switch (PixelType) {
-          case PIXEL_RGB:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(mSrc), R, G, B);
-            break;
-          case PIXEL_BGR:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(mSrc), B, G, R);
-            break;
-          case PIXEL_RGBA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), R, G, B, A);
-            break;
-          case PIXEL_BGRA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), B, G, R, A);
-            break;
-          case PIXEL_ARGB:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), A, R, G, B);
-            break;
-          case PIXEL_ABGR:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), A, B, G, R);
-            break;
-        }
+        LoadRGBTo16<PixelType>(du16, reinterpret_cast<const uint16_t *>(mSrc), R, G, B);
       } else {
         static_assert(std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value, "Unexpected storage type");
       }
@@ -169,10 +138,10 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           const auto Cgh = ShiftRight<6>(Add(viBiasUV,
                                              Sub(ShiftRight<1>(Gh),
                                                  ShiftRight<2>(Add(Rh, Bh)))));
-          Cg = BitCast(du16, Combine(di16, DemoteTo(di16, Cgh), DemoteTo(di16, Cgl)));
+          Cg = BitCast(du16, Combine(di16, DemoteTo(dhi16, Cgh), DemoteTo(dhi16, Cgl)));
           const auto Col = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
           const auto Coh = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
-          Co = BitCast(du16, Combine(di16, DemoteTo(di16, Coh), DemoteTo(di16, Col)));
+          Co = BitCast(du16, Combine(di16, DemoteTo(dhi16, Coh), DemoteTo(dhi16, Col)));
         }
 
         if (std::is_same<T, uint16_t>::value) {
@@ -191,7 +160,6 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         using VHU16 = Vec<decltype(dhu16)>;
         VU16 Y;
         VHU16 Cg, Co;
-        using V32 = Vec<decltype(di32)>;
 
         // uint16_t 12 bit max colors 4096 then 4096*2 < 2^16 so overflowing is not possible in uint16_t domain
         // Bi-linear sample
@@ -278,26 +246,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       int g;
       int b;
 
-      switch (PixelType) {
-        case PIXEL_RGB:
-        case PIXEL_RGBA:r = static_cast<int>(mSrc[0]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[2]);
-          break;
-        case PIXEL_BGRA:
-        case PIXEL_BGR:r = static_cast<int>(mSrc[2]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[0]);
-          break;
-        case PIXEL_ARGB:r = static_cast<int>(mSrc[1]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[3]);
-          break;
-        case PIXEL_ABGR:r = static_cast<int>(mSrc[3]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[1]);
-          break;
-      }
+      LoadRGB<T, int, PixelType>(mSrc, r, g, b);
 
       r *= rangeReduction;
       g *= rangeReduction;
@@ -315,27 +264,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         mSrc += components;
         if (x + 1 < width) {
           int r1 = r, g1 = g, b1 = b;
-
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r1 = static_cast<int>(mSrc[0]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r1 = static_cast<int>(mSrc[2]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[0]);
-              break;
-            case PIXEL_ARGB:r1 = static_cast<int>(mSrc[1]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[3]);
-              break;
-            case PIXEL_ABGR:r1 = static_cast<int>(mSrc[3]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[1]);
-              break;
-          }
+          LoadRGB<T, int, PixelType>(mSrc, r1, g1, b1);
 
           r1 *= rangeReduction;
           g1 *= rangeReduction;
@@ -360,26 +289,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         int r3 = r, g3 = g, b3 = b;
 
         if (x + 1 < width) {
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r1 = static_cast<int>(mSrc[0]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r1 = static_cast<int>(mSrc[2]);
-              g1 = static_cast<int>(mSrc[1]);
-              b1 = static_cast<int>(mSrc[0]);
-              break;
-            case PIXEL_ARGB:r1 = static_cast<int>(mSrc[1]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[3]);
-              break;
-            case PIXEL_ABGR:r1 = static_cast<int>(mSrc[3]);
-              g1 = static_cast<int>(mSrc[2]);
-              b1 = static_cast<int>(mSrc[1]);
-              break;
-          }
+          LoadRGB<T, int, PixelType>(mSrc, r1, g1, b1);
 
           r1 *= rangeReduction;
           g1 *= rangeReduction;
@@ -396,26 +306,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           if (y + 1 < height - 1) {
             nextRow = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(oldSrc) + srcStride);
           }
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r2 = static_cast<int>(nextRow[0]);
-              g2 = static_cast<int>(nextRow[1]);
-              b2 = static_cast<int>(nextRow[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r2 = static_cast<int>(nextRow[2]);
-              g2 = static_cast<int>(nextRow[1]);
-              b2 = static_cast<int>(nextRow[0]);
-              break;
-            case PIXEL_ARGB:r2 = static_cast<int>(nextRow[1]);
-              g2 = static_cast<int>(nextRow[2]);
-              b2 = static_cast<int>(nextRow[3]);
-              break;
-            case PIXEL_ABGR:r2 = static_cast<int>(nextRow[3]);
-              g2 = static_cast<int>(nextRow[2]);
-              b2 = static_cast<int>(nextRow[1]);
-              break;
-          }
+
+          LoadRGB<T, int, PixelType>(nextRow, r2, g2, b2);
 
           r2 *= rangeReduction;
           g2 *= rangeReduction;
@@ -424,26 +316,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           nextRow += components;
 
           if (x + 1 < width) {
-            switch (PixelType) {
-              case PIXEL_RGB:
-              case PIXEL_RGBA:r3 = static_cast<int>(nextRow[0]);
-                g3 = static_cast<int>(nextRow[1]);
-                b3 = static_cast<int>(nextRow[2]);
-                break;
-              case PIXEL_BGRA:
-              case PIXEL_BGR:r3 = static_cast<int>(nextRow[2]);
-                g3 = static_cast<int>(nextRow[1]);
-                b3 = static_cast<int>(nextRow[0]);
-                break;
-              case PIXEL_ARGB:r3 = static_cast<int>(nextRow[1]);
-                g3 = static_cast<int>(nextRow[2]);
-                b3 = static_cast<int>(nextRow[3]);
-                break;
-              case PIXEL_ABGR:r3 = static_cast<int>(nextRow[3]);
-                g3 = static_cast<int>(nextRow[2]);
-                b3 = static_cast<int>(nextRow[1]);
-                break;
-            }
+            LoadRGB<T, int, PixelType>(nextRow, r3, g3, b3);
 
             r3 *= rangeReduction;
             g3 *= rangeReduction;
@@ -499,7 +372,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
  * and compile each variant separately however increase of binary size about 400%
  * and compile time abound 1000% sacrifices this benefit
 */
-#define PIXEL_TO_YCCBCCRC(T, PixelType, bit, yuvname, chroma) \
+#define PIXEL_TO_YCGCO(T, PixelType, bit, yuvname, chroma) \
 void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                     const uint32_t width, const uint32_t height,                                 \
                     T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,                         \
@@ -513,79 +386,79 @@ void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, co
                                                                colorRange);\
 }
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, RGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, RGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, RGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, RGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, RGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCCBCCRC(uint16_t, RGBA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, RGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, RGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCCBCCRC(uint8_t, RGBA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint8_t, RGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, RGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCCBCCRC(uint8_t, RGBA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint8_t, RGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, RGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCCBCCRC(uint8_t, RGBA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint8_t, RGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, RGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, BGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, BGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, BGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCCBCCRC(uint8_t, BGRA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint8_t, ABGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint8_t, ARGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint8_t, BGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint8_t, BGRA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint8_t, ABGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint8_t, ARGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint8_t, BGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint8_t, BGRA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint8_t, ABGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint8_t, ARGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint8_t, BGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, BGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, BGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint8_t, BGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCCBCCRC(uint16_t, BGRA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, ABGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, ARGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCCBCCRC(uint16_t, BGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, BGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, BGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YCGCO(uint16_t, BGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
-#undef PIXEL_TO_YCCBCCRC
+#undef PIXEL_TO_YCGCO
 
 template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
     SparkYuvChromaSubsample chromaSubsample, int bitDepth>
@@ -619,6 +492,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 
   const ScalableTag<uint16_t> du16;
   const RebindToSigned<decltype(du16)> di16;
+  const Half<decltype(di16)> dhi16;
   using VU16 = Vec<decltype(du16)>;
   const Rebind<T, decltype(du16)> d;
   const Half<decltype(d)> dh;
@@ -629,7 +503,6 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const auto viZeros = Zero(di16);
   const auto A16 = Set(du16, maxColors);
   const Rebind<uint8_t, decltype(du16)> d8;
-  const auto A8 = Set(d8, maxColors);
   const auto vRangeReduction = Set(di16, rangeReduction);
   const Rebind<int32_t, decltype(dhu16)> di32;
   const auto viRangeReduction = Set(di32, rangeReduction);
@@ -717,44 +590,15 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
         const auto Rl = ShiftRight<6>(Add(tl, sCol));
         const auto Rh = ShiftRight<6>(Add(th, sCoh));
 
-        G16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(di16, Gh), DemoteTo(di16, Gl)), viZeros, vMaxColors));
-        B16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(di16, Bh), DemoteTo(di16, Bl)), viZeros, vMaxColors));
-        R16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(di16, Rh), DemoteTo(di16, Rl)), viZeros, vMaxColors));
+        G16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Gh), DemoteTo(dhi16, Gl)), viZeros, vMaxColors));
+        B16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Bh), DemoteTo(dhi16, Bl)), viZeros, vMaxColors));
+        R16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Rh), DemoteTo(dhi16, Rl)), viZeros, vMaxColors));
       }
 
       if (std::is_same<T, uint16_t>::value) {
-        switch (PixelType) {
-          case PIXEL_RGBA:StoreInterleaved4(R16, G16, B16, A16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-          case PIXEL_ABGR:StoreInterleaved4(A16, B16, G16, R16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-          case PIXEL_BGR:StoreInterleaved3(B16, G16, R16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-          case PIXEL_RGB:StoreInterleaved3(R16, G16, B16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-          case PIXEL_BGRA:StoreInterleaved4(B16, G16, R16, A16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-          case PIXEL_ARGB:StoreInterleaved4(A16, R16, G16, B16, du16, reinterpret_cast<uint16_t*>(store));
-            break;
-        }
+        StoreRGBA<PixelType>(du16, reinterpret_cast<uint16_t *>(store), R16, G16, B16, A16);
       } else if (std::is_same<T, uint8_t>::value) {
-        const auto R8 = DemoteTo(d8, R16);
-        const auto G8 = DemoteTo(d8, G16);
-        const auto B8 = DemoteTo(d8, B16);
-        switch (PixelType) {
-          case PIXEL_RGBA:StoreInterleaved4(R8, G8, B8, A8, d8, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_ABGR:StoreInterleaved4(A8, B8, G8, R8, d8, reinterpret_cast<uint8_t*>(store));
-            break;
-          case PIXEL_BGR:StoreInterleaved3(B8, G8, R8, d8, reinterpret_cast<uint8_t*>(store));
-            break;
-          case PIXEL_RGB:StoreInterleaved3(R8, G8, B8, d8, reinterpret_cast<uint8_t*>(store));
-            break;
-          case PIXEL_BGRA:StoreInterleaved4(B8, G8, R8, A8, d8, reinterpret_cast<uint8_t*>(store));
-            break;
-          case PIXEL_ARGB:StoreInterleaved4(A8, R8, G8, B8, d8, reinterpret_cast<uint8_t*>(store));
-            break;
-        }
+        StoreRGBA<PixelType>(du16, reinterpret_cast<uint8_t *>(store), R16, G16, B16, A16);
       } else {
         static_assert(std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value, "Unexpected storage type");
       }
@@ -779,30 +623,8 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       int B = std::clamp((t - Cr) >> precision, 0, maxColors);
       int R = std::clamp((t + Cr) >> precision, 0, maxColors);
 
-      switch (PixelType) {
-        case PIXEL_RGBA:store[3] = maxColors;
-        case PIXEL_RGB:store[0] = static_cast<T>(R);
-          store[1] = static_cast<T>(G);
-          store[2] = static_cast<T>(B);
-          break;
-        case PIXEL_BGRA:store[3] = maxColors;
-        case PIXEL_BGR:store[2] = static_cast<T>(R);
-          store[1] = static_cast<T>(G);
-          store[0] = static_cast<T>(B);
-          break;
-        case PIXEL_ABGR:store[0] = maxColors;
-          store[3] = static_cast<T>(R);
-          store[2] = static_cast<T>(G);
-          store[1] = static_cast<T>(B);
-          break;
-        case PIXEL_ARGB: {
-          store[0] = maxColors;
-          store[1] = static_cast<T>(R);
-          store[2] = static_cast<T>(G);
-          store[3] = static_cast<T>(B);
-        }
-          break;
-      }
+      StoreRGBA<T, int, PixelType>(store, R, G, B, maxColors);
+
       store += components;
       ySrc += 1;
 
@@ -814,30 +636,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
           int B1 = std::clamp((t1 - Cr) >> precision, 0, maxColors);
           int R1 = std::clamp((t + Cr) >> precision, 0, maxColors);
 
-          switch (PixelType) {
-            case PIXEL_RGBA:store[3] = maxColors;
-            case PIXEL_RGB:store[0] = static_cast<T>(R1);
-              store[1] = static_cast<T>(G1);
-              store[2] = static_cast<T>(B1);
-              break;
-            case PIXEL_BGRA:store[3] = maxColors;
-            case PIXEL_BGR:store[2] = static_cast<T>(R1);
-              store[1] = static_cast<T>(G1);
-              store[0] = static_cast<T>(B1);
-              break;
-            case PIXEL_ABGR:store[0] = maxColors;
-              store[3] = static_cast<T>(R1);
-              store[2] = static_cast<T>(G1);
-              store[1] = static_cast<T>(B1);
-              break;
-            case PIXEL_ARGB: {
-              store[0] = maxColors;
-              store[1] = static_cast<T>(R1);
-              store[2] = static_cast<T>(G1);
-              store[3] = static_cast<T>(B1);
-            }
-              break;
-          }
+          StoreRGBA<T, int, PixelType>(store, R1, G1, B1, maxColors);
           store += components;
           ySrc += 1;
         }
@@ -859,8 +658,6 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
     mYSrc += yStride;
     dst += dstStride;
   }
-
-#undef SUITABLE_FLOAT_16
 }
 
 /**

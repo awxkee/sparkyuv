@@ -9,10 +9,10 @@
 #include <string>
 
 namespace sparkyuv {
-bool decompressJPEG(const char *filename, std::vector<uint8_t> &imageBuffer, int &width, int &height) {
-  FILE *file = fopen(filename, "rb");
+static bool decompressJPEG(std::string &filename, std::vector<uint8_t> &imageBuffer, int &width, int &height) {
+  FILE *file = fopen(filename.c_str(), "rb");
   if (!file) {
-    fprintf(stderr, "Error opening JPEG file: %s\n", filename);
+    fprintf(stderr, "Error opening JPEG file: %s\n", filename.c_str());
     return false;
   }
 

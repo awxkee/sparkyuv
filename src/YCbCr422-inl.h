@@ -80,7 +80,6 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
 
 #if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto coeffTag = di16;
-  const auto zeros32 = Zero(d32);
 #else
   const auto coeffTag = d32;
 #endif
@@ -121,20 +120,7 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
       VU8 G8;
       VU8 B8;
       VU8 A8;
-      switch (PixelType) {
-        case PIXEL_RGB:LoadInterleaved3(du8, mSrc, R8, G8, B8);
-          break;
-        case PIXEL_BGR:LoadInterleaved3(du8, mSrc, B8, G8, R8);
-          break;
-        case PIXEL_RGBA:LoadInterleaved4(du8, mSrc, R8, G8, B8, A8);
-          break;
-        case PIXEL_BGRA:LoadInterleaved4(du8, mSrc, B8, G8, R8, A8);
-          break;
-        case PIXEL_ARGB:LoadInterleaved4(du8, mSrc, A8, R8, G8, B8);
-          break;
-        case PIXEL_ABGR:LoadInterleaved4(du8, mSrc, A8, B8, G8, R8);
-          break;
-      }
+      LoadRGBA<PixelType>(du8, mSrc, R8, G8, B8, A8);
 
       const auto R = BitCast(di16, PromoteTo(du16, R8));
       const auto G = BitCast(di16, PromoteTo(du16, G8));
@@ -146,21 +132,24 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
       YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
       YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
-      const auto Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(YRh)), DemoteTo(dhi16, ShiftRight<8>(YRl))));
+      const auto
+          Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(YRh)), DemoteTo(dhi16, ShiftRight<8>(YRl))));
 
       V32 Cbh = vBiasUV;
       V32 Cbl = ReorderWidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
       Cbl = ReorderWidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
       Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
-      const auto Cbf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Cbh)), DemoteTo(dhi16, ShiftRight<8>(Cbl))));
+      const auto
+          Cbf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Cbh)), DemoteTo(dhi16, ShiftRight<8>(Cbl))));
 
       V32 Crh = vBiasUV;
       V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
       Crl = ReorderWidenMulAccumulate(d32, G, vCrG, Crl, Crh);
       Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
-      const auto Crf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Crh)), DemoteTo(dhi16, ShiftRight<8>(Crl))));
+      const auto
+          Crf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Crh)), DemoteTo(dhi16, ShiftRight<8>(Crl))));
 #else
       V32 Rl = PromoteLowerTo(d32, R);
       V32 Rh = PromoteUpperTo(d32, R);
@@ -213,26 +202,7 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
       int g;
       int b;
 
-      switch (PixelType) {
-        case PIXEL_RGB:
-        case PIXEL_RGBA:r = static_cast<int>(mSrc[0]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[2]);
-          break;
-        case PIXEL_BGRA:
-        case PIXEL_BGR:r = static_cast<int>(mSrc[2]);
-          g = static_cast<int>(mSrc[1]);
-          b = static_cast<int>(mSrc[0]);
-          break;
-        case PIXEL_ARGB:r = static_cast<uint16_t>(mSrc[1]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[3]);
-          break;
-        case PIXEL_ABGR:r = static_cast<int>(mSrc[3]);
-          g = static_cast<int>(mSrc[2]);
-          b = static_cast<int>(mSrc[1]);
-          break;
-      }
+      LoadRGB<uint8_t, int, PixelType>(mSrc, r, g, b);
 
       int Y = ((r * YR + g * YG + b * YB + iBiasY) >> precision);
 
@@ -246,26 +216,7 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
         int g1;
         int b1;
 
-        switch (PixelType) {
-          case PIXEL_RGB:
-          case PIXEL_RGBA:r1 = static_cast<int>(mSrc[0]);
-            g1 = static_cast<int>(mSrc[1]);
-            b1 = static_cast<int>(mSrc[2]);
-            break;
-          case PIXEL_BGRA:
-          case PIXEL_BGR:r1 = static_cast<int>(mSrc[2]);
-            g1 = static_cast<int>(mSrc[1]);
-            b1 = static_cast<int>(mSrc[0]);
-            break;
-          case PIXEL_ARGB:r1 = static_cast<int>(mSrc[1]);
-            g1 = static_cast<int>(mSrc[2]);
-            b1 = static_cast<int>(mSrc[3]);
-            break;
-          case PIXEL_ABGR:r1 = static_cast<int>(mSrc[3]);
-            g1 = static_cast<int>(mSrc[2]);
-            b1 = static_cast<int>(mSrc[1]);
-            break;
-        }
+        LoadRGB<uint8_t, int, PixelType>(mSrc, r1, g1, b1);
 
         int Y1 = ((r1 * YR + g1 * YG + b1 * YB + iBiasY) >> precision);
 
@@ -336,7 +287,6 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   const ScalableTag<int16_t> du16x8;
   const Rebind<uint8_t, decltype(du16x8)> du8x8;
   const Half<decltype(du8x8)> du8h;
-  using VU8x8 = Vec<decltype(du8x8)>;
   using VU16 = Vec<decltype(du16x8)>;
   const Half<decltype(du16x8)> du16h;
   using VU16H = Vec<decltype(du16h)>;
@@ -354,7 +304,7 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
   auto mVSrc = reinterpret_cast<const uint8_t *>(vPlane);
 
-  const VU8x8 alpha8x8 = Set(du8x8, 255);
+  const auto A = Set(du16x8, 255);
 
   float fCrCoeff = 0.f;
   float fCbCoeff = 0.f;
@@ -406,32 +356,10 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
       const auto light = Mul(luma, ivLumaCoeff);
       const VU16 r = Max(ShiftRight<6>(SaturatedAdd(Mul(ivCrCoeff, cr), light)), vZero);
       const VU16 b = Max(ShiftRight<6>(SaturatedAdd(Mul(ivCbCoeff, cb), light)), vZero);
-      const VU16 g = Max(ShiftRight<6>(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb)))), vZero);
+      const VU16
+          g = Max(ShiftRight<6>(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb)))), vZero);
 
-      switch (PixelType) {
-        case PIXEL_RGBA:
-          StoreInterleaved4(DemoteTo(du8x8, r), DemoteTo(du8x8, g), DemoteTo(du8x8, b),
-                            alpha8x8, du8x8, store);
-          break;
-        case PIXEL_ABGR:
-          StoreInterleaved4(alpha8x8,
-                            DemoteTo(du8x8, b), DemoteTo(du8x8, g), DemoteTo(du8x8, r),
-                            du8x8, store);
-          break;
-        case PIXEL_BGR:StoreInterleaved3(DemoteTo(du8x8, b), DemoteTo(du8x8, g), DemoteTo(du8x8, r), du8x8, store);
-          break;
-        case PIXEL_RGB:StoreInterleaved3(DemoteTo(du8x8, r), DemoteTo(du8x8, g), DemoteTo(du8x8, b), du8x8, store);
-          break;
-        case PIXEL_BGRA:
-          StoreInterleaved4(DemoteTo(du8x8, b), DemoteTo(du8x8, g), DemoteTo(du8x8, r),
-                            alpha8x8, du8x8, store);
-          break;
-        case PIXEL_ARGB:
-          StoreInterleaved4(alpha8x8,
-                            DemoteTo(du8x8, r), DemoteTo(du8x8, g), DemoteTo(du8x8, b),
-                            du8x8, store);
-          break;
-      }
+      StoreRGBA<PixelType>(du16x8, store, r, g, b, A);
 
       store += lanes * components;
       ySrc += lanes;
@@ -452,28 +380,8 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
       int B = (Y + CbCoeff * Cb) >> precision;
       int G = (Y - GCoeff1 * Cr - GCoeff2 * Cb) >> precision;
 
-      switch (PixelType) {
-        case PIXEL_RGBA:store[3] = 255;
-        case PIXEL_RGB:store[0] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-          store[1] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-          store[2] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-          break;
-        case PIXEL_BGRA:store[3] = 255;
-        case PIXEL_BGR:store[2] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-          store[1] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-          store[0] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-          break;
-        case PIXEL_ABGR:store[0] = 255;
-          store[3] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-          store[2] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-          store[1] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-          break;
-        case PIXEL_ARGB:store[0] = 255;
-          store[1] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-          store[2] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-          store[3] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-          break;
-      }
+      SaturatedStoreRGBA<uint8_t, int, PixelType>(store, R, G, B, 255, 255);
+
       store += components;
       ySrc += 1;
 
@@ -482,28 +390,8 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
         R = (Y + CrCoeff * Cr) >> precision;
         B = (Y + CbCoeff * Cb) >> precision;
         G = (Y - GCoeff1 * Cr - GCoeff2 * Cb) >> precision;
-        switch (PixelType) {
-          case PIXEL_RGBA:store[3] = 255;
-          case PIXEL_RGB:store[0] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-            store[1] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-            store[2] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-            break;
-          case PIXEL_BGRA:store[3] = 255;
-          case PIXEL_BGR:store[2] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-            store[1] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-            store[0] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-            break;
-          case PIXEL_ABGR:store[0] = 255;
-            store[3] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-            store[2] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-            store[1] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-            break;
-          case PIXEL_ARGB:store[0] = 255;
-            store[1] = static_cast<uint8_t>(std::clamp(R, 0, 255));
-            store[2] = static_cast<uint8_t>(std::clamp(G, 0, 255));
-            store[3] = static_cast<uint8_t>(std::clamp(B, 0, 255));
-            break;
-        }
+
+        SaturatedStoreRGBA<uint8_t, int, PixelType>(store, R, G, B, 255, 255);
         store += components;
         ySrc += 1;
       }

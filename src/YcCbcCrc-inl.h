@@ -14,11 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//
-// Created by Radzivon Bartoshyk on 02/04/2024.
-//
-
-
 #if defined(SPARKYUV__YUVBT2020CL_INL_H) == defined(HWY_TARGET_TOGGLE)
 #ifdef SPARKYUV__YUVBT2020CL_INL_H
 #undef SPARKYUV__YUVBT2020CL_INL_H
@@ -157,20 +152,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       VF Rh, Rl, Gh, Gl, Bh, Bl, Ah, Al;
       if (std::is_same<T, uint16_t>::value) {
         VU R16, G16, B16, A16;
-        switch (PixelType) {
-          case PIXEL_RGB:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(mSrc), R16, G16, B16);
-            break;
-          case PIXEL_BGR:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(mSrc), B16, G16, R16);
-            break;
-          case PIXEL_RGBA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), R16, G16, B16, A16);
-            break;
-          case PIXEL_BGRA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), B16, G16, R16, A16);
-            break;
-          case PIXEL_ARGB:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), A16, R16, G16, B16);
-            break;
-          case PIXEL_ABGR:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(mSrc), A16, B16, G16, R16);
-            break;
-        }
+        LoadRGBA<PixelType>(du16, reinterpret_cast<const uint16_t *>(mSrc), R16, G16, B16, A16);
 
         Rh = ConvertTo(df, PromoteUpperTo(du32, R16));
         Rl = ConvertTo(df, PromoteLowerTo(du32, R16));
@@ -179,31 +161,15 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         Bh = ConvertTo(df, PromoteUpperTo(du32, B16));
         Bl = ConvertTo(df, PromoteLowerTo(du32, B16));
       } else if (std::is_same<T, uint8_t>::value) {
-        const Rebind<uint8_t, decltype(du16)> du8;
-        using V8 = Vec<decltype(du8)>;
-        const Half<decltype(du8)> dhu8;
-        V8 R8, G8, B8, A8;
-        switch (PixelType) {
-          case PIXEL_RGB:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(mSrc), R8, G8, B8);
-            break;
-          case PIXEL_BGR:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(mSrc), B8, G8, R8);
-            break;
-          case PIXEL_RGBA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), R8, G8, B8, A8);
-            break;
-          case PIXEL_BGRA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), B8, G8, R8, A8);
-            break;
-          case PIXEL_ARGB:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), A8, R8, G8, B8);
-            break;
-          case PIXEL_ABGR:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(mSrc), A8, B8, G8, R8);
-            break;
-        }
+        VU R16, G16, B16, A16;
+        LoadRGB<PixelType>(du16, reinterpret_cast<const uint8_t *>(mSrc), R16, G16, B16);
 
-        Rh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, R8)));
-        Rl = ConvertTo(df, PromoteLowerTo(du32, R8));
-        Gh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, G8)));
-        Gl = ConvertTo(df, PromoteLowerTo(du32, G8));
-        Bh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, B8)));
-        Bl = ConvertTo(df, PromoteLowerTo(du32, B8));
+        Rh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, R16)));
+        Rl = ConvertTo(df, PromoteLowerTo(du32, R16));
+        Gh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, G16)));
+        Gl = ConvertTo(df, PromoteLowerTo(du32, G16));
+        Bh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, B16)));
+        Bl = ConvertTo(df, PromoteLowerTo(du32, B16));
       }
 
       Rh = Mul(Rh, vLinearScale);
@@ -241,58 +207,26 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       if (chromaSubsample == YUV_SAMPLE_420 || chromaSubsample == YUV_SAMPLE_422) {
         if (chromaSubsample == YUV_SAMPLE_420) {
           if (!(y & 1) && y + 1 < height) {
-            auto nextRow = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
             VF vRh, vRl, vGh, vGl, vBh, vBl, vAh, vAl;
             if (std::is_same<T, uint16_t>::value) {
+              auto nextRow = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
               VU R16, G16, B16, A16;
-              switch (PixelType) {
-                case PIXEL_RGB:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(nextRow), R16, G16, B16);
-                  break;
-                case PIXEL_BGR:LoadInterleaved3(du16, reinterpret_cast<const uint16_t *>(nextRow), B16, G16, R16);
-                  break;
-                case PIXEL_RGBA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), R16, G16, B16, A16);
-                  break;
-                case PIXEL_BGRA:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), B16, G16, R16, A16);
-                  break;
-                case PIXEL_ARGB:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), A16, R16, G16, B16);
-                  break;
-                case PIXEL_ABGR:LoadInterleaved4(du16, reinterpret_cast<const uint16_t *>(nextRow), A16, B16, G16, R16);
-                  break;
-              }
+              LoadRGBA<PixelType>(du16, reinterpret_cast<const uint16_t *>(nextRow), R16, G16, B16, A16);
 
               vRh = ConvertTo(df, PromoteUpperTo(du32, R16));
               vRl = ConvertTo(df, PromoteLowerTo(du32, R16));
-              vGh = ConvertTo(df, PromoteUpperTo(du32, G16));
-              vGl = ConvertTo(df, PromoteLowerTo(du32, G16));
               vBh = ConvertTo(df, PromoteUpperTo(du32, B16));
               vBl = ConvertTo(df, PromoteLowerTo(du32, B16));
             } else if (std::is_same<T, uint8_t>::value) {
               const Rebind<uint8_t, decltype(du16)> du8;
-              using V8 = Vec<decltype(du8)>;
-              const Half<decltype(du8)> dhu8;
-              V8 R8, G8, B8, A8;
+              VU R16, G16, B16, A16;
               auto nextRow = reinterpret_cast<const uint8_t*>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
-              switch (PixelType) {
-                case PIXEL_RGB:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(nextRow), R8, G8, B8);
-                  break;
-                case PIXEL_BGR:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(nextRow), B8, G8, R8);
-                  break;
-                case PIXEL_RGBA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(nextRow), R8, G8, B8, A8);
-                  break;
-                case PIXEL_BGRA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(nextRow), B8, G8, R8, A8);
-                  break;
-                case PIXEL_ARGB:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(nextRow), A8, R8, G8, B8);
-                  break;
-                case PIXEL_ABGR:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(nextRow), A8, B8, G8, R8);
-                  break;
-              }
+              LoadRGB<PixelType>(du16, reinterpret_cast<const uint8_t *>(nextRow), R16, G16, B16);
 
-              vRh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, R8)));
-              vRl = ConvertTo(df, PromoteLowerTo(du32, R8));
-              vGh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, G8)));
-              vGl = ConvertTo(df, PromoteLowerTo(du32, G8));
-              vBh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu8, B8)));
-              vBl = ConvertTo(df, PromoteLowerTo(du32, B8));
+              vRh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, R16)));
+              vRl = ConvertTo(df, PromoteLowerTo(du32, R16));
+              vBh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, B16)));
+              vBl = ConvertTo(df, PromoteLowerTo(du32, B16));
             }
 
             vRh = Mul(vRh, vLinearScale);
@@ -387,26 +321,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       float g;
       float b;
 
-      switch (PixelType) {
-        case PIXEL_RGB:
-        case PIXEL_RGBA:r = static_cast<float>(mSrc[0]);
-          g = static_cast<float>(mSrc[1]);
-          b = static_cast<float>(mSrc[2]);
-          break;
-        case PIXEL_BGRA:
-        case PIXEL_BGR:r = static_cast<float>(mSrc[2]);
-          g = static_cast<float>(mSrc[1]);
-          b = static_cast<float>(mSrc[0]);
-          break;
-        case PIXEL_ARGB:r = static_cast<float>(mSrc[1]);
-          g = static_cast<float>(mSrc[2]);
-          b = static_cast<float>(mSrc[3]);
-          break;
-        case PIXEL_ABGR:r = static_cast<float>(mSrc[3]);
-          g = static_cast<float>(mSrc[2]);
-          b = static_cast<float>(mSrc[1]);
-          break;
-      }
+      LoadRGB<T, float, PixelType>(mSrc, r, g, b);
 
       r *= linearScale;
       g *= linearScale;
@@ -424,26 +339,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         if (x + 1 < width) {
           float r1 = r, g1 = g, b1 = b;
 
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r1 = static_cast<float>(mSrc[0]);
-              g1 = static_cast<float>(mSrc[1]);
-              b1 = static_cast<float>(mSrc[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r1 = static_cast<float>(mSrc[2]);
-              g1 = static_cast<float>(mSrc[1]);
-              b1 = static_cast<float>(mSrc[0]);
-              break;
-            case PIXEL_ARGB:r1 = static_cast<float>(mSrc[1]);
-              g1 = static_cast<float>(mSrc[2]);
-              b1 = static_cast<float>(mSrc[3]);
-              break;
-            case PIXEL_ABGR:r1 = static_cast<float>(mSrc[3]);
-              g1 = static_cast<float>(mSrc[2]);
-              b1 = static_cast<float>(mSrc[1]);
-              break;
-          }
+          LoadRGB<T, float, PixelType>(mSrc, r1, g1, b1);
 
           r1 *= linearScale;
           g1 *= linearScale;
@@ -472,27 +368,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         mSrc += components;
 
         if (x + 1 < width) {
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r1 = static_cast<float>(mSrc[0]);
-              g1 = static_cast<float>(mSrc[1]);
-              b1 = static_cast<float>(mSrc[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r1 = static_cast<float>(mSrc[2]);
-              g1 = static_cast<float>(mSrc[1]);
-              b1 = static_cast<float>(mSrc[0]);
-              break;
-            case PIXEL_ARGB:r1 = static_cast<float >(mSrc[1]);
-              g1 = static_cast<float>(mSrc[2]);
-              b1 = static_cast<float>(mSrc[3]);
-              break;
-            case PIXEL_ABGR:r1 = static_cast<float>(mSrc[3]);
-              g1 = static_cast<float>(mSrc[2]);
-              b1 = static_cast<float>(mSrc[1]);
-              break;
-          }
-
+          LoadRGB<T, float, PixelType>(mSrc, r1, g1, b1);
           r1 *= linearScale;
           g1 *= linearScale;
           b1 *= linearScale;
@@ -512,26 +388,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           if (y + 1 < height - 1) {
             nextRow = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(oldSrc) + srcStride);
           }
-          switch (PixelType) {
-            case PIXEL_RGB:
-            case PIXEL_RGBA:r2 = static_cast<float>(nextRow[0]);
-              g2 = static_cast<float>(nextRow[1]);
-              b2 = static_cast<float>(nextRow[2]);
-              break;
-            case PIXEL_BGRA:
-            case PIXEL_BGR:r2 = static_cast<float>(nextRow[2]);
-              g2 = static_cast<float>(nextRow[1]);
-              b2 = static_cast<float>(nextRow[0]);
-              break;
-            case PIXEL_ARGB:r2 = static_cast<float>(nextRow[1]);
-              g2 = static_cast<float>(nextRow[2]);
-              b2 = static_cast<float>(nextRow[3]);
-              break;
-            case PIXEL_ABGR:r2 = static_cast<float>(nextRow[3]);
-              g2 = static_cast<float>(nextRow[2]);
-              b2 = static_cast<float>(nextRow[1]);
-              break;
-          }
+          LoadRGB<T, float, PixelType>(nextRow, r2, g2, b2);
 
           r2 *= linearScale;
           g2 *= linearScale;
@@ -540,26 +397,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           nextRow += components;
 
           if (x + 1 < width) {
-            switch (PixelType) {
-              case PIXEL_RGB:
-              case PIXEL_RGBA:r3 = static_cast<float>(nextRow[0]);
-                g3 = static_cast<float>(nextRow[1]);
-                b3 = static_cast<float>(nextRow[2]);
-                break;
-              case PIXEL_BGRA:
-              case PIXEL_BGR:r3 = static_cast<float>(nextRow[2]);
-                g3 = static_cast<float>(nextRow[1]);
-                b3 = static_cast<float>(nextRow[0]);
-                break;
-              case PIXEL_ARGB:r3 = static_cast<float>(nextRow[1]);
-                g3 = static_cast<float>(nextRow[2]);
-                b3 = static_cast<float>(nextRow[3]);
-                break;
-              case PIXEL_ABGR:r3 = static_cast<float>(nextRow[3]);
-                g3 = static_cast<float>(nextRow[2]);
-                b3 = static_cast<float>(nextRow[1]);
-                break;
-            }
+            LoadRGB<T, float, PixelType>(nextRow, r3, g3, b3);
 
             r3 *= linearScale;
             g3 *= linearScale;
@@ -806,8 +644,6 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const Rebind<hwy::float32_t, decltype(dfi32)> df;
 #endif
 
-  const RebindToUnsigned<decltype(dh)> dhi;
-
   using VF = Vec<decltype(df)>;
 
 #if SPARKYUV_ALLOW_FLOAT16
@@ -849,6 +685,8 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const auto vZeros = Zero(df);
   const auto alpha = Set(d, maxColors);
 #endif
+
+  const auto A = Set(du16, maxColors);
 
   for (int y = 0; y < height; ++y) {
     auto CbSource = reinterpret_cast<const T *>(mUSrc);
@@ -925,74 +763,41 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       auto Gu = ConvertTo(du16, Clamp(Mul(Gf, vMaxColors), vZeros, vMaxColors));
 
       if (std::is_same<T, uint8_t>::value) {
-        const Rebind<uint8_t, decltype(d)> tg;
-        using VU = Vec<decltype(tg)>;
-        VU R = DemoteTo(tg, Ru);
-        VU G = DemoteTo(tg, Gu);
-        VU B = DemoteTo(tg, Bu);
-        VU A = Set(tg, maxColors);
-        switch (PixelType) {
-          case PIXEL_RGBA:StoreInterleaved4(R, G, B, A, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_ABGR:StoreInterleaved4(A, B, G, R, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_BGR:StoreInterleaved3(B, G, R, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_RGB:StoreInterleaved3(R, G, B, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_BGRA:StoreInterleaved4(B, G, R, A, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-          case PIXEL_ARGB:StoreInterleaved4(A, R, G, B, tg, reinterpret_cast<uint8_t *>(store));
-            break;
-        }
+        StoreRGBA<PixelType>(du16, reinterpret_cast<uint8_t *>(store), Ru, Gu, Bu, A);
       } else if (std::is_same<T, uint16_t>::value) {
         using VU = Vec<decltype(du16)>;
         VU R = Ru, G = Gu, B = Bu;
-        VU A = Set(du16, maxColors);
-        switch (PixelType) {
-          case PIXEL_RGBA:StoreInterleaved4(R, G, B, A, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-          case PIXEL_ABGR:StoreInterleaved4(A, B, G, R, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-          case PIXEL_BGR:StoreInterleaved3(B, G, R, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-          case PIXEL_RGB:StoreInterleaved3(R, G, B, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-          case PIXEL_BGRA:StoreInterleaved4(B, G, R, A, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-          case PIXEL_ARGB:StoreInterleaved4(A, R, G, B, du16, reinterpret_cast<uint16_t *>(store));
-            break;
-        }
+        StoreRGBA<PixelType>(du16, reinterpret_cast<uint16_t *>(store), R, G, B, A);
       }
 #else
       const auto uY = LoadU(d, reinterpret_cast<const T *>(ySrc));
       const auto Yl = Mul(Sub(ConvertTo(df, PromoteLowerTo(du32, uY)), vBiasY), vScaleRangeY);
-      const auto Yh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dhi, uY))), vBiasY), vScaleRangeY);
+      const auto Yh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dh, uY))), vBiasY), vScaleRangeY);
 
       VF Cbl, Cbh, Crl, Crh;
 
       if (chromaSubsample == YUV_SAMPLE_444) {
         const auto uCb = LoadU(d, reinterpret_cast<const T *>(CbSource));
         Cbl = Mul(Sub(ConvertTo(df, PromoteLowerTo(du32, uCb)), vBiasUV), vScaleRangeUV);
-        Cbh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dhi, uCb))), vBiasUV), vScaleRangeUV);
+        Cbh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dh, uCb))), vBiasUV), vScaleRangeUV);
 
         const auto uCr = LoadU(d, reinterpret_cast<const T *>(CrSource));
         Crl = Mul(Sub(ConvertTo(df, PromoteLowerTo(du32, uCr)), vBiasUV), vScaleRangeUV);
-        Crh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dhi, uCr))), vBiasUV), vScaleRangeUV);
+        Crh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dh, uCr))), vBiasUV), vScaleRangeUV);
       } else if (chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420) {
         const auto fuCb = LoadU(dh, reinterpret_cast<const T *>(CbSource));
         const auto cuCb = Combine(d, fuCb, fuCb);
         const auto uCb = InterleaveLower(d, cuCb, cuCb);
 
         Cbl = Mul(Sub(ConvertTo(df, PromoteLowerTo(du32, uCb)), vBiasUV), vScaleRangeUV);
-        Cbh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dhi, uCb))), vBiasUV), vScaleRangeUV);
+        Cbh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dh, uCb))), vBiasUV), vScaleRangeUV);
 
-        const auto fuCr = BitCast(dhi, LoadU(dh, reinterpret_cast<const T *>(CrSource)));
+        const auto fuCr = BitCast(dh, LoadU(dh, reinterpret_cast<const T *>(CrSource)));
         const auto cuCr = Combine(d, fuCr, fuCr);
         const auto uCr = InterleaveLower(d, cuCr, cuCr);
 
         Crl = Mul(Sub(ConvertTo(df, PromoteLowerTo(du32, uCr)), vBiasUV), vScaleRangeUV);
-        Crh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dhi, uCr))), vBiasUV), vScaleRangeUV);
+        Crh = Mul(Sub(ConvertTo(df, PromoteTo(du32, UpperHalf(dh, uCr))), vBiasUV), vScaleRangeUV);
       }
 
       auto Bl = YcCbcCrcInverse(df, Yl, Cbl, vEpbLow, vEpbHigh, vNb, vPb);
@@ -1015,24 +820,11 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       Rh = Clamp(Mul(Rh, vMaxColors), vZeros, vMaxColors);
       Gh = Clamp(Mul(Gh, vMaxColors), vZeros, vMaxColors);
 
-      const auto R = BitCast(d, Combine(d, DemoteTo(dhi, ConvertTo(du32, Rh)), DemoteTo(dhi, ConvertTo(du32, Rl))));
-      const auto G = BitCast(d, Combine(d, DemoteTo(dhi, ConvertTo(du32, Gh)), DemoteTo(dhi, ConvertTo(du32, Gl))));
-      const auto B = BitCast(d, Combine(d, DemoteTo(dhi, ConvertTo(du32, Bh)), DemoteTo(dhi, ConvertTo(du32, Bl))));
+      const auto R = BitCast(d, Combine(d, DemoteTo(dh, ConvertTo(du32, Rh)), DemoteTo(dh, ConvertTo(du32, Rl))));
+      const auto G = BitCast(d, Combine(d, DemoteTo(dh, ConvertTo(du32, Gh)), DemoteTo(dh, ConvertTo(du32, Gl))));
+      const auto B = BitCast(d, Combine(d, DemoteTo(dh, ConvertTo(du32, Bh)), DemoteTo(dh, ConvertTo(du32, Bl))));
 
-      switch (PixelType) {
-        case PIXEL_RGBA:StoreInterleaved4(R, G, B, alpha, d, store);
-          break;
-        case PIXEL_ABGR:StoreInterleaved4(alpha, B, G, R, d, store);
-          break;
-        case PIXEL_BGR:StoreInterleaved3(B, G, R, d, store);
-          break;
-        case PIXEL_RGB:StoreInterleaved3(R, G, B, d, store);
-          break;
-        case PIXEL_BGRA:StoreInterleaved4(B, G, R, alpha, d, store);
-          break;
-        case PIXEL_ARGB:StoreInterleaved4(alpha, R, G, B, d, store);
-          break;
-      }
+      StoreRGBA<PixelType>(d, store, R, G, B, alpha);
 #endif
 
       ySrc += lanes;
@@ -1058,30 +850,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       B = std::clamp(std::roundf(B * fMaxColors), 0.f, fMaxColors);
       G = std::clamp(std::roundf(G * fMaxColors), 0.f, fMaxColors);
 
-      switch (PixelType) {
-        case PIXEL_RGBA:store[3] = maxColors;
-        case PIXEL_RGB:store[0] = static_cast<T>(R);
-          store[1] = static_cast<T>(G);
-          store[2] = static_cast<T>(B);
-          break;
-        case PIXEL_BGRA:store[3] = maxColors;
-        case PIXEL_BGR:store[2] = static_cast<T>(R);
-          store[1] = static_cast<T>(G);
-          store[0] = static_cast<T>(B);
-          break;
-        case PIXEL_ABGR:store[0] = maxColors;
-          store[3] = static_cast<T>(R);
-          store[2] = static_cast<T>(G);
-          store[1] = static_cast<T>(B);
-          break;
-        case PIXEL_ARGB: {
-          store[0] = maxColors;
-          store[1] = static_cast<T>(R);
-          store[2] = static_cast<T>(G);
-          store[3] = static_cast<T>(B);
-        }
-          break;
-      }
+      StoreRGBA<T, float, PixelType>(store, R, G, B, maxColors);
       store += components;
       ySrc += 1;
 
@@ -1099,30 +868,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
           B1 = std::clamp(std::roundf(B1 * fMaxColors), 0.f, fMaxColors);
           G1 = std::clamp(std::roundf(G1 * fMaxColors), 0.f, fMaxColors);
 
-          switch (PixelType) {
-            case PIXEL_RGBA:store[3] = maxColors;
-            case PIXEL_RGB:store[0] = static_cast<T>(R1);
-              store[1] = static_cast<T>(G1);
-              store[2] = static_cast<T>(B1);
-              break;
-            case PIXEL_BGRA:store[3] = maxColors;
-            case PIXEL_BGR:store[2] = static_cast<T>(R1);
-              store[1] = static_cast<T>(G1);
-              store[0] = static_cast<T>(B1);
-              break;
-            case PIXEL_ABGR:store[0] = maxColors;
-              store[3] = static_cast<T>(R1);
-              store[2] = static_cast<T>(G1);
-              store[1] = static_cast<T>(B1);
-              break;
-            case PIXEL_ARGB: {
-              store[0] = maxColors;
-              store[1] = static_cast<T>(R1);
-              store[2] = static_cast<T>(G1);
-              store[3] = static_cast<T>(B1);
-            }
-              break;
-          }
+          StoreRGBA<T, float, PixelType>(store, R1, G1, B1, maxColors);
           store += components;
           ySrc += 1;
         }

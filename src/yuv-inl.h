@@ -23,6 +23,7 @@
 
 #include "hwy/highway.h"
 #include "sparkyuv-def.h"
+#include "sparkyuv-internal.h"
 
 /**
 * VW ReorderWidenMulAccumulate(D d, V a, V b, VW sum0, VW& sum1): widens a and b to TFromD<D>,
@@ -83,7 +84,7 @@ VH GetOdd(D d, Vec<D> v) {
 
 // Hack for HWY EMU128.
 
-template <class D, HWY_IF_F16_D(D)>
+template<class D, HWY_IF_F16_D(D)>
 HWY_API Vec<D> Int16ToFloat(D d, Vec<Rebind<uint16_t, D>> v) {
   const RebindToSigned<D> di16;
   const Half<decltype(di16)> dhi16;
@@ -96,7 +97,7 @@ HWY_API Vec<D> Int16ToFloat(D d, Vec<Rebind<uint16_t, D>> v) {
   return Combine(d, hi, lo);
 }
 
-template <class D, HWY_IF_F16_D(D)>
+template<class D, HWY_IF_F16_D(D)>
 HWY_API Vec<D> Int16ToFloat(D d, Vec<Rebind<int16_t, D>> v) {
   const Half<decltype(d)> dhi16;
   const Rebind<int32_t, decltype(dhi16)> di32;
@@ -117,6 +118,229 @@ template<class D, HWY_IF_F32_D(D), HWY_IF_LANES_D(D, 4)>
 HWY_API VFromD<D> PromoteTo(D df, Vec<Rebind<uint8_t, D>> v) {
   const Rebind<uint32_t, decltype(df)> du32;
   return ConvertTo(df, PromoteTo(du32, v));
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType,
+    class D, typename V = Vec<D>, HWY_IF_U8_D(D),
+    typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>>
+HWY_API void LoadRGBTo16(D d, const uint8_t *src, V16 &R, V16 &G, V16 &B) {
+  using V8 = Vec<decltype(d)>;
+  V R8, G8, B8, A8;
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGB:LoadInterleaved3(d, reinterpret_cast<const uint8_t *>(src), R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_BGR:LoadInterleaved3(d, reinterpret_cast<const uint8_t *>(src), B8, G8, R8);
+      break;
+    case sparkyuv::PIXEL_RGBA:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), R8, G8, B8, A8);
+      break;
+    case sparkyuv::PIXEL_BGRA:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), B8, G8, R8, A8);
+      break;
+    case sparkyuv::PIXEL_ARGB:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), A8, R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_ABGR:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), A8, B8, G8, R8);
+      break;
+  }
+  D16 d16;
+  R = PromoteTo(d16, R8);
+  G = PromoteTo(d16, G8);
+  B = PromoteTo(d16, B8);
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType,
+    class D, typename V = Vec<D>, HWY_IF_U16_D(D),
+    typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>>
+HWY_API void LoadRGBTo16(D d, const uint16_t *src, V16 &R, V16 &G, V16 &B) {
+  V16 A;
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGB:LoadInterleaved3(d, reinterpret_cast<const uint16_t *>(src), R, G, B);
+      break;
+    case sparkyuv::PIXEL_BGR:LoadInterleaved3(d, reinterpret_cast<const uint16_t *>(src), B, G, R);
+      break;
+    case sparkyuv::PIXEL_RGBA:LoadInterleaved4(d, reinterpret_cast<const uint16_t *>(src), R, G, B, A);
+      break;
+    case sparkyuv::PIXEL_BGRA:LoadInterleaved4(d, reinterpret_cast<const uint16_t *>(src), B, G, R, A);
+      break;
+    case sparkyuv::PIXEL_ARGB:LoadInterleaved4(d, reinterpret_cast<const uint16_t *>(src), A, R, G, B);
+      break;
+    case sparkyuv::PIXEL_ABGR:LoadInterleaved4(d, reinterpret_cast<const uint16_t *>(src), A, B, G, R);
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType,
+    class D, HWY_IF_U8_D(D), typename V = Vec<D>,
+    typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>>
+HWY_API void LoadRGBATo16(D d, uint8_t *src, V16 &R, V16 &G, V16 &B, V16 &A) {
+  V R8, G8, B8, A8;
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGB:LoadInterleaved3(d, reinterpret_cast<const uint8_t *>(src), R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_BGR:LoadInterleaved3(d, reinterpret_cast<const uint8_t *>(src), B8, G8, R8);
+      break;
+    case sparkyuv::PIXEL_RGBA:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), R8, G8, B8, A8);
+      break;
+    case sparkyuv::PIXEL_BGRA:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), B8, G8, R8, A8);
+      break;
+    case sparkyuv::PIXEL_ARGB:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), A8, R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_ABGR:LoadInterleaved4(d, reinterpret_cast<const uint8_t *>(src), A8, B8, G8, R8);
+      break;
+  }
+  D16 d16;
+  R = PromoteTo(d16, R8);
+  G = PromoteTo(d16, G8);
+  B = PromoteTo(d16, B8);
+  A = PromoteTo(d16, A8);
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType, class D, typename V = Vec<D>>
+HWY_API void StoreRGBA(D d, TFromD<D> *store, V R, V G, V B, V A) {
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGBA:StoreInterleaved4(R, G, B, A, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::PIXEL_ABGR:StoreInterleaved4(A, B, G, R, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::PIXEL_BGR:StoreInterleaved3(B, G, R, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::PIXEL_RGB:StoreInterleaved3(R, G, B, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::PIXEL_BGRA:StoreInterleaved4(B, G, R, A, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::PIXEL_ARGB:StoreInterleaved4(A, R, G, B, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvReformatPixelType PixelType, class D, typename V = Vec<D>>
+HWY_API void StoreReformatRGBA(D d, TFromD<D> *store, V R, V G, V B, V A) {
+  switch (PixelType) {
+    case sparkyuv::REFORMAT_RGBA:StoreInterleaved4(R, G, B, A, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::REFORMAT_ABGR:StoreInterleaved4(A, B, G, R, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::REFORMAT_BGR:StoreInterleaved3(B, G, R, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::REFORMAT_RGB:StoreInterleaved3(R, G, B, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::REFORMAT_BGRA:StoreInterleaved4(B, G, R, A, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+    case sparkyuv::REFORMAT_ARGB:StoreInterleaved4(A, R, G, B, d, reinterpret_cast<TFromD<D> *>(store));
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType, class D, typename V = Vec<D>>
+HWY_API void LoadRGBA(D d, const TFromD<D> *source, V &R, V &G, V &B, V &A) {
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGB:LoadInterleaved3(d, reinterpret_cast<const TFromD<D> *>(source), R, G, B);
+      break;
+    case sparkyuv::PIXEL_BGR:LoadInterleaved3(d, reinterpret_cast<const TFromD<D> *>(source), B, G, R);
+      break;
+    case sparkyuv::PIXEL_RGBA:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), R, G, B, A);
+      break;
+    case sparkyuv::PIXEL_BGRA:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), B, G, R, A);
+      break;
+    case sparkyuv::PIXEL_ARGB:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), A, R, G, B);
+      break;
+    case sparkyuv::PIXEL_ABGR:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), A, B, G, R);
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvReformatPixelType PixelType, class D, typename V = Vec<D>>
+HWY_API void LoadReformatRGBA(D d, const TFromD<D> *source, V &R, V &G, V &B, V &A) {
+  switch (PixelType) {
+    case sparkyuv::REFORMAT_RGB:LoadInterleaved3(d, reinterpret_cast<const TFromD<D> *>(source), R, G, B);
+      break;
+    case sparkyuv::REFORMAT_BGR:LoadInterleaved3(d, reinterpret_cast<const TFromD<D> *>(source), B, G, R);
+      break;
+    case sparkyuv::REFORMAT_RGBA:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), R, G, B, A);
+      break;
+    case sparkyuv::REFORMAT_BGRA:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), B, G, R, A);
+      break;
+    case sparkyuv::REFORMAT_ARGB:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), A, R, G, B);
+      break;
+    case sparkyuv::REFORMAT_ABGR:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), A, B, G, R);
+      break;
+    default:
+      A = Zero(d);
+      R = Zero(d);
+      B = Zero(d);
+      G = Zero(d);
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType, typename D, typename V = Vec<D>>
+HWY_API void LoadRGB(D d, const uint8_t *source, V &R, V &G, V &B) {
+  const Rebind<uint8_t, decltype(d)> du8;
+  using V8 = Vec<decltype(du8)>;
+  V8 R8, G8, B8, A8;
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGB:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(source), R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_BGR:LoadInterleaved3(du8, reinterpret_cast<const uint8_t *>(source), B8, G8, R8);
+      break;
+    case sparkyuv::PIXEL_RGBA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(source), R8, G8, B8, A8);
+      break;
+    case sparkyuv::PIXEL_BGRA:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(source), B8, G8, R8, A8);
+      break;
+    case sparkyuv::PIXEL_ARGB:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(source), A8, R8, G8, B8);
+      break;
+    case sparkyuv::PIXEL_ABGR:LoadInterleaved4(du8, reinterpret_cast<const uint8_t *>(source), A8, B8, G8, R8);
+      break;
+  }
+  R = PromoteTo(d, R8);
+  G = PromoteTo(d, G8);
+  B = PromoteTo(d, B8);
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType,
+    class D, typename V = Vec<D>, HWY_IF_U16_D(D)>
+HWY_API void StoreRGBA(D d, uint8_t *store, V R, V G, V B, V A) {
+  const Rebind<uint8_t, decltype(d)> t;
+  const auto r = DemoteTo(t, R);
+  const auto g = DemoteTo(t, G);
+  const auto b = DemoteTo(t, B);
+  const auto a = DemoteTo(t, A);
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGBA:StoreInterleaved4(r, g, b, a, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_ABGR:StoreInterleaved4(a, b, g, r, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_BGR:StoreInterleaved3(b, g, r, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_RGB:StoreInterleaved3(r, g, b, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_BGRA:StoreInterleaved4(b, g, r, a, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_ARGB:StoreInterleaved4(a, r, g, b, t, reinterpret_cast<uint8_t *>(store));
+      break;
+  }
+}
+
+template<sparkyuv::SparkYuvDefaultPixelType PixelType,
+    class D, typename V = Vec<D>, HWY_IF_I16_D(D)>
+HWY_API void StoreRGBA(D d, uint8_t *store, V R, V G, V B, V A) {
+  const Rebind<uint8_t, decltype(d)> t;
+  const auto r = DemoteTo(t, R);
+  const auto g = DemoteTo(t, G);
+  const auto b = DemoteTo(t, B);
+  const auto a = DemoteTo(t, A);
+  switch (PixelType) {
+    case sparkyuv::PIXEL_RGBA:StoreInterleaved4(r, g, b, a, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_ABGR:StoreInterleaved4(a, b, g, r, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_BGR:StoreInterleaved3(b, g, r, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_RGB:StoreInterleaved3(r, g, b, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_BGRA:StoreInterleaved4(b, g, r, a, t, reinterpret_cast<uint8_t *>(store));
+      break;
+    case sparkyuv::PIXEL_ARGB:StoreInterleaved4(a, r, g, b, t, reinterpret_cast<uint8_t *>(store));
+      break;
+  }
 }
 
 #if !HWY_HAVE_FLOAT16 || HWY_TARGET == HWY_EMU128
@@ -243,6 +467,120 @@ static void ComputeInverseTransform(const float kr,
   }
   GCoeff1 = (2 * ((1 - kr) * kr / kg)) * range;
   GCoeff2 = (2 * ((1 - kb) * kb / kg)) * range;
+}
+
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
+SPARKYUV_INLINE static void LoadRGBA(const T *source, C &r, C &g, C &b, C& a) {
+  switch (PixelType) {
+    case PIXEL_RGB:r = static_cast<C>(source[0]);
+      g = static_cast<C>(source[1]);
+      b = static_cast<C>(source[2]);
+      break;
+    case PIXEL_RGBA:r = static_cast<C>(source[0]);
+      g = static_cast<C>(source[1]);
+      b = static_cast<C>(source[2]);
+      a = static_cast<C>(source[3]);
+      break;
+    case PIXEL_BGRA:b = static_cast<C>(source[0]);
+      g = static_cast<C>(source[1]);
+      r = static_cast<C>(source[2]);
+      a = static_cast<C>(source[3]);
+      break;
+    case PIXEL_BGR:b = static_cast<C>(source[0]);
+      g = static_cast<C>(source[1]);
+      r = static_cast<C>(source[2]);
+      break;
+    case PIXEL_ARGB:a = static_cast<C>(source[0]);
+      r = static_cast<C>(source[1]);
+      g = static_cast<C>(source[2]);
+      b = static_cast<C>(source[3]);
+      break;
+    case PIXEL_ABGR:a = static_cast<C>(source[0]);
+      b = static_cast<C>(source[1]);
+      g = static_cast<C>(source[2]);
+      r = static_cast<C>(source[3]);
+      break;
+  }
+}
+
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
+SPARKYUV_INLINE static void LoadRGB(const T *source, C &r, C &g, C &b) {
+  switch (PixelType) {
+    case PIXEL_RGB:
+    case PIXEL_RGBA:r = static_cast<C>(source[0]);
+      g = static_cast<C>(source[1]);
+      b = static_cast<C>(source[2]);
+      break;
+    case PIXEL_BGRA:
+    case PIXEL_BGR:r = static_cast<C>(source[2]);
+      g = static_cast<C>(source[1]);
+      b = static_cast<C>(source[0]);
+      break;
+    case PIXEL_ARGB:r = static_cast<C>(source[1]);
+      g = static_cast<C>(source[2]);
+      b = static_cast<C>(source[3]);
+      break;
+    case PIXEL_ABGR:r = static_cast<int>(source[3]);
+      g = static_cast<C>(source[2]);
+      b = static_cast<C>(source[1]);
+      break;
+  }
+}
+
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
+SPARKYUV_INLINE static void StoreRGBA(T *store, C r, C g, C b, C a) {
+  switch (PixelType) {
+    case PIXEL_RGBA:store[3] = a;
+    case PIXEL_RGB:store[0] = static_cast<T>(r);
+      store[1] = static_cast<T>(g);
+      store[2] = static_cast<T>(b);
+      break;
+    case PIXEL_BGRA:store[3] = a;
+    case PIXEL_BGR:store[2] = static_cast<T>(r);
+      store[1] = static_cast<T>(g);
+      store[0] = static_cast<T>(b);
+      break;
+    case PIXEL_ABGR:store[0] = a;
+      store[3] = static_cast<T>(r);
+      store[2] = static_cast<T>(g);
+      store[1] = static_cast<T>(b);
+      break;
+    case PIXEL_ARGB: {
+      store[0] = a;
+      store[1] = static_cast<T>(r);
+      store[2] = static_cast<T>(g);
+      store[3] = static_cast<T>(b);
+    }
+      break;
+  }
+}
+
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
+SPARKYUV_INLINE static void SaturatedStoreRGBA(T *store, C r, C g, C b, C a, C max) {
+  switch (PixelType) {
+    case PIXEL_RGBA:store[3] = a;
+    case PIXEL_RGB:store[0] = static_cast<T>(std::clamp(r, 0, max));
+      store[1] = static_cast<T>(std::clamp(g, 0, max));
+      store[2] = static_cast<T>(std::clamp(b, 0, max));
+      break;
+    case PIXEL_BGRA:store[3] = a;
+    case PIXEL_BGR:store[2] = static_cast<T>(std::clamp(r, 0, max));
+      store[1] = static_cast<T>(std::clamp(g, 0, max));
+      store[0] = static_cast<T>(std::clamp(b, 0, max));
+      break;
+    case PIXEL_ABGR:store[0] = a;
+      store[3] = static_cast<T>(std::clamp(r, 0, max));
+      store[2] = static_cast<T>(std::clamp(g, 0, max));
+      store[1] = static_cast<T>(std::clamp(b, 0, max));
+      break;
+    case PIXEL_ARGB: {
+      store[0] = a;
+      store[1] = static_cast<T>(std::clamp(r, 0, max));
+      store[2] = static_cast<T>(std::clamp(g, 0, max));
+      store[3] = static_cast<T>(std::clamp(b, 0, max));
+    }
+      break;
+  }
 }
 
 }

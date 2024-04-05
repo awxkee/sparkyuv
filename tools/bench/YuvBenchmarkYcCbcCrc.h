@@ -14,29 +14,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#ifndef YUV_TOOLS_BENCH_YUVBENCHMARKYCCBCCRC_H_
+#define YUV_TOOLS_BENCH_YUVBENCHMARKYCCBCCRC_H_
 
-namespace sparkyuv {
-enum SparkYuvColorRange {
-  YUV_RANGE_TV = 1,
-  YUV_RANGE_PC = 2
-};
+#include <benchmark/benchmark.h>
 
-enum SparkYuvYCgCoRType {
-  YCGCO_RE = 1,
-  YCGCO_RO = 2
-};
+void SparkyuvYcCbcCrc444ToRGBA8(benchmark::State &state);
+void SparkyuvYcCbcCrc422ToRGBA8(benchmark::State &state);
+void SparkyuvYcCbcCrc420ToRGBA8(benchmark::State &state);
+void SparkyuvRGBA8ToYcCbcCrc420(benchmark::State &state);
+void SparkyuvRGBA8ToYcCbcCrc422(benchmark::State &state);
+void SparkyuvRGBA8ToYcCbcCrc444(benchmark::State &state);
 
-enum SparkYuvSampler {
-  bilinear = 1,
-  nearest = 2,
-  cubic = 3,
-  mitchell = 4,
-  lanczos = 5,
-  catmullRom = 6,
-  hermite = 7,
-  bSpline = 8,
-  bicubic = 9,
-  box = 10
-};
-}
+#endif //YUV_TOOLS_BENCH_YUVBENCHMARKYCCBCCRC_H_

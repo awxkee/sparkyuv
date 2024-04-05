@@ -62,17 +62,7 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       V8 G;
       V8 B;
       V8 A;
-      switch (PixelType) {
-        case PIXEL_RGBA:LoadInterleaved4(du8, source, R, G, B, A);
-          break;
-        case PIXEL_BGRA:LoadInterleaved4(du8, source, B, G, B, A);
-          break;
-        case PIXEL_ARGB:LoadInterleaved4(du8, source, A, R, G, B);
-          break;
-        case PIXEL_ABGR:LoadInterleaved4(du8, source, A, B, G, R);
-          break;
-        default:break;
-      }
+      LoadRGBA<PixelType>(du8, source, R, G, B, A);
 
       const auto A16 = PromoteTo(du16, A);
 
@@ -80,16 +70,7 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       G = DemoteTo(du8, ShiftRight<8>(SaturatedAdd(Mul(PromoteTo(du16, G), A16), vExpand)));
       B = DemoteTo(du8, ShiftRight<8>(SaturatedAdd(Mul(PromoteTo(du16, B), A16), vExpand)));
 
-      switch (PixelType) {
-        case PIXEL_RGBA:StoreInterleaved4(R, G, B, A, du8, store);
-          break;
-        case PIXEL_ABGR:StoreInterleaved4(A, B, G, R, du8, store);
-          break;
-        case PIXEL_BGRA:StoreInterleaved4(B, G, R, A, du8, store);
-          break;
-        case PIXEL_ARGB:StoreInterleaved4(A, R, G, B, du8, store);
-          break;
-      }
+      StoreRGBA<PixelType>(du8, store, R, G, B, A);
 
       store += lanes * components;
       source += lanes * components;
@@ -101,63 +82,13 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       uint16_t b;
       uint16_t a;
 
-      switch (PixelType) {
-        case PIXEL_RGBA:r = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          b = static_cast<uint16_t>(source[2]);
-          a = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_BGRA:b = static_cast<uint16_t>(source[0]);
-          g = static_cast<uint16_t>(source[1]);
-          r = static_cast<uint16_t>(source[2]);
-          a = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_ARGB:a = static_cast<uint16_t>(source[0]);
-          r = static_cast<uint16_t>(source[1]);
-          g = static_cast<uint16_t>(source[2]);
-          b = static_cast<uint16_t>(source[3]);
-          break;
-        case PIXEL_ABGR:a = static_cast<uint16_t>(source[0]);
-          b = static_cast<uint16_t>(source[1]);
-          g = static_cast<uint16_t>(source[2]);
-          r = static_cast<uint16_t>(source[3]);
-          break;
-      }
+      LoadRGBA<uint8_t, uint16_t, PixelType>(source, r, g, b, a);
 
       r = (r * a + 255) >> 8;
       g = (g * a + 255) >> 8;
       b = (b * a + 255) >> 8;
 
-      switch (PixelType) {
-        case PIXEL_RGBA: {
-          store[3] = a;
-          store[0] = r;
-          store[1] = g;
-          store[2] = b;
-        }
-          break;
-        case PIXEL_BGRA: {
-          store[3] = a;
-          store[2] = r;
-          store[1] = g;
-          store[0] = b;
-        }
-          break;
-        case PIXEL_ABGR: {
-          store[0] = a;
-          store[3] = r;
-          store[2] = g;
-          store[1] = b;
-        }
-          break;
-        case PIXEL_ARGB: {
-          store[0] = a;
-          store[1] = r;
-          store[2] = g;
-          store[3] = b;
-        }
-          break;
-      }
+      StoreRGBA<uint8_t, uint16_t, PixelType>(store, r, g, b, a);
 
       store += components;
       source += components;

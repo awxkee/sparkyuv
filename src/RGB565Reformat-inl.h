@@ -58,25 +58,7 @@ ReformatSurfaceToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStr
         V G;
         V B;
         V A;
-        switch (PixelType) {
-          case REFORMAT_RGB: {
-            LoadInterleaved3(d8, reinterpret_cast<const uint8_t *>(srcPixels), R, G, B);
-          }
-            break;
-          case REFORMAT_BGR: {
-            LoadInterleaved3(d8, reinterpret_cast<const uint8_t *>(srcPixels), B, G, R);
-          }
-            break;
-          case REFORMAT_RGBA:LoadInterleaved4(d8, reinterpret_cast<const uint8_t *>(srcPixels), R, G, B, A);
-            break;
-          case REFORMAT_BGRA:LoadInterleaved4(d8, reinterpret_cast<const uint8_t *>(srcPixels), B, G, R, A);
-            break;
-          case REFORMAT_ARGB:LoadInterleaved4(d8, reinterpret_cast<const uint8_t *>(srcPixels), A, R, G, B);
-            break;
-          case REFORMAT_ABGR:LoadInterleaved4(d8, reinterpret_cast<const uint8_t *>(srcPixels), A, B, G, R);
-            break;
-          default:break;
-        }
+        LoadReformatRGBA<PixelType>(d8, reinterpret_cast<const uint8_t *>(srcPixels), R, G, B, A);
 
         auto R16l = PromoteLowerTo(d16, R);
         auto G16l = PromoteLowerTo(d16, G);
@@ -111,25 +93,7 @@ ReformatSurfaceToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStr
       V G;
       V B;
       V A;
-      switch (PixelType) {
-        case REFORMAT_RGB: {
-          LoadInterleaved3(d16, reinterpret_cast<const uint16_t *>(srcPixels), R, G, B);
-        }
-          break;
-        case REFORMAT_BGR: {
-          LoadInterleaved3(d16, reinterpret_cast<const uint16_t *>(srcPixels), B, G, R);
-        }
-          break;
-        case REFORMAT_RGBA:LoadInterleaved4(d16, reinterpret_cast<const uint16_t *>(srcPixels), R, G, B, A);
-          break;
-        case REFORMAT_BGRA:LoadInterleaved4(d16, reinterpret_cast<const uint16_t *>(srcPixels), B, G, R, A);
-          break;
-        case REFORMAT_ARGB:LoadInterleaved4(d16, reinterpret_cast<const uint16_t *>(srcPixels), A, R, G, B);
-          break;
-        case REFORMAT_ABGR:LoadInterleaved4(d16, reinterpret_cast<const uint16_t *>(srcPixels), A, B, G, R);
-          break;
-        default:break;
-      }
+      LoadReformatRGBA<PixelType>(d16, reinterpret_cast<const uint16_t *>(srcPixels), R, G, B, A);
 
       const auto R32h = ShiftLeft<11>(ShiftRightSame(R, rbShiftDiff));
       const auto G32h = ShiftLeft<5>(ShiftRightSame(G, gShiftDiff));
@@ -249,21 +213,7 @@ RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       G = Mul(G, vGScale);
       B = Mul(B, vRBScale);
 
-      switch (PixelType) {
-        case REFORMAT_RGBA:StoreInterleaved4(R, G, B, A, df, dstPixels);
-          break;
-        case REFORMAT_ABGR:StoreInterleaved4(A, B, G, R, df, dstPixels);
-          break;
-        case REFORMAT_BGR:StoreInterleaved3(B, G, R, df, dstPixels);
-          break;
-        case REFORMAT_RGB:StoreInterleaved3(R, G, B, df, dstPixels);
-          break;
-        case REFORMAT_BGRA:StoreInterleaved4(B, G, R, A, df, dstPixels);
-          break;
-        case REFORMAT_ARGB:StoreInterleaved4(A, R, G, B, df, dstPixels);
-          break;
-        default:break;
-      }
+      StoreReformatRGBA<PixelType>(df, reinterpret_cast<hwy::float16_t*>(dstPixels), R, G, B, A);
 
       srcPixels += lanes;
       dstPixels += components*lanes;
@@ -367,25 +317,7 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
       V G;
       V B;
       V A;
-      switch (PixelType) {
-        case REFORMAT_RGB: {
-          LoadInterleaved3(df, srcPixels, R, G, B);
-        }
-          break;
-        case REFORMAT_BGR: {
-          LoadInterleaved3(df, srcPixels, B, G, R);
-        }
-          break;
-        case REFORMAT_RGBA:LoadInterleaved4(df, srcPixels, R, G, B, A);
-          break;
-        case REFORMAT_BGRA:LoadInterleaved4(df, srcPixels, B, G, R, A);
-          break;
-        case REFORMAT_ARGB:LoadInterleaved4(df, srcPixels, A, R, G, B);
-          break;
-        case REFORMAT_ABGR:LoadInterleaved4(df, srcPixels, A, B, G, R);
-          break;
-        default:break;
-      }
+      LoadReformatRGBA<PixelType>(df, reinterpret_cast<const hwy::float16_t*>(srcPixels), R, G, B, A);
 
       R = Mul(R, vRBScale);
       G = Mul(G, vGScale);

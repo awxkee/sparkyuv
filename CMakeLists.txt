@@ -41,6 +41,17 @@ target_include_directories(sparkyuv PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DI
 
 if (BUILD_TOOLS)
     add_executable(yuvtools tools/main.cpp tools/JPEGEncoder.cpp)
+    add_executable(yuvbench
+            tools/YuvBenchmarkMain.cpp
+            tools/bench/YuvBenchmark10.cpp
+            tools/bench/YuvBenchmark10.h
+            tools/bench/YuvBenchmarkYCgCo.cpp
+            tools/bench/YuvBenchmarkYCgCoR.cpp
+            tools/bench/YuvBenchmarkYCgCoR.h
+            tools/bench/YuvBenchmarkYcCbcCrc.cpp
+            tools/bench/YuvBenchmarkYcCbcCrc.h
+            tools/bench/YuvSupport.cpp
+            tools/bench/YuvSupport.h)
 
     add_library(libyuv STATIC IMPORTED)
     set_target_properties(yuvtools libyuv PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libyuv.a)
@@ -49,7 +60,11 @@ if (BUILD_TOOLS)
 
     find_package(JPEG REQUIRED)
 
+    find_package(benchmark REQUIRED)
+
     target_link_libraries(yuvtools PRIVATE JPEG::JPEG libyuv sparkyuv)
+
+    target_link_libraries(yuvbench PRIVATE JPEG::JPEG libyuv sparkyuv benchmark::benchmark)
 
 endif ()
 
