@@ -27,6 +27,7 @@
 #include "bench/YuvBenchmarkYCgCoR.h"
 #include "bench/YuvBenchmarkYcCbcCrc.h"
 #include "bench/YuvSupport.h"
+#include "bench/YuvBenchmarkYDzDx.h"
 
 static std::string filename = "filirovska.jpeg";
 
@@ -478,6 +479,13 @@ BENCHMARK(SparkyuvYcCbcCrc420ToRGBA8);
 BENCHMARK(SparkyuvRGBA8ToYcCbcCrc420);
 BENCHMARK(SparkyuvRGBA8ToYcCbcCrc422);
 BENCHMARK(SparkyuvRGBA8ToYcCbcCrc444);
+
+BENCHMARK(SparkyuvYDzDx444ToRGBA8);
+BENCHMARK(SparkyuvYDzDx422ToRGBA8);
+BENCHMARK(SparkyuvYDzDx420ToRGBA8);
+BENCHMARK(SparkyuvRGBA8ToYDzDx420);
+BENCHMARK(SparkyuvRGBA8ToYDzDx422);
+BENCHMARK(SparkyuvRGBA8ToYDzDx444);
 
 BENCHMARK(LibyuvPremultiply);
 BENCHMARK(SparkyuvPremultiply);

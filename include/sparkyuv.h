@@ -25,6 +25,7 @@
 #include "sparkyuv-yccbccrc.h"
 #include "sparkyuv-ycgco.h"
 #include "sparkyuv-ycgcor.h"
+#include "sparkyuv-ydzdx.h"
 
 namespace sparkyuv {
 

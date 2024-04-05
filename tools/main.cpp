@@ -43,7 +43,8 @@ int main() {
 
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
-  if (!sparkyuv::decompressJPEG("filirovska.jpeg", inSrcData, inWidth, inHeight)) {
+  std::string filename = "filirovska.jpeg";
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
     std::cout << "Cannot read file (((" << std::endl;
     return -1;
   }
@@ -82,8 +83,8 @@ int main() {
 //  vPlane.resize(uvPlaneStride * (height + 1) / 2);
 
   int yPlaneStride = width;
-  int uvPlaneStride = (width + 1) / 2;
-  int uvPlaneHeight = (height + 1) / 2;
+  int uvPlaneStride = width;
+  int uvPlaneHeight = height;
   yPlane.resize(yPlaneStride * height);
   uPlane.resize(uvPlaneStride * uvPlaneHeight);
   vPlane.resize(uvPlaneStride * uvPlaneHeight);
@@ -149,30 +150,18 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YUV420", [&]() {
-    sparkyuv::RGBAToYUV420BT601(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBA8ToYDzDx444P8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
   });
 
-
-  bench(1, ANSI_COLOR_BLUE, "Libyuv RGB -> YUV420", [&]() {
-    libyuv::ABGRToI420(rgbaData.data(), rgbaStride, yPlane.data(), yPlaneStride,
-                       uPlane.data(), uvPlaneStride,
-                       vPlane.data(), uvPlaneStride, width, height);
-  });
 
   bench(1, ANSI_COLOR_GREEN, "YUV420 -> RGB", [&]() {
-    sparkyuv::YUV420BT601ToRGBA(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YDzDx444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
-  });
-
-  bench(15, ANSI_COLOR_BLUE, "Libyuv YUV420 -> RGB", [&]() {
-    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
-                       uPlane.data(), uvPlaneStride,
-                       vPlane.data(), uvPlaneStride,rgbaData.data(), rgbaStride, width, height);
+                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);
@@ -201,12 +190,12 @@ int main() {
   std::vector<uint8_t> rgba16Data(sizeof(uint16_t) * inWidth * 4 * inHeight);
 
 //
-  sparkyuv::WideRGBA8To10(rgbaData.data(),
-                          inWidth * 4 * sizeof(uint8_t),
-                          reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                          inWidth * 4 * sizeof(uint16_t),
-                          inWidth,
-                          inHeight);
+//  sparkyuv::WideRGBA8To10(rgbaData.data(),
+//                          inWidth * 4 * sizeof(uint8_t),
+//                          reinterpret_cast<uint16_t *>(rgba16Data.data()),
+//                          inWidth * 4 * sizeof(uint16_t),
+//                          inWidth,
+//                          inHeight);
 //  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
 //    sparkyuv::RGBA10ToYCgCoR422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
 //                                inWidth * 4 * sizeof(uint16_t),

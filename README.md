@@ -2,7 +2,7 @@
 
 Library allows to convert RGB to Y'UV formats at high speed using platform SIMD acceleration and appropriate approximation level
 
-## Supported YUV formats table
+## Supported YUV formats and layouts
 
 | YUV      | 444 | 422 | 420 | 400 | NV12/NV21 | NV16/NV61 | NV24/NV42 |
 |----------|-----|-----|-----|-----|-----------|-----------|-----------|
@@ -11,6 +11,7 @@ Library allows to convert RGB to Y'UV formats at high speed using platform SIMD 
 | YCgCo    | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YCgCo-Ro | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YCgCo-Re | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
+| YDzDx    | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 
 When encoding to NV12/NV21, NV12/N61, 420, 422 for chroma subsampling bi-linear scaling is automatically applied. There
 is no option to turn this off.
@@ -21,7 +22,7 @@ Due to nature of this transformation in those cases it is exceptionally fast.
 - YCgCo-Ro/YCgCo-Re 8-bit cannot be represented in 8-bit uint storage, so YCgCo-Ro/YCgCo-Re 8-bit requires a storage buffer to be at least twice widen ( 16-bit storage type )
 - YCgCo-Ro/YCgCo-Re cannot be in limited YUV range at the moment, since it not clear how to this range reduction with dynamic bit-depth. For now, it always in full PC range.
 - YCgCo current implementation allows to do a range reduction for TV range. That approximation have significant slowdown against full range transform. If that important range reduction may be removed and potential speed up about 30-60% is expected. 10/12-bit transformations may experience about 100-200% slowdown due to range reductions.
-- YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space, however ITU-R provides implementation for any  possible kr, kb.
+- YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space, however ITU-R provides implementation for any possible kr, kb.
 - YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower than other approximations. Against naive implementation current transformation about 400-600% faster.
 
 ## Performance
@@ -34,9 +35,9 @@ Not all the conversion path exists in libyuv so not everything can be benchmarke
 - Since very close approach to libyuv is used for YCbCr in general performance of decoding 8 bit is very close to libyuv.
 - Encoding of YCbCr 8-bit faster in libyuv.
 - 10/12 bit YCbCr in the library faster than libyuv.
-- 8-bit YCbCr decoding in line with libyuv, encoding slower.
 - YcCbcCrc very slow transformation.
 - YCgCo-Re/YCgCo-Ro fastest transformations available.
+- YCgCo maybe reworked up to 100% performance gain for full range transform
 
 #### Benchmark
 
@@ -92,7 +93,7 @@ SparkyuvRGBA8ToYcCbcCrc444   18733719 ns     18688514 ns           35
 
 ##### YcCbcCrc 
 
-Without F16 Support
+Without `F16` Support
 
 ```bash
 Run on (12 X 24 MHz CPU s)
@@ -112,7 +113,7 @@ SparkyuvRGBA8ToYcCbcCrc422   19822250 ns     19736371 ns           35
 SparkyuvRGBA8ToYcCbcCrc444   19283523 ns     19162514 ns           35
 ```
 
-With F16 Support
+With `F16` Support
 
 ```bash
 Run on (12 X 24 MHz CPU s)

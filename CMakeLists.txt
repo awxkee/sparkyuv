@@ -17,7 +17,8 @@ set(SPARKYUV_SOURCES
         src/YcCbcCrc.cpp
         src/Eotf.cpp
         src/YCgCo.cpp
-        src/YCgCoR.cpp)
+        src/YCgCoR.cpp
+        src/YDzDx.cpp)
 
 set(HWY_SOURCES hwy/aligned_allocator.cc hwy/targets.cc hwy/targets.cc hwy/nanobenchmark.cc hwy/per_target.cc hwy/timer.cc
         src/Eotf.cpp
@@ -51,7 +52,9 @@ if (BUILD_TOOLS)
             tools/bench/YuvBenchmarkYcCbcCrc.cpp
             tools/bench/YuvBenchmarkYcCbcCrc.h
             tools/bench/YuvSupport.cpp
-            tools/bench/YuvSupport.h)
+            tools/bench/YuvSupport.h
+            tools/bench/YuvBenchmarkYDzDx.cpp
+            tools/bench/YuvBenchmarkYDzDx.h)
 
     add_library(libyuv STATIC IMPORTED)
     set_target_properties(yuvtools libyuv PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libyuv.a)
