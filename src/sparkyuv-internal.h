@@ -32,6 +32,26 @@ enum SparkYuvNVLoadOrder {
   YUV_ORDER_VU
 };
 
+struct SparkYuvTransformMatrix {
+  float Y1;
+  float Y2;
+  float Y3;
+  float U1;
+  float U2;
+  float U3;
+  float V1;
+  float V2;
+  float V3;
+};
+
+static SparkYuvTransformMatrix kRGBToYIQMatrix = {.Y1 = 0.299f, .Y2 = 0.587f, .Y3 = 0.114f,
+    .U1 = 0.5959f, .U2 = -0.2746f, .U3 = -0.3213f,
+    .V1 = 0.2115f, .V2 = -0.5227, .V3 = 0.3112f};
+
+static SparkYuvTransformMatrix kYIQToRGBMatrix = {.Y1 = 1.f, .Y2 = 0.956f, .Y3 = 0.619f,
+    .U1 = 1.f, .U2 = -0.272f, .U3 = -0.647f,
+    .V1 = 1.f, .V2 = -1.106f, .V3 = 1.703f};
+
 enum SparkYuvDefaultPixelType {
   PIXEL_RGBA,
   PIXEL_RGB,

@@ -367,11 +367,6 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   }
 }
 
-/**
-* @brief It will be good to declare a type of transfer function
- * and compile each variant separately however increase of binary size about 400%
- * and compile time abound 1000% sacrifices this benefit
-*/
 #define PIXEL_TO_YCGCO(T, PixelType, bit, yuvname, chroma) \
 void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                     const uint32_t width, const uint32_t height,                                 \
@@ -660,12 +655,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   }
 }
 
-/**
-* @brief It will be good to declare a type of transfer function
- * and compile each variant separately however increase of binary size about 400%
- * and compile time abound 1000% sacrifices this benefit
-*/
-#define YcCbcCrcToXXXX_DECLARATION_R(T, PixelType, bit, yuvname, chroma) \
+#define YCGCO_ToXXXX_DECLARATION_R(T, PixelType, bit, yuvname, chroma) \
 void yuvname##P##bit##To##PixelType##bit##HWY(T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                     const uint32_t width, const uint32_t height,                                 \
                     const T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,                         \
@@ -679,73 +669,73 @@ void yuvname##P##bit##To##PixelType##bit##HWY(T *SPARKYUV_RESTRICT src, const ui
                                                                colorRange);  \
 }
 
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
 #if SPARKYUV_FULL_CHANNELS
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 10, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGBA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, RGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
 #if SPARKYUV_FULL_CHANNELS
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGRA, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ABGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, ARGB, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint8_t, BGR, 8, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGBA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, RGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 
 #if SPARKYUV_FULL_CHANNELS
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
-YcCbcCrcToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo444, sparkyuv::YUV_SAMPLE_444)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo422, sparkyuv::YUV_SAMPLE_422)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGRA, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ABGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, ARGB, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
+YCGCO_ToXXXX_DECLARATION_R(uint16_t, BGR, 12, YCgCo420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
-#undef YcCbcCrcToXXXX_DECLARATION_R
+#undef YCGCO_ToXXXX_DECLARATION_R
 
 }
 HWY_AFTER_NAMESPACE();

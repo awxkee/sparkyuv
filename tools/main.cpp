@@ -150,7 +150,7 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YUV420", [&]() {
-    sparkyuv::RGBA8ToYDzDx444P8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBA8ToYIQ444P8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
                                 vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
@@ -158,7 +158,7 @@ int main() {
 
 
   bench(1, ANSI_COLOR_GREEN, "YUV420 -> RGB", [&]() {
-    sparkyuv::YDzDx444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YIQ444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
                                 vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
