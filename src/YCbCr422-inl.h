@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__YUV422_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__YUV422_INL_H
-#undef SPARKYUV__YUV422_INL_H
+#if defined(SPARKYUV__YCbCr422_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV__YCbCr422_INL_H
+#undef SPARKYUV__YCbCr422_INL_H
 #else
-#define SPARKYUV__YUV422_INL_H
+#define SPARKYUV__YCbCr422_INL_H
 #endif
 
 #include "hwy/highway.h"
@@ -28,7 +28,7 @@ HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
-void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
+void Pixel8ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src,
                     const uint32_t srcStride,
                     const uint32_t width, const uint32_t height,
                     uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
@@ -248,30 +248,30 @@ void Pixel8ToYUV422(const uint8_t *SPARKYUV_RESTRICT src,
   }
 }
 
-#define XXXXToYUV422HWY_DECLARATION_R(pixelType) \
-        void pixelType##ToYUV422HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+#define XXXXToYCbCr422HWY_DECLARATION_R(pixelType) \
+        void pixelType##ToYCbCr422HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                    const uint32_t width, const uint32_t height,\
                                    uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                    uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                    uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                    const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-          Pixel8ToYUV422<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
+          Pixel8ToYCbCr422<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
                                                       yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
         }
 
-XXXXToYUV422HWY_DECLARATION_R(RGBA)
-XXXXToYUV422HWY_DECLARATION_R(RGB)
+XXXXToYCbCr422HWY_DECLARATION_R(RGBA)
+XXXXToYCbCr422HWY_DECLARATION_R(RGB)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYUV422HWY_DECLARATION_R(ARGB)
-XXXXToYUV422HWY_DECLARATION_R(ABGR)
-XXXXToYUV422HWY_DECLARATION_R(BGRA)
-XXXXToYUV422HWY_DECLARATION_R(BGR)
+XXXXToYCbCr422HWY_DECLARATION_R(ARGB)
+XXXXToYCbCr422HWY_DECLARATION_R(ABGR)
+XXXXToYCbCr422HWY_DECLARATION_R(BGRA)
+XXXXToYCbCr422HWY_DECLARATION_R(BGR)
 #endif
 
-#undef YUV444ToXXXX_DECLARATION_R
+#undef YCbCr444ToXXXX_DECLARATION_R
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
-void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
+void YCbCr422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
                     const uint32_t dstStride,
                     const uint32_t width,
                     const uint32_t height,
@@ -407,28 +407,28 @@ void YUV422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   }
 }
 
-#define YUV422ToXXXXHWY_DECLARATION_R(pixelType) \
-        void YUV422To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst,const uint32_t dstStride,\
+#define YCbCr422ToXXXXHWY_DECLARATION_R(pixelType) \
+        void YCbCr422To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst,const uint32_t dstStride,\
                                       const uint32_t width,const uint32_t height,\
                                       const uint8_t *SPARKYUV_RESTRICT yPlane,const uint32_t yStride,\
                                       const uint8_t *SPARKYUV_RESTRICT uPlane,const uint32_t uStride,\
                                       const uint8_t *SPARKYUV_RESTRICT vPlane,const uint32_t vStride,\
                                       const float kr,const float kb, const SparkYuvColorRange colorRange) {\
-          YUV422ToPixel8<PIXEL_##pixelType>(dst, dstStride, width, height,\
+          YCbCr422ToPixel8<PIXEL_##pixelType>(dst, dstStride, width, height,\
                                      yPlane, yStride, uPlane, uStride, vPlane, vStride,\
                                      kr, kb, colorRange);\
         }
 
-YUV422ToXXXXHWY_DECLARATION_R(RGBA)
-YUV422ToXXXXHWY_DECLARATION_R(RGB)
+YCbCr422ToXXXXHWY_DECLARATION_R(RGBA)
+YCbCr422ToXXXXHWY_DECLARATION_R(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV422ToXXXXHWY_DECLARATION_R(ARGB)
-YUV422ToXXXXHWY_DECLARATION_R(ABGR)
-YUV422ToXXXXHWY_DECLARATION_R(BGRA)
-YUV422ToXXXXHWY_DECLARATION_R(BGR)
+YCbCr422ToXXXXHWY_DECLARATION_R(ARGB)
+YCbCr422ToXXXXHWY_DECLARATION_R(ABGR)
+YCbCr422ToXXXXHWY_DECLARATION_R(BGRA)
+YCbCr422ToXXXXHWY_DECLARATION_R(BGR)
 #endif
 
-#undef YUV422ToXXXXHWY_DECLARATION_R
+#undef YCbCr422ToXXXXHWY_DECLARATION_R
 
 }
 HWY_AFTER_NAMESPACE();

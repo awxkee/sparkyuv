@@ -54,7 +54,7 @@ int main() {
   std::vector<uint8_t> vPlane;
   const int width = 1629;
   const int height = 1080;
-  if (!readYUV420File("filirovska_420_pc.yuv", width, height, yPlane, uPlane, vPlane)) {
+  if (!readYCbCr420File("filirovska_420_pc.yuv", width, height, yPlane, uPlane, vPlane)) {
     std::cout << "Cannot read file (((" << std::endl;
   }
 
@@ -149,7 +149,7 @@ int main() {
 
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
-  bench(1, ANSI_COLOR_GREEN, "RGBA -> YUV420", [&]() {
+  bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
     sparkyuv::RGBA8ToYIQ444P8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
@@ -157,7 +157,7 @@ int main() {
   });
 
 
-  bench(1, ANSI_COLOR_GREEN, "YUV420 -> RGB", [&]() {
+  bench(1, ANSI_COLOR_GREEN, "YCbCr420 -> RGB", [&]() {
     sparkyuv::YIQ444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
@@ -209,7 +209,7 @@ int main() {
 //                                uvPlaneStride16 * sizeof(uint16_t), sparkyuv::YCGCO_RE);
 //  });
 //  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
-////    sparkyuv::YUV420P12ToRGBA12(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+////    sparkyuv::YCbCr420P12ToRGBA12(reinterpret_cast<uint16_t *>(rgba16Data.data()),
 ////                                     inWidth * 4 * sizeof(uint16_t),
 ////                                     inWidth,
 ////                                     inHeight,

@@ -19,14 +19,14 @@
 
 #include <benchmark/benchmark.h>
 
-void SparkyuvYUV444P10ToRGBA10(benchmark::State &state);
-void LibYuvYUV444P10ToRGBA8(benchmark::State &state);
-void SparkyuvYUV422P10ToRGBA10(benchmark::State &state);
-void LibYuvYUV422P10ToRGBA8(benchmark::State &state);
-void SparkyuvYUV420P10ToRGBA10(benchmark::State &state);
-void LibYuvYUV420P10ToRGBA8(benchmark::State &state);
-void SparkyuvRGBAP10ToYUV420P10(benchmark::State &state);
-void SparkyuvRGBA10ToYUV422P10(benchmark::State &state);
-void SparkyuvRGBA10ToYUV444P10(benchmark::State &state);
+void SparkyuvYCbCr444P10ToRGBA10(benchmark::State &state);
+void LibYuvYCbCr444P10ToRGBA8(benchmark::State &state);
+void SparkyuvYCbCr422P10ToRGBA10(benchmark::State &state);
+void LibYuvYCbCr422P10ToRGBA8(benchmark::State &state);
+void SparkyuvYCbCr420P10ToRGBA10(benchmark::State &state);
+void LibYuvYCbCr420P10ToRGBA8(benchmark::State &state);
+void SparkyuvRGBAP10ToYCbCr420P10(benchmark::State &state);
+void SparkyuvRGBA10ToYCbCr422P10(benchmark::State &state);
+void SparkyuvRGBA10ToYCbCr444P10(benchmark::State &state);
 
 #endif //YUV_TOOLS_BENCH_YUVBENCHMARK10_H_

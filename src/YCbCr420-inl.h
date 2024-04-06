@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__YUV420_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__YUV420_INL_H
-#undef SPARKYUV__YUV420_INL_H
+#if defined(SPARKYUV__YCbCr420_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV__YCbCr420_INL_H
+#undef SPARKYUV__YCbCr420_INL_H
 #else
-#define SPARKYUV__YUV420_INL_H
+#define SPARKYUV__YCbCr420_INL_H
 #endif
 
 #include "hwy/highway.h"
@@ -31,7 +31,7 @@ using namespace hwy;
 using namespace hwy::HWY_NAMESPACE;
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
-void Pixel8ToYUV420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                        const uint32_t width, const uint32_t height,
                        uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
                        uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
@@ -295,31 +295,31 @@ void Pixel8ToYUV420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
   }
 }
 
-#define XXXXToYUV420HWY_DECLARATION_R(pixelType) \
-        void pixelType##ToYUV420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+#define XXXXToYCbCr420HWY_DECLARATION_R(pixelType) \
+        void pixelType##ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                     const uint32_t width, const uint32_t height,\
                                     uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                     uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                     uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                     const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-          Pixel8ToYUV420HWY<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
+          Pixel8ToYCbCr420HWY<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
                                                          yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
         }
 
-XXXXToYUV420HWY_DECLARATION_R(RGBA)
-XXXXToYUV420HWY_DECLARATION_R(RGB)
+XXXXToYCbCr420HWY_DECLARATION_R(RGBA)
+XXXXToYCbCr420HWY_DECLARATION_R(RGB)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYUV420HWY_DECLARATION_R(ARGB)
-XXXXToYUV420HWY_DECLARATION_R(ABGR)
-XXXXToYUV420HWY_DECLARATION_R(BGRA)
-XXXXToYUV420HWY_DECLARATION_R(BGR)
+XXXXToYCbCr420HWY_DECLARATION_R(ARGB)
+XXXXToYCbCr420HWY_DECLARATION_R(ABGR)
+XXXXToYCbCr420HWY_DECLARATION_R(BGRA)
+XXXXToYCbCr420HWY_DECLARATION_R(BGR)
 #endif
 
-#undef XXXXToYUV420HWY_DECLARATION_R
+#undef XXXXToYCbCr420HWY_DECLARATION_R
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
 void
-YUV420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
+YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
                 const uint32_t width, const uint32_t height,
                 const uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
                 const uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
@@ -449,27 +449,27 @@ YUV420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
   }
 }
 
-#define YUV420ToXXXX_DECLARATION_R(pixelType) \
-    void YUV420To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+#define YCbCr420ToXXXX_DECLARATION_R(pixelType) \
+    void YCbCr420To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                   const uint32_t width, const uint32_t height,\
                                   const uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                   const uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                   const uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                   const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-         YUV420ToXXXXHWY<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
+         YCbCr420ToXXXXHWY<sparkyuv::PIXEL_##pixelType>(src, srcStride, width, height,\
                                                       yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
     }
 
-YUV420ToXXXX_DECLARATION_R(RGBA)
-YUV420ToXXXX_DECLARATION_R(RGB)
+YCbCr420ToXXXX_DECLARATION_R(RGBA)
+YCbCr420ToXXXX_DECLARATION_R(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV420ToXXXX_DECLARATION_R(ARGB)
-YUV420ToXXXX_DECLARATION_R(ABGR)
-YUV420ToXXXX_DECLARATION_R(BGRA)
-YUV420ToXXXX_DECLARATION_R(BGR)
+YCbCr420ToXXXX_DECLARATION_R(ARGB)
+YCbCr420ToXXXX_DECLARATION_R(ABGR)
+YCbCr420ToXXXX_DECLARATION_R(BGRA)
+YCbCr420ToXXXX_DECLARATION_R(BGR)
 #endif
 
-#undef YUV420ToXXXX_DECLARATION_R
+#undef YCbCr420ToXXXX_DECLARATION_R
 
 }
 HWY_AFTER_NAMESPACE();

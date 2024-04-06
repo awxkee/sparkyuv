@@ -25,7 +25,7 @@
 
 static std::string filename = "filirovska.jpeg";
 
-void SparkyuvYUV444P10ToRGBA10(benchmark::State &state) {
+void SparkyuvYCbCr444P10ToRGBA10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -61,21 +61,7 @@ void SparkyuvYUV444P10ToRGBA10(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
-  for (auto _ : state) {
-    sparkyuv::YUV444P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+  sparkyuv::RGBA10ToYCbCr444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
                                 rgba16Stride,
                                 inWidth,
                                 inHeight,
@@ -88,10 +74,24 @@ void SparkyuvYUV444P10ToRGBA10(benchmark::State &state) {
                                 0.299f,
                                 0.114f,
                                 sparkyuv::YUV_RANGE_TV);
+  for (auto _ : state) {
+    sparkyuv::YCbCr444P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }
 
-void LibYuvYUV444P10ToRGBA8(benchmark::State &state) {
+void LibYuvYCbCr444P10ToRGBA8(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -127,19 +127,19 @@ void LibYuvYUV444P10ToRGBA8(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
+  sparkyuv::RGBA10ToYCbCr444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                rgba16Stride,
+                                inWidth,
+                                inHeight,
+                                reinterpret_cast<uint16_t *>(yPlane.data()),
+                                yPlaneStride,
+                                reinterpret_cast<uint16_t *>(uPlane.data()),
+                                uvPlaneStride,
+                                reinterpret_cast<uint16_t *>(vPlane.data()),
+                                uvPlaneStride,
+                                0.299f,
+                                0.114f,
+                                sparkyuv::YUV_RANGE_TV);
   for (auto _ : state) {
     libyuv::I410ToARGBMatrix(reinterpret_cast<uint16_t *>(yPlane.data()),
                              yPlaneStride,
@@ -155,7 +155,7 @@ void LibYuvYUV444P10ToRGBA8(benchmark::State &state) {
   }
 }
 
-void SparkyuvYUV422P10ToRGBA10(benchmark::State &state) {
+void SparkyuvYCbCr422P10ToRGBA10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -191,21 +191,7 @@ void SparkyuvYUV422P10ToRGBA10(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
-  for (auto _ : state) {
-    sparkyuv::YUV422P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+  sparkyuv::RGBA10ToYCbCr422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
                                 rgba16Stride,
                                 inWidth,
                                 inHeight,
@@ -218,10 +204,24 @@ void SparkyuvYUV422P10ToRGBA10(benchmark::State &state) {
                                 0.299f,
                                 0.114f,
                                 sparkyuv::YUV_RANGE_TV);
+  for (auto _ : state) {
+    sparkyuv::YCbCr422P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }
 
-void LibYuvYUV422P10ToRGBA8(benchmark::State &state) {
+void LibYuvYCbCr422P10ToRGBA8(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -257,19 +257,19 @@ void LibYuvYUV422P10ToRGBA8(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
+  sparkyuv::RGBA10ToYCbCr422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                rgba16Stride,
+                                inWidth,
+                                inHeight,
+                                reinterpret_cast<uint16_t *>(yPlane.data()),
+                                yPlaneStride,
+                                reinterpret_cast<uint16_t *>(uPlane.data()),
+                                uvPlaneStride,
+                                reinterpret_cast<uint16_t *>(vPlane.data()),
+                                uvPlaneStride,
+                                0.299f,
+                                0.114f,
+                                sparkyuv::YUV_RANGE_TV);
   for (auto _ : state) {
     libyuv::I210ToARGBMatrix(reinterpret_cast<uint16_t *>(yPlane.data()),
                              yPlaneStride,
@@ -285,7 +285,7 @@ void LibYuvYUV422P10ToRGBA8(benchmark::State &state) {
   }
 }
 
-void SparkyuvYUV420P10ToRGBA10(benchmark::State &state) {
+void SparkyuvYCbCr420P10ToRGBA10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -321,21 +321,7 @@ void SparkyuvYUV420P10ToRGBA10(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
-  for (auto _ : state) {
-    sparkyuv::YUV420P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+  sparkyuv::RGBA10ToYCbCr420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
                                 rgba16Stride,
                                 inWidth,
                                 inHeight,
@@ -348,10 +334,24 @@ void SparkyuvYUV420P10ToRGBA10(benchmark::State &state) {
                                 0.299f,
                                 0.114f,
                                 sparkyuv::YUV_RANGE_TV);
+  for (auto _ : state) {
+    sparkyuv::YCbCr420P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }
 
-void LibYuvYUV420P10ToRGBA8(benchmark::State &state) {
+void LibYuvYCbCr420P10ToRGBA8(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -387,19 +387,19 @@ void LibYuvYUV420P10ToRGBA8(benchmark::State &state) {
                           inWidth,
                           inHeight);
 
-  sparkyuv::RGBA10ToYUV420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                              rgba16Stride,
-                              inWidth,
-                              inHeight,
-                              reinterpret_cast<uint16_t *>(yPlane.data()),
-                              yPlaneStride,
-                              reinterpret_cast<uint16_t *>(uPlane.data()),
-                              uvPlaneStride,
-                              reinterpret_cast<uint16_t *>(vPlane.data()),
-                              uvPlaneStride,
-                              0.299f,
-                              0.114f,
-                              sparkyuv::YUV_RANGE_TV);
+  sparkyuv::RGBA10ToYCbCr420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                rgba16Stride,
+                                inWidth,
+                                inHeight,
+                                reinterpret_cast<uint16_t *>(yPlane.data()),
+                                yPlaneStride,
+                                reinterpret_cast<uint16_t *>(uPlane.data()),
+                                uvPlaneStride,
+                                reinterpret_cast<uint16_t *>(vPlane.data()),
+                                uvPlaneStride,
+                                0.299f,
+                                0.114f,
+                                sparkyuv::YUV_RANGE_TV);
   for (auto _ : state) {
     libyuv::I010ToARGBMatrix(reinterpret_cast<uint16_t *>(yPlane.data()),
                              yPlaneStride,
@@ -415,7 +415,7 @@ void LibYuvYUV420P10ToRGBA8(benchmark::State &state) {
   }
 }
 
-void SparkyuvRGBAP10ToYUV420P10(benchmark::State &state) {
+void SparkyuvRGBAP10ToYCbCr420P10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -451,23 +451,23 @@ void SparkyuvRGBAP10ToYUV420P10(benchmark::State &state) {
                           inWidth,
                           inHeight);
   for (auto _ : state) {
-    sparkyuv::RGBA10ToYUV420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                                rgba16Stride,
-                                inWidth,
-                                inHeight,
-                                reinterpret_cast<uint16_t *>(yPlane.data()),
-                                yPlaneStride,
-                                reinterpret_cast<uint16_t *>(uPlane.data()),
-                                uvPlaneStride,
-                                reinterpret_cast<uint16_t *>(vPlane.data()),
-                                uvPlaneStride,
-                                0.299f,
-                                0.114f,
-                                sparkyuv::YUV_RANGE_TV);
+    sparkyuv::RGBA10ToYCbCr420P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }
 
-void SparkyuvRGBA10ToYUV422P10(benchmark::State &state) {
+void SparkyuvRGBA10ToYCbCr422P10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -503,23 +503,23 @@ void SparkyuvRGBA10ToYUV422P10(benchmark::State &state) {
                           inWidth,
                           inHeight);
   for (auto _ : state) {
-    sparkyuv::RGBA10ToYUV422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                                rgba16Stride,
-                                inWidth,
-                                inHeight,
-                                reinterpret_cast<uint16_t *>(yPlane.data()),
-                                yPlaneStride,
-                                reinterpret_cast<uint16_t *>(uPlane.data()),
-                                uvPlaneStride,
-                                reinterpret_cast<uint16_t *>(vPlane.data()),
-                                uvPlaneStride,
-                                0.299f,
-                                0.114f,
-                                sparkyuv::YUV_RANGE_TV);
+    sparkyuv::RGBA10ToYCbCr422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }
 
-void SparkyuvRGBA10ToYUV444P10(benchmark::State &state) {
+void SparkyuvRGBA10ToYCbCr444P10(benchmark::State &state) {
   std::vector<uint8_t> inSrcData;
   int inWidth, inHeight;
 
@@ -555,18 +555,18 @@ void SparkyuvRGBA10ToYUV444P10(benchmark::State &state) {
                           inWidth,
                           inHeight);
   for (auto _ : state) {
-    sparkyuv::RGBA10ToYUV444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                                rgba16Stride,
-                                inWidth,
-                                inHeight,
-                                reinterpret_cast<uint16_t *>(yPlane.data()),
-                                yPlaneStride,
-                                reinterpret_cast<uint16_t *>(uPlane.data()),
-                                uvPlaneStride,
-                                reinterpret_cast<uint16_t *>(vPlane.data()),
-                                uvPlaneStride,
-                                0.299f,
-                                0.114f,
-                                sparkyuv::YUV_RANGE_TV);
+    sparkyuv::RGBA10ToYCbCr444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                  rgba16Stride,
+                                  inWidth,
+                                  inHeight,
+                                  reinterpret_cast<uint16_t *>(yPlane.data()),
+                                  yPlaneStride,
+                                  reinterpret_cast<uint16_t *>(uPlane.data()),
+                                  uvPlaneStride,
+                                  reinterpret_cast<uint16_t *>(vPlane.data()),
+                                  uvPlaneStride,
+                                  0.299f,
+                                  0.114f,
+                                  sparkyuv::YUV_RANGE_TV);
   }
 }

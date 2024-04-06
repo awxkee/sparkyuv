@@ -28,15 +28,15 @@
 
 #if HWY_ONCE
 namespace sparkyuv {
-#define YUV420ToXXXX_DECLARATION_E(pixelType) \
+#define YCbCr420ToXXXX_DECLARATION_E(pixelType) \
   HWY_DLLEXPORT void \
-  YUV420To##pixelType(uint8_t *SPARKYUV_RESTRICT rgba,const uint32_t rgbaStride,\
+  YCbCr420To##pixelType(uint8_t *SPARKYUV_RESTRICT rgba,const uint32_t rgbaStride,\
                       const uint32_t width, const uint32_t height,\
                       const uint8_t *SPARKYUV_RESTRICT ySrc, const uint32_t yPlaneStride,\
                       const uint8_t *SPARKYUV_RESTRICT uSrc, const uint32_t uPlaneStride,\
                       const uint8_t *SPARKYUV_RESTRICT vSrc, const uint32_t vPlaneStride,\
                       const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-    HWY_DYNAMIC_DISPATCH(YUV420To##pixelType##HWY)(rgba, rgbaStride,\
+    HWY_DYNAMIC_DISPATCH(YCbCr420To##pixelType##HWY)(rgba, rgbaStride,\
                                                    width, height,\
                                                    ySrc, yPlaneStride,\
                                                    uSrc, uPlaneStride,\
@@ -44,198 +44,198 @@ namespace sparkyuv {
                                                    kr, kb, colorRange); \
   }
 
-#define YUV420ToXXXX_DECLARATION_HWY(pixelType) HWY_EXPORT(YUV420To##pixelType##HWY);
+#define YCbCr420ToXXXX_DECLARATION_HWY(pixelType) HWY_EXPORT(YCbCr420To##pixelType##HWY);
 
-YUV420ToXXXX_DECLARATION_HWY(RGBA)
-YUV420ToXXXX_DECLARATION_HWY(RGB)
+YCbCr420ToXXXX_DECLARATION_HWY(RGBA)
+YCbCr420ToXXXX_DECLARATION_HWY(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV420ToXXXX_DECLARATION_HWY(ARGB)
-YUV420ToXXXX_DECLARATION_HWY(ABGR)
-YUV420ToXXXX_DECLARATION_HWY(BGRA)
-YUV420ToXXXX_DECLARATION_HWY(BGR)
+YCbCr420ToXXXX_DECLARATION_HWY(ARGB)
+YCbCr420ToXXXX_DECLARATION_HWY(ABGR)
+YCbCr420ToXXXX_DECLARATION_HWY(BGRA)
+YCbCr420ToXXXX_DECLARATION_HWY(BGR)
 #endif
 
-#undef YUV420ToXXXX_DECLARATION_HWY
+#undef YCbCr420ToXXXX_DECLARATION_HWY
 
-YUV420ToXXXX_DECLARATION_E(RGBA)
-YUV420ToXXXX_DECLARATION_E(RGB)
+YCbCr420ToXXXX_DECLARATION_E(RGBA)
+YCbCr420ToXXXX_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV420ToXXXX_DECLARATION_E(ARGB)
-YUV420ToXXXX_DECLARATION_E(ABGR)
-YUV420ToXXXX_DECLARATION_E(BGRA)
-YUV420ToXXXX_DECLARATION_E(BGR)
+YCbCr420ToXXXX_DECLARATION_E(ARGB)
+YCbCr420ToXXXX_DECLARATION_E(ABGR)
+YCbCr420ToXXXX_DECLARATION_E(BGRA)
+YCbCr420ToXXXX_DECLARATION_E(BGR)
 #endif
 
-#undef YUV420ToXXXX_DECLARATION_E
+#undef YCbCr420ToXXXX_DECLARATION_E
 
-// MARK: YUV444 To RGBX
+// MARK: YCbCr444 To RGBX
 
-HWY_EXPORT(YUV444ToRGBAHWY);
-HWY_EXPORT(YUV444ToRGBHWY);
+HWY_EXPORT(YCbCr444ToRGBAHWY);
+HWY_EXPORT(YCbCr444ToRGBHWY);
 #if SPARKYUV_FULL_CHANNELS
-HWY_EXPORT(YUV444ToBGRAHWY);
-HWY_EXPORT(YUV444ToABGRHWY);
-HWY_EXPORT(YUV444ToARGBHWY);
-HWY_EXPORT(YUV444ToBGRHWY);
+HWY_EXPORT(YCbCr444ToBGRAHWY);
+HWY_EXPORT(YCbCr444ToABGRHWY);
+HWY_EXPORT(YCbCr444ToARGBHWY);
+HWY_EXPORT(YCbCr444ToBGRHWY);
 #endif
 
-#define YUV444ToXXXX_DECLARATION_E(pixelType) \
-    HWY_DLLEXPORT void YUV444To##pixelType(uint8_t *SPARKYUV_RESTRICT src, uint32_t srcStride, \
+#define YCbCr444ToXXXX_DECLARATION_E(pixelType) \
+    HWY_DLLEXPORT void YCbCr444To##pixelType(uint8_t *SPARKYUV_RESTRICT src, uint32_t srcStride, \
                                             uint32_t width, uint32_t height, \
                                             const uint8_t *SPARKYUV_RESTRICT yPlane, uint32_t yStride, \
                                             const uint8_t *SPARKYUV_RESTRICT uPlane, uint32_t uStride, \
                                             const uint8_t *SPARKYUV_RESTRICT vPlane, uint32_t vStride, \
                                             float kr, float kb, SparkYuvColorRange colorRange) { \
-        HWY_DYNAMIC_DISPATCH(YUV444To##pixelType##HWY)(src, srcStride, width, height, yPlane, yStride, uPlane, uStride, vPlane, vStride, \
+        HWY_DYNAMIC_DISPATCH(YCbCr444To##pixelType##HWY)(src, srcStride, width, height, yPlane, yStride, uPlane, uStride, vPlane, vStride, \
                                                    kr, kb, colorRange); \
     }
 
-YUV444ToXXXX_DECLARATION_E(RGBA)
-YUV444ToXXXX_DECLARATION_E(RGB)
+YCbCr444ToXXXX_DECLARATION_E(RGBA)
+YCbCr444ToXXXX_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV444ToXXXX_DECLARATION_E(ARGB)
-YUV444ToXXXX_DECLARATION_E(ABGR)
-YUV444ToXXXX_DECLARATION_E(BGRA)
-YUV444ToXXXX_DECLARATION_E(BGR)
+YCbCr444ToXXXX_DECLARATION_E(ARGB)
+YCbCr444ToXXXX_DECLARATION_E(ABGR)
+YCbCr444ToXXXX_DECLARATION_E(BGRA)
+YCbCr444ToXXXX_DECLARATION_E(BGR)
 #endif
 
-#undef YUV444ToXXXX_DECLARATION
+#undef YCbCr444ToXXXX_DECLARATION
 
-// MARK: YUV422
+// MARK: YCbCr422
 
-HWY_EXPORT(YUV422ToRGBAHWY);
-HWY_EXPORT(YUV422ToRGBHWY);
+HWY_EXPORT(YCbCr422ToRGBAHWY);
+HWY_EXPORT(YCbCr422ToRGBHWY);
 #if SPARKYUV_FULL_CHANNELS
-HWY_EXPORT(YUV422ToBGRAHWY);
-HWY_EXPORT(YUV422ToABGRHWY);
-HWY_EXPORT(YUV422ToARGBHWY);
-HWY_EXPORT(YUV422ToBGRHWY);
+HWY_EXPORT(YCbCr422ToBGRAHWY);
+HWY_EXPORT(YCbCr422ToABGRHWY);
+HWY_EXPORT(YCbCr422ToARGBHWY);
+HWY_EXPORT(YCbCr422ToBGRHWY);
 #endif
 
-#define YUV422ToXXXX_DECLARATION_E(pixelType) \
+#define YCbCr422ToXXXX_DECLARATION_E(pixelType) \
 HWY_DLLEXPORT void \
-YUV422To##pixelType(uint8_t *SPARKYUV_RESTRICT rgba, const uint32_t rgbaStride, \
+YCbCr422To##pixelType(uint8_t *SPARKYUV_RESTRICT rgba, const uint32_t rgbaStride, \
                     const uint32_t width, const uint32_t height, \
                     const uint8_t *SPARKYUV_RESTRICT ySrc, uint32_t yPlaneStride, \
                     const uint8_t *SPARKYUV_RESTRICT uSrc, uint32_t uPlaneStride, \
                     const uint8_t *SPARKYUV_RESTRICT vSrc, uint32_t vPlaneStride, \
                     const float kr, const float kb, const SparkYuvColorRange colorRange) { \
-                       HWY_DYNAMIC_DISPATCH(YUV422To##pixelType##HWY)(rgba, rgbaStride, width, height, \
+                       HWY_DYNAMIC_DISPATCH(YCbCr422To##pixelType##HWY)(rgba, rgbaStride, width, height, \
                                                            ySrc, yPlaneStride, uSrc, uPlaneStride, vSrc, vPlaneStride,\
                                                            kr, kb, colorRange);\
                     }
 
-YUV422ToXXXX_DECLARATION_E(RGBA)
-YUV422ToXXXX_DECLARATION_E(RGB)
+YCbCr422ToXXXX_DECLARATION_E(RGBA)
+YCbCr422ToXXXX_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-YUV422ToXXXX_DECLARATION_E(ARGB)
-YUV422ToXXXX_DECLARATION_E(ABGR)
-YUV422ToXXXX_DECLARATION_E(BGRA)
-YUV422ToXXXX_DECLARATION_E(BGR)
+YCbCr422ToXXXX_DECLARATION_E(ARGB)
+YCbCr422ToXXXX_DECLARATION_E(ABGR)
+YCbCr422ToXXXX_DECLARATION_E(BGRA)
+YCbCr422ToXXXX_DECLARATION_E(BGR)
 #endif
 
-#undef YUV422ToXXXX_DECLARATION_E
+#undef YCbCr422ToXXXX_DECLARATION_E
 
-// MARK: RGBX To YUV444
+// MARK: RGBX To YCbCr444
 
-HWY_EXPORT(RGBAToYUV444HWY);
-HWY_EXPORT(RGBToYUV444HWY);
+HWY_EXPORT(RGBAToYCbCr444HWY);
+HWY_EXPORT(RGBToYCbCr444HWY);
 #if SPARKYUV_FULL_CHANNELS
-HWY_EXPORT(ARGBToYUV444HWY);
-HWY_EXPORT(BGRAToYUV444HWY);
-HWY_EXPORT(ABGRToYUV444HWY);
-HWY_EXPORT(BGRToYUV444HWY);
+HWY_EXPORT(ARGBToYCbCr444HWY);
+HWY_EXPORT(BGRAToYCbCr444HWY);
+HWY_EXPORT(ABGRToYCbCr444HWY);
+HWY_EXPORT(BGRToYCbCr444HWY);
 #endif
 
-#define XXXXToYUV444_DECLARATION_E(pixelType) \
-    HWY_DLLEXPORT void pixelType##ToYUV444(const uint8_t *SPARKYUV_RESTRICT src, \
+#define XXXXToYCbCr444_DECLARATION_E(pixelType) \
+    HWY_DLLEXPORT void pixelType##ToYCbCr444(const uint8_t *SPARKYUV_RESTRICT src, \
                                            const uint32_t srcStride, const uint32_t width, const uint32_t height, \
                                            uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride, \
                                            uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride, \
                                            uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride, \
                                            const float kr, const float kb, const SparkYuvColorRange colorRange) { \
-            HWY_DYNAMIC_DISPATCH(pixelType##ToYUV444HWY)(src, srcStride, width, height, \
+            HWY_DYNAMIC_DISPATCH(pixelType##ToYCbCr444HWY)(src, srcStride, width, height, \
                                                           yPlane, yStride, uPlane, uStride, vPlane, vStride, \
                                                           kr, kb, colorRange); \
     }
 
-XXXXToYUV444_DECLARATION_E(RGBA)
-XXXXToYUV444_DECLARATION_E(RGB)
+XXXXToYCbCr444_DECLARATION_E(RGBA)
+XXXXToYCbCr444_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYUV444_DECLARATION_E(ARGB)
-XXXXToYUV444_DECLARATION_E(ABGR)
-XXXXToYUV444_DECLARATION_E(BGRA)
-XXXXToYUV444_DECLARATION_E(BGR)
+XXXXToYCbCr444_DECLARATION_E(ARGB)
+XXXXToYCbCr444_DECLARATION_E(ABGR)
+XXXXToYCbCr444_DECLARATION_E(BGRA)
+XXXXToYCbCr444_DECLARATION_E(BGR)
 #endif
 
-#undef XXXXToYUV444_DECLARATION_E
+#undef XXXXToYCbCr444_DECLARATION_E
 
-// MARK: RGBX To YUV422
+// MARK: RGBX To YCbCr422
 
-HWY_EXPORT(RGBAToYUV422HWY);
-HWY_EXPORT(RGBToYUV422HWY);
+HWY_EXPORT(RGBAToYCbCr422HWY);
+HWY_EXPORT(RGBToYCbCr422HWY);
 #if SPARKYUV_FULL_CHANNELS
-HWY_EXPORT(ARGBToYUV422HWY);
-HWY_EXPORT(BGRAToYUV422HWY);
-HWY_EXPORT(ABGRToYUV422HWY);
-HWY_EXPORT(BGRToYUV422HWY);
+HWY_EXPORT(ARGBToYCbCr422HWY);
+HWY_EXPORT(BGRAToYCbCr422HWY);
+HWY_EXPORT(ABGRToYCbCr422HWY);
+HWY_EXPORT(BGRToYCbCr422HWY);
 #endif
 
-#define XXXXToYUV422_DECLARATION_E(pixelType) \
-    HWY_DLLEXPORT void pixelType##ToYUV422(const uint8_t *SPARKYUV_RESTRICT src, \
+#define XXXXToYCbCr422_DECLARATION_E(pixelType) \
+    HWY_DLLEXPORT void pixelType##ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src, \
                                            const uint32_t srcStride, const uint32_t width, const uint32_t height, \
                                            uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride, \
                                            uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride, \
                                            uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride, \
                                            const float kr, const float kb, const SparkYuvColorRange colorRange) { \
-            HWY_DYNAMIC_DISPATCH(pixelType##ToYUV422HWY)(src, srcStride, width, height, \
+            HWY_DYNAMIC_DISPATCH(pixelType##ToYCbCr422HWY)(src, srcStride, width, height, \
                                                          yPlane, yStride, uPlane, uStride, vPlane, vStride, \
                                                          kr, kb, colorRange); \
     }
 
-XXXXToYUV422_DECLARATION_E(RGBA)
-XXXXToYUV422_DECLARATION_E(RGB)
+XXXXToYCbCr422_DECLARATION_E(RGBA)
+XXXXToYCbCr422_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYUV422_DECLARATION_E(ARGB)
-XXXXToYUV422_DECLARATION_E(ABGR)
-XXXXToYUV422_DECLARATION_E(BGRA)
-XXXXToYUV422_DECLARATION_E(BGR)
+XXXXToYCbCr422_DECLARATION_E(ARGB)
+XXXXToYCbCr422_DECLARATION_E(ABGR)
+XXXXToYCbCr422_DECLARATION_E(BGRA)
+XXXXToYCbCr422_DECLARATION_E(BGR)
 #endif
 
-#undef XXXXToYUV422_DECLARATION_E
+#undef XXXXToYCbCr422_DECLARATION_E
 
-HWY_EXPORT(RGBToYUV420HWY);
-HWY_EXPORT(RGBAToYUV420HWY);
+HWY_EXPORT(RGBToYCbCr420HWY);
+HWY_EXPORT(RGBAToYCbCr420HWY);
 #if SPARKYUV_FULL_CHANNELS
-HWY_EXPORT(BGRToYUV420HWY);
-HWY_EXPORT(BGRAToYUV420HWY);
-HWY_EXPORT(ABGRToYUV420HWY);
-HWY_EXPORT(ARGBToYUV420HWY);
+HWY_EXPORT(BGRToYCbCr420HWY);
+HWY_EXPORT(BGRAToYCbCr420HWY);
+HWY_EXPORT(ABGRToYCbCr420HWY);
+HWY_EXPORT(ARGBToYCbCr420HWY);
 #endif
 
-#define XXXXToYUV420_DECLARATION_E(pixelType) \
-HWY_DLLEXPORT void pixelType##ToYUV420(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+#define XXXXToYCbCr420_DECLARATION_E(pixelType) \
+HWY_DLLEXPORT void pixelType##ToYCbCr420(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                        const uint32_t width, const uint32_t height,\
                                        uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                        uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                        uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                        const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-    HWY_DYNAMIC_DISPATCH(pixelType##ToYUV420HWY)(src, srcStride,\
+    HWY_DYNAMIC_DISPATCH(pixelType##ToYCbCr420HWY)(src, srcStride,\
                                          width, height,\
                                          yPlane, yStride, uPlane, uStride, vPlane, vStride,\
                                          kr, kb, colorRange);\
   }
 
-XXXXToYUV420_DECLARATION_E(RGBA)
-XXXXToYUV420_DECLARATION_E(RGB)
+XXXXToYCbCr420_DECLARATION_E(RGBA)
+XXXXToYCbCr420_DECLARATION_E(RGB)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYUV420_DECLARATION_E(ARGB)
-XXXXToYUV420_DECLARATION_E(ABGR)
-XXXXToYUV420_DECLARATION_E(BGRA)
-XXXXToYUV420_DECLARATION_E(BGR)
+XXXXToYCbCr420_DECLARATION_E(ARGB)
+XXXXToYCbCr420_DECLARATION_E(ABGR)
+XXXXToYCbCr420_DECLARATION_E(BGRA)
+XXXXToYCbCr420_DECLARATION_E(BGR)
 #endif
 
-#undef XXXXToYUV420_DECLARATION_E
+#undef XXXXToYCbCr420_DECLARATION_E
 
 }
 #endif

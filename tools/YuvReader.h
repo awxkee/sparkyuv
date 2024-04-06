@@ -9,7 +9,7 @@
 #include <fstream>
 #include <vector>
 
-bool readYUV420File(const std::string &filename, const int width, const int height,
+bool readYCbCr420File(const std::string &filename, const int width, const int height,
                     std::vector<uint8_t> &yData,
                     std::vector<uint8_t> &uData,
                     std::vector<uint8_t> &vData) {
@@ -26,7 +26,7 @@ bool readYUV420File(const std::string &filename, const int width, const int heig
   // Calculate the size of Y, U, and V planes
   size_t yuvTotal = width * height * 3 / 2;
   size_t ySize = width * height;
-  size_t uSize = ((width + 1) / 2) * ((height + 1) / 2);  // YUV420 has 1/4 U and V resolution
+  size_t uSize = ((width + 1) / 2) * ((height + 1) / 2);  // YCbCr420 has 1/4 U and V resolution
   size_t vSize = uSize;
 
   size_t total = ySize + uSize + vSize;
@@ -66,7 +66,7 @@ bool readYUV420File(const std::string &filename, const int width, const int heig
   return true;
 }
 
-bool readYUV422File(const std::string &filename, const int width, const int height,
+bool readYCbCr422File(const std::string &filename, const int width, const int height,
                     std::vector<uint8_t> &yData,
                     std::vector<uint8_t> &uData,
                     std::vector<uint8_t> &vData) {
@@ -82,7 +82,7 @@ bool readYUV422File(const std::string &filename, const int width, const int heig
 
   // Calculate the size of Y, U, and V planes
   size_t ySize = width * height;
-  size_t uSize = ((width + 1) / 2) * height;  // YUV420 has 1/4 U and V resolution
+  size_t uSize = ((width + 1) / 2) * height;  // YCbCr420 has 1/4 U and V resolution
   size_t vSize = uSize;
 
   size_t total = ySize + uSize + vSize;
@@ -138,7 +138,7 @@ bool readYUV444File(const std::string &filename, const int width, const int heig
 
   // Calculate the size of Y, U, and V planes
   size_t ySize = width * height;
-  size_t uSize = width * height;  // YUV420 has 1/4 U and V resolution
+  size_t uSize = width * height;  // YCbCr420 has 1/4 U and V resolution
   size_t vSize = uSize;
 
   size_t total = ySize + uSize + vSize;
