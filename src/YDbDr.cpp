@@ -37,7 +37,7 @@ void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, co
                                                                yPlane, yStride,                  \
                                                                uPlane, uStride,                  \
                                                                vPlane, vStride,                  \
-                                                               colorRange, kRGBToYIQMatrix);\
+                                                               colorRange, kRGBToYDbDrMatrix);\
 }
 
 PIXEL_TO_YIQ(uint16_t, RGBA, 10, YDbDr444, sparkyuv::YUV_SAMPLE_444)
@@ -125,7 +125,7 @@ void yuvname##P##bit##To##PixelType##bit##HWY(T *SPARKYUV_RESTRICT src, const ui
                                                                yPlane, yStride,                  \
                                                                uPlane, uStride,                  \
                                                                vPlane, vStride,                  \
-                                                               colorRange, kYIQToRGBMatrix);  \
+                                                               colorRange, kYDbDrToRGBMatrix);  \
 }
 
 YIQ_ToXXXX_DECLARATION_R(uint16_t, RGBA, 10, YDbDr444, sparkyuv::YUV_SAMPLE_444)
