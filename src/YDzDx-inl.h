@@ -196,12 +196,7 @@ PixelToYDzDxHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   }
 }
 
-/**
-* @brief It will be good to declare a type of transfer function
- * and compile each variant separately however increase of binary size about 400%
- * and compile time abound 1000% sacrifices this benefit
-*/
-#define PIXEL_TO_YCGCO(T, PixelType, bit, yuvname, chroma) \
+#define PIXEL_TO_YDZDX(T, PixelType, bit, yuvname, chroma) \
 void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                     const uint32_t width, const uint32_t height,                                 \
                     T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,                         \
@@ -215,79 +210,79 @@ void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, co
                                                                colorRange);\
 }
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, RGB, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, RGB, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, RGB, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, RGB, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, RGB, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, RGB, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, RGB, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, RGB, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, RGB, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, RGB, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCGCO(uint16_t, RGBA, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, RGB, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, RGBA, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, RGB, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint8_t, RGB, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, RGBA, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, RGB, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 
-PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint8_t, RGB, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, RGBA, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, RGB, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
 
-PIXEL_TO_YCGCO(uint8_t, RGBA, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint8_t, RGB, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, RGBA, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, RGB, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, BGR, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, BGR, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, BGRA, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, BGR, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, BGR, 10, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, BGR, 10, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, BGR, 10, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint8_t, BGR, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint8_t, BGR, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint8_t, BGRA, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint8_t, ABGR, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint8_t, ARGB, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint8_t, BGR, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, BGRA, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, ABGR, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, ARGB, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, BGR, 8, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint8_t, BGRA, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, ABGR, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, ARGB, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, BGR, 8, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint8_t, BGRA, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, ABGR, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, ARGB, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint8_t, BGR, 8, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, BGR, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
-PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, BGR, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
-PIXEL_TO_YCGCO(uint16_t, BGRA, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, ABGR, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, ARGB, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
-PIXEL_TO_YCGCO(uint16_t, BGR, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, BGR, 12, YDzDx444, sparkyuv::YUV_SAMPLE_444)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, BGR, 12, YDzDx422, sparkyuv::YUV_SAMPLE_422)
+PIXEL_TO_YDZDX(uint16_t, BGRA, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, ABGR, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, ARGB, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
+PIXEL_TO_YDZDX(uint16_t, BGR, 12, YDzDx420, sparkyuv::YUV_SAMPLE_420)
 #endif
 
-#undef PIXEL_TO_YCGCO
+#undef PIXEL_TO_YDZDX
 
 template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
     SparkYuvChromaSubsample chromaSubsample, int bitDepth>

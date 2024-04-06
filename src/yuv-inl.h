@@ -38,7 +38,7 @@
 * However on neon target there is vmlal which works pretty good so for neon it's preferable to accumulate results with
 * ReorderWidenMulAccumulate instead of passing zeros
 */
-#if (HWY_ARCH_ARM_A64 && (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES || HWY_TARGET == HWY_SVE))
+#if (HWY_ARCH_ARM_A64 && (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES))
 #define SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE 1
 #endif
 
@@ -80,6 +80,43 @@ VH GetOdd(D d, Vec<D> v) {
   const Half<D> dh;
   const Rebind<uint32_t, decltype(dh)> du32;
   return DemoteTo(dh, ShiftRight<16>(BitCast(du32, v)));
+}
+
+template<typename D, HWY_IF_U8_D(D), typename VH = Vec<Half<D>>>
+VH GetOdd(D d, Vec<D> v) {
+  const Half<D> dh;
+  const Rebind<uint16_t, decltype(dh)> du16;
+  return DemoteTo(dh, ShiftRight<8>(BitCast(du16, v)));
+}
+
+template<typename D, HWY_IF_U8_D(D), typename VH = Vec<Half<D>>>
+VH GetEven(D d, Vec<D> v) {
+  const Half<D> dh;
+  const Rebind<uint32_t, decltype(dh)> du16;
+  const auto erase = Set(du16, static_cast<uint16_t>(0x00FF));
+  return DemoteTo(dh, And(BitCast(du16, v), erase));
+}
+
+template<typename D, HWY_IF_U32_D(D), typename VW = Vec<D>, typename VL = Vec<Rebind<uint16_t, Twice<D>>>>
+void WidenMul(D d, VL v, VL o, VW &hiSum, VW &loSum) {
+#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
+  loSum = ReorderWidenMulAccumulate(d, v, o, o, hiSum);
+#else
+  const VW dw;
+  loSum = MulAdd(PromoteLowerTo(dw, v), lo, loSum);
+  hiSum = MulAdd(PromoteUpperTo(dw, v), hi, hiSum);
+#endif
+}
+
+template<typename D, HWY_IF_I32_D(D), typename VW = Vec<D>, typename VL = Vec<Rebind<int16_t, Twice<D>>>>
+void WidenMul(D d, VL v, VL o, VW &hiSum, VW &loSum) {
+#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
+  loSum = ReorderWidenMulAccumulate(d, v, o, loSum, hiSum);
+#else
+  const VW dw;
+  loSum = MulAdd(PromoteLowerTo(dw, v), lo, loSum);
+  hiSum = MulAdd(PromoteUpperTo(dw, v), hi, hiSum);
+#endif
 }
 
 // Hack for HWY EMU128.
@@ -262,8 +299,7 @@ HWY_API void LoadReformatRGBA(D d, const TFromD<D> *source, V &R, V &G, V &B, V 
       break;
     case sparkyuv::REFORMAT_ABGR:LoadInterleaved4(d, reinterpret_cast<const TFromD<D> *>(source), A, B, G, R);
       break;
-    default:
-      A = Zero(d);
+    default:A = Zero(d);
       R = Zero(d);
       B = Zero(d);
       G = Zero(d);
@@ -416,6 +452,58 @@ static void ComputeTransform(const float kr,
   CrB = 0.5f * kb / (1.f - kr) * rangeUV / fullRangeRGB;
 }
 
+static void ComputeForwardTransform(const float kr,
+                                    const float kb,
+                                    const float biasY,
+                                    const float biasUV,
+                                    const float rangeY,
+                                    const float rangeUV,
+                                    const float fullRangeRGB,
+                                    float &YR, float &YG, float &YB,
+                                    float &Cb,
+                                    float &Cr) {
+  const float kg = 1.0f - kr - kb;
+  if (kg == 0.f) {
+    throw std::runtime_error("1.0f - kr - kg must not be 0");
+  }
+
+  YR = kr * rangeY / fullRangeRGB;
+  YG = kg * rangeY / fullRangeRGB;
+  YB = kb * rangeY / fullRangeRGB;
+
+  Cb = 0.5f / (1.f - kb) * rangeUV / fullRangeRGB;
+  Cr = 0.5f / (1.f - kr) * rangeUV / fullRangeRGB;
+}
+
+static void ComputeForwardIntegersTransform(const float kr,
+                                            const float kb,
+                                            const float biasY,
+                                            const float biasUV,
+                                            const float rangeY,
+                                            const float rangeUV,
+                                            const float fullRangeRGB,
+                                            const uint16_t precision,
+                                            const uint16_t uvPrecision,
+                                            uint16_t &uYR, uint16_t &uYG, uint16_t &uYB,
+                                            uint16_t &kuCb, uint16_t &kuCr) {
+  float YR, YG, YB;
+  float kCb, kCr;
+
+  const auto scale = static_cast<float>( 1 << precision );
+  const auto scaleUV = static_cast<float>( 1 << uvPrecision );
+
+  ComputeForwardTransform(kr, kb, static_cast<float>(biasY), static_cast<float>(biasUV),
+                          static_cast<float>(rangeY), static_cast<float>(rangeUV),
+                          fullRangeRGB, YR, YG, YB, kCb, kCr);
+
+  uYR = static_cast<uint16_t>(std::roundf(scale * YR));
+  uYG = static_cast<uint16_t>(std::roundf(scale * YG));
+  uYB = static_cast<uint16_t>(std::roundf(scale * YB));
+
+  kuCb = static_cast<uint16_t>(std::roundf(scaleUV * kCb));
+  kuCr = static_cast<uint16_t>(std::roundf(scaleUV * kCr));
+}
+
 static void ComputeTransformIntegers(const float kr,
                                      const float kb,
                                      const float biasY,
@@ -470,7 +558,7 @@ static void ComputeInverseTransform(const float kr,
 }
 
 template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
-SPARKYUV_INLINE static void LoadRGBA(const T *source, C &r, C &g, C &b, C& a) {
+SPARKYUV_INLINE static void LoadRGBA(const T *source, C &r, C &g, C &b, C &a) {
   switch (PixelType) {
     case PIXEL_RGB:r = static_cast<C>(source[0]);
       g = static_cast<C>(source[1]);

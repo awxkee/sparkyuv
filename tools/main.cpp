@@ -89,7 +89,7 @@ int main() {
   uPlane.resize(uvPlaneStride * uvPlaneHeight);
   vPlane.resize(uvPlaneStride * uvPlaneHeight);
 
-  int uvPlaneStride16 = (width + 1) / 2;
+  int uvPlaneStride16 = width;
   int uvPlaneHeight16 = height;
 
   std::vector<uint8_t> yPlane16;
@@ -150,18 +150,18 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
-    sparkyuv::RGBA8ToYIQ444P8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBAToYCbCr444BT601(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
+                                vPlane.data(), uvPlaneStride);
   });
 
 
   bench(1, ANSI_COLOR_GREEN, "YCbCr420 -> RGB", [&]() {
-    sparkyuv::YIQ444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YCbCr444BT601ToRGBA(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
+                                vPlane.data(), uvPlaneStride);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);

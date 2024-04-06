@@ -14,10 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//
-// Created by Radzivon Bartoshyk on 24/03/2024.
-//
-
 #pragma once
 
 #include <exception>
@@ -51,6 +47,14 @@ static SparkYuvTransformMatrix kRGBToYIQMatrix = {.Y1 = 0.299f, .Y2 = 0.587f, .Y
 static SparkYuvTransformMatrix kYIQToRGBMatrix = {.Y1 = 1.f, .Y2 = 0.956f, .Y3 = 0.619f,
     .U1 = 1.f, .U2 = -0.272f, .U3 = -0.647f,
     .V1 = 1.f, .V2 = -1.106f, .V3 = 1.703f};
+
+static SparkYuvTransformMatrix kRGBToYDbDrMatrix = {.Y1 = 0.299f, .Y2 = 0.587f, .Y3 = 0.114f,
+    .U1 = -0.450f, .U2 = -0.883f, .U3 = 1.333f,
+    .V1 = -1.333f, .V2 = 1.116f, .V3 = 0.217f};
+
+static SparkYuvTransformMatrix kYDbDrToRGBMatrix = {.Y1 = 1.f, .Y2 = 0.000092303716148f, .Y3 = -0.52591263066185f,
+    .U1 = 1.f, .U2 = -0.129132898890509f, .U3 = 0.267899328207599f,
+    .V1 = 1.f, .V2 = 0.664679059978955f, .V3 = -0.000079202563533f};
 
 enum SparkYuvDefaultPixelType {
   PIXEL_RGBA,
