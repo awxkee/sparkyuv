@@ -25,6 +25,8 @@ Due to nature of this transformation in those cases it is exceptionally fast.
 - YCgCo current implementation allows to do a range reduction for TV range. That approximation have significant slowdown against full range transform. If that important range reduction may be removed and potential speed up about 30-60% is expected. 10/12-bit transformations may experience about 100-200% slowdown due to range reductions.
 - YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space, however ITU-R provides implementation for any possible kr, kb.
 - YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower than other approximations. Against naive implementation current transformation about 400-600% faster.
+- YDbDr should be computed from linearized components, however library expect that content already linearized and won't do that
+- YDbDr required very high precision matrix for decoding, however low precision approximation is used, some color info loss is highly possible especially in TV range
 
 ## Performance
 
@@ -48,70 +50,68 @@ CPU Caches:
   L1 Data 64 KiB
   L1 Instruction 128 KiB
   L2 Unified 4096 KiB (x12)
-Load Average: 4.05, 3.49, 3.12
----------------------------------------------------------------------
-Benchmark                           Time             CPU   Iterations
----------------------------------------------------------------------
-CPU Caches:
-  L1 Data 64 KiB
-  L1 Instruction 128 KiB
-  L2 Unified 4096 KiB (x12)
-Load Average: 3.97, 3.17, 2.49
+Load Average: 3.61, 3.07, 2.71
 -----------------------------------------------------------------------
 Benchmark                             Time             CPU   Iterations
 -----------------------------------------------------------------------
-SparkyuvYCbCr444P10ToRGBA10      529913 ns       529228 ns         1356
-LibYuvYCbCr444P10ToRGBA8        1240636 ns      1238238 ns          567
-SparkyuvYCbCr422P10ToRGBA10      524934 ns       524014 ns         1343
-LibYuvYCbCr422P10ToRGBA8        1027332 ns      1026172 ns          686
-SparkyuvYCbCr420P10ToRGBA10      527574 ns       526863 ns         1326
-LibYuvYCbCr420P10ToRGBA8        1028310 ns      1027050 ns          685
-SparkyuvRGBAP10ToYCbCr420P10     559627 ns       559209 ns         1251
-SparkyuvRGBA10ToYCbCr422P10      629020 ns       628380 ns         1117
-SparkyuvRGBA10ToYCbCr444P10      551020 ns       550281 ns         1272
-SparkyuvYCbCr444ToRGBA8          405062 ns       402525 ns         1771
-LibYuvYCbCr444ToRGBA8            365472 ns       365111 ns         1917
-SparkyuvYCbCr422ToRGBA8          433533 ns       433216 ns         1614
-LibYuvYCbCr422ToRGBA8            435511 ns       435088 ns         1605
-SparkyuvYCbCr420ToRGBA8          433548 ns       433306 ns         1613
-LibYuvYCbCr420ToRGBA8            437906 ns       437572 ns         1602
-SparkyuvRGBA8ToYCbCr420          479681 ns       479230 ns         1459
-LibyuvRGBA8ToYCbCr420            265424 ns       265233 ns         2633
-SparkyuvRGBA8ToYCbCr422          676895 ns       676320 ns         1037
-LibYuvRGBA8ToYCbCr422            389598 ns       389285 ns         1797
-SparkyuvRGBA8ToYCbCr444          566461 ns       565914 ns         1239
-SparkyuvYCgCoR444ToRGBA8         380957 ns       380588 ns         1842
-SparkyuvYCgCoR422ToRGBA8         377372 ns       376931 ns         1875
-SparkyuvYCgCoR420ToRGBA8         383632 ns       383336 ns         1822
-SparkyuvRGBA8ToYCgCoR420         240795 ns       240627 ns         2898
-SparkyuvRGBA8ToYCgCoR422         310966 ns       310709 ns         2279
-SparkyuvRGBA8ToYCgCoR444         237510 ns       237271 ns         2820
-SparkyuvYCgCo444ToRGBA8          437727 ns       437380 ns         1595
-SparkyuvYCgCo422ToRGBA8          450829 ns       450511 ns         1552
-SparkyuvYCgCo420ToRGBA8          450551 ns       450213 ns         1554
-SparkyuvRGBA8ToYCgCo420          350294 ns       350012 ns         1994
-SparkyuvRGBA8ToYCgCo422          514462 ns       514013 ns         1379
-SparkyuvRGBA8ToYCgCo444          346769 ns       346320 ns         1972
-SparkyuvYcCbcCrc444ToRGBA8     15018564 ns     15002660 ns           47
-SparkyuvYcCbcCrc422ToRGBA8     14947334 ns     14932830 ns           47
-SparkyuvYcCbcCrc420ToRGBA8     14951980 ns     14937149 ns           47
-SparkyuvRGBA8ToYcCbcCrc420     17118340 ns     17098024 ns           41
-SparkyuvRGBA8ToYcCbcCrc422     17838106 ns     17807026 ns           39
-SparkyuvRGBA8ToYcCbcCrc444     17155542 ns     17135805 ns           41
-SparkyuvYIQ444ToRGBA8            577836 ns       577133 ns         1221
-SparkyuvYIQ422ToRGBA8            627080 ns       626398 ns         1119
-SparkyuvYIQ420ToRGBA8            630263 ns       629753 ns         1110
-SparkyuvRGBA8ToYIQ420            594194 ns       591400 ns         1192
-SparkyuvRGBA8ToYIQ422            656416 ns       655664 ns         1068
-SparkyuvRGBA8ToYIQ444            576889 ns       576047 ns         1223
-SparkyuvYDzDx444ToRGBA8          754052 ns       749348 ns         1034
-SparkyuvYDzDx422ToRGBA8          795340 ns       790486 ns          878
-SparkyuvYDzDx420ToRGBA8          791833 ns       787225 ns          916
-SparkyuvRGBA8ToYDzDx420         1079805 ns      1074111 ns          633
-SparkyuvRGBA8ToYDzDx422         1215429 ns      1208062 ns          617
-SparkyuvRGBA8ToYDzDx444          239677 ns       238794 ns         2959
-LibyuvPremultiply                221311 ns       219895 ns         3304
-SparkyuvPremultiply              313820 ns       312474 ns         2224
+SparkyuvYCbCr444P10ToRGBA10      550366 ns       549948 ns         1287
+LibYuvYCbCr444P10ToRGBA8        1308003 ns      1307043 ns          538
+SparkyuvYCbCr422P10ToRGBA10      571971 ns       571742 ns         1271
+LibYuvYCbCr422P10ToRGBA8        1099869 ns      1099643 ns          639
+SparkyuvYCbCr420P10ToRGBA10      575550 ns       575350 ns         1267
+LibYuvYCbCr420P10ToRGBA8        1127683 ns      1124824 ns          618
+SparkyuvRGBAP10ToYCbCr420P10     615994 ns       614896 ns         1129
+SparkyuvRGBA10ToYCbCr422P10      725135 ns       718817 ns          960
+SparkyuvRGBA10ToYCbCr444P10      613594 ns       611047 ns         1125
+SparkyuvYCbCr444ToRGBA8          465757 ns       462832 ns         1557
+LibYuvYCbCr444ToRGBA8            404306 ns       402583 ns         1774
+SparkyuvYCbCr422ToRGBA8          505272 ns       502037 ns         1507
+LibYuvYCbCr422ToRGBA8            470946 ns       469183 ns         1341
+SparkyuvYCbCr420ToRGBA8          465562 ns       464248 ns         1503
+LibYuvYCbCr420ToRGBA8            470852 ns       469671 ns         1473
+SparkyuvRGBA8ToYCbCr420          523110 ns       521630 ns         1348
+LibyuvRGBA8ToYCbCr420            277892 ns       277030 ns         2510
+SparkyuvRGBA8ToYCbCr422          735605 ns       733550 ns          949
+LibYuvRGBA8ToYCbCr422            404793 ns       404317 ns         1714
+SparkyuvRGBA8ToYCbCr444          608959 ns       608084 ns         1152
+SparkyuvYCgCoR444ToRGBA8         410194 ns       408953 ns         1760
+SparkyuvYCgCoR422ToRGBA8         407927 ns       406654 ns         1720
+SparkyuvYCgCoR420ToRGBA8         407004 ns       406035 ns         1717
+SparkyuvRGBA8ToYCgCoR420         255195 ns       254620 ns         2743
+SparkyuvRGBA8ToYCgCoR422         324746 ns       324075 ns         2153
+SparkyuvRGBA8ToYCgCoR444         257719 ns       257132 ns         2684
+SparkyuvYCgCo444ToRGBA8          468750 ns       467536 ns         1516
+SparkyuvYCgCo422ToRGBA8          484087 ns       482108 ns         1451
+SparkyuvYCgCo420ToRGBA8          486016 ns       484576 ns         1453
+SparkyuvRGBA8ToYCgCo420          370847 ns       369858 ns         1904
+SparkyuvRGBA8ToYCgCo422          548260 ns       546906 ns         1282
+SparkyuvRGBA8ToYCgCo444          374832 ns       373820 ns         1849
+SparkyuvYcCbcCrc444ToRGBA8     16107218 ns     16083767 ns           43
+SparkyuvYcCbcCrc422ToRGBA8     15951363 ns     15924636 ns           44
+SparkyuvYcCbcCrc420ToRGBA8     16165950 ns     16137545 ns           44
+SparkyuvRGBA8ToYcCbcCrc420     18620914 ns     18564395 ns           38
+SparkyuvRGBA8ToYcCbcCrc422     19361869 ns     19301865 ns           37
+SparkyuvRGBA8ToYcCbcCrc444     18771207 ns     18714474 ns           38
+SparkyuvYIQ444ToRGBA8            626179 ns       623892 ns         1116
+SparkyuvYIQ422ToRGBA8            691582 ns       689509 ns         1042
+SparkyuvYIQ420ToRGBA8            681508 ns       679841 ns         1027
+SparkyuvRGBA8ToYIQ420            632046 ns       630068 ns         1113
+SparkyuvRGBA8ToYIQ422            715291 ns       713345 ns          995
+SparkyuvRGBA8ToYIQ444            630726 ns       629078 ns         1134
+SparkyuvYDzDx444ToRGBA8          735837 ns       733462 ns          940
+SparkyuvYDzDx422ToRGBA8          784505 ns       782142 ns          906
+SparkyuvYDzDx420ToRGBA8          788515 ns       780979 ns          897
+SparkyuvRGBA8ToYDzDx420         1037394 ns      1032611 ns          689
+SparkyuvRGBA8ToYDzDx422         1132408 ns      1129809 ns          608
+SparkyuvRGBA8ToYDzDx444          238964 ns       238226 ns         2901
+SparkyuvYDbDr444ToRGBA8          672767 ns       671066 ns         1056
+SparkyuvYDbDr422ToRGBA8          736621 ns       734111 ns          975
+SparkyuvYDbDr420ToRGBA8          731772 ns       730075 ns          964
+SparkyuvRGBA8ToYDbDr420          620523 ns       619666 ns         1132
+SparkyuvRGBA8ToYDbDr422          712573 ns       710845 ns          993
+SparkyuvRGBA8ToYDbDr444          629323 ns       627746 ns         1136
+LibyuvPremultiply                213606 ns       212369 ns         3289
+SparkyuvPremultiply              317568 ns       316792 ns         2183
 ```
 
 ##### YcCbcCrc 

@@ -32,7 +32,7 @@ void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, co
                     T *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,                         \
                     T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,                         \
                     const SparkYuvColorRange colorRange) {                           \
-      TransformPixelToSample<T, sparkyuv::PIXEL_##PixelType, chroma, bit>(src, srcStride, width, height,    \
+      TransformPixelToSample<T, sparkyuv::PIXEL_##PixelType, chroma, bit, 8>(src, srcStride, width, height,    \
                                                                yPlane, yStride,                  \
                                                                uPlane, uStride,                  \
                                                                vPlane, vStride,                  \
@@ -120,7 +120,7 @@ void yuvname##P##bit##To##PixelType##bit##HWY(T *SPARKYUV_RESTRICT src, const ui
                     const T *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,                         \
                     const T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,                         \
                     const sparkyuv::SparkYuvColorRange colorRange) {                           \
-      TransformYUVToRGBMatrix<T, sparkyuv::PIXEL_##PixelType, chroma, bit>(src, srcStride, width, height,    \
+      TransformYUVToRGBMatrix<T, sparkyuv::PIXEL_##PixelType, chroma, bit, 6>(src, srcStride, width, height,    \
                                                                yPlane, yStride,                  \
                                                                uPlane, uStride,                  \
                                                                vPlane, vStride,                  \

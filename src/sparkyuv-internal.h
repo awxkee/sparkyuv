@@ -52,9 +52,9 @@ static SparkYuvTransformMatrix kRGBToYDbDrMatrix = {.Y1 = 0.299f, .Y2 = 0.587f, 
     .U1 = -0.450f, .U2 = -0.883f, .U3 = 1.333f,
     .V1 = -1.333f, .V2 = 1.116f, .V3 = 0.217f};
 
-static SparkYuvTransformMatrix kYDbDrToRGBMatrix = {.Y1 = 1.f, .Y2 = 0.000092303716148f, .Y3 = -0.52591263066185f,
-    .U1 = 1.f, .U2 = -0.129132898890509f, .U3 = 0.267899328207599f,
-    .V1 = 1.f, .V2 = 0.664679059978955f, .V3 = -0.000079202563533f};
+static SparkYuvTransformMatrix kYDbDrToRGBMatrix = {.Y1 = 1.f, .Y2 = 0.0000923037161479f, .Y3 = -0.52591263066186528545f,
+    .U1 = 1.f, .U2 = -0.1291328988905095f, .U3 = 0.26789932820759879925f,
+    .V1 = 1.f, .V2 = 0.6646790599789547528f, .V3 = -0.000079202543533f};
 
 enum SparkYuvDefaultPixelType {
   PIXEL_RGBA,

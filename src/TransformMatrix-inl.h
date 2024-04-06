@@ -31,7 +31,7 @@ namespace sparkyuv::HWY_NAMESPACE {
 
 template<typename T,
     SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
-    SparkYuvChromaSubsample chromaSubsample, int bitDepth>
+    SparkYuvChromaSubsample chromaSubsample, int bitDepth, int precision>
 void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                             const uint32_t width, const uint32_t height,
                             T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
@@ -45,8 +45,6 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   uint16_t rangeY;
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
-
-  const int precision = 8;
 
   const auto scale = static_cast<float>(1 << precision);
   const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
@@ -134,12 +132,12 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
       V32 Bh = PromoteUpperTo(d32, B);
       V32 Gl = PromoteLowerTo(d32, G);
       V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRight<8>(MulAdd(Rl, vYR,
-                                           MulAdd(Gl, vYG,
-                                                  MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRight<8>(MulAdd(Rh, vYR,
-                                           MulAdd(Gh, vYG,
-                                                  MulAdd(Bh, vYB, vBiasY))));
+      const auto Yl = ShiftRight<precision>(MulAdd(Rl, vYR,
+                                                   MulAdd(Gl, vYG,
+                                                          MulAdd(Bl, vYB, vBiasY))));
+      const auto Yh = ShiftRight<precision>(MulAdd(Rh, vYR,
+                                                   MulAdd(Gh, vYG,
+                                                          MulAdd(Bh, vYB, vBiasY))));
 
       if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
@@ -168,20 +166,20 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
         }
       }
 
-      const auto Cbl = ShiftRight<8>(Add(MulAdd(Bl, vCbB,
-                                                MulAdd(Gl, vCbG,
-                                                       Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRight<8>(Add(MulAdd(Bh, vCbB,
-                                                MulAdd(Gh, vCbG,
-                                                       Mul(Rh, vCbR))), vBiasUV));
+      const auto Cbl = ShiftRight<precision>(Add(MulAdd(Bl, vCbB,
+                                                        MulAdd(Gl, vCbG,
+                                                               Mul(Rl, vCbR))), vBiasUV));
+      const auto Cbh = ShiftRight<precision>(Add(MulAdd(Bh, vCbB,
+                                                        MulAdd(Gh, vCbG,
+                                                               Mul(Rh, vCbR))), vBiasUV));
 
-      const auto Crh = ShiftRight<8>(Add(MulAdd(Rh, vCrR,
-                                                MulAdd(Gh, vCrG,
-                                                       Mul(Bh, vCrB))), vBiasUV));
+      const auto Crh = ShiftRight<precision>(Add(MulAdd(Rh, vCrR,
+                                                        MulAdd(Gh, vCrG,
+                                                               Mul(Bh, vCrB))), vBiasUV));
 
-      const auto Crl = ShiftRight<8>(Add(MulAdd(Rl, vCrR,
-                                                MulAdd(Gl, vCrG,
-                                                       Mul(Bl, vCrB))), vBiasUV));
+      const auto Crl = ShiftRight<precision>(Add(MulAdd(Rl, vCrR,
+                                                        MulAdd(Gl, vCrG,
+                                                               Mul(Bl, vCrB))), vBiasUV));
 
       const auto Y = Combine(d16, DemoteTo(dh16, Yh), DemoteTo(dh16, Yl));
       const auto Cb = Combine(d16, DemoteTo(dh16, Cbh), DemoteTo(dh16, Cbl));
@@ -350,7 +348,7 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   }
 }
 
-template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample, int bitDepth>
+template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample, int bitDepth, int precision>
 void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                              const uint32_t width, const uint32_t height,
                              const T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
@@ -383,8 +381,6 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   const auto uvCorrection = Set(di16, biasUV);
   const V16 vAlpha = Set(d16, maxColors);
   const auto uvCorrIY = Set(di16, biasY);
-
-  const int precision = 6;
 
   const auto scale = static_cast<float>(1 << precision);
   const float rangeReformatY = static_cast<float>(maxColors) / static_cast<float>(rangeY);
@@ -495,14 +491,14 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
 
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
-      if (bitDepth == 12) {
-        r = Combine(d16, DemoteTo(dh16, ShiftRight<6>(rh)), DemoteTo(dh16, ShiftRight<6>(rl)));
-        g = Combine(d16, DemoteTo(dh16, ShiftRight<6>(gh)), DemoteTo(dh16, ShiftRight<6>(gl)));
-        b = Combine(d16, DemoteTo(dh16, ShiftRight<6>(bh)), DemoteTo(dh16, ShiftRight<6>(bl)));
+      if (bitDepth == 12 || precision > 8) {
+        r = Combine(d16, DemoteTo(dh16, ShiftRight<precision>(rh)), DemoteTo(dh16, ShiftRight<precision>(rl)));
+        g = Combine(d16, DemoteTo(dh16, ShiftRight<precision>(gh)), DemoteTo(dh16, ShiftRight<precision>(gl)));
+        b = Combine(d16, DemoteTo(dh16, ShiftRight<precision>(bh)), DemoteTo(dh16, ShiftRight<precision>(bl)));
       } else {
-        r = ShiftRight<6>(Combine(d16, DemoteTo(dh16, rh), DemoteTo(dh16, rl)));
-        g = ShiftRight<6>(Combine(d16, DemoteTo(dh16, gh), DemoteTo(dh16, gl)));
-        b = ShiftRight<6>(Combine(d16, DemoteTo(dh16, bh), DemoteTo(dh16, bl)));
+        r = ShiftRight<precision>(Combine(d16, DemoteTo(dh16, rh), DemoteTo(dh16, rl)));
+        g = ShiftRight<precision>(Combine(d16, DemoteTo(dh16, gh), DemoteTo(dh16, gl)));
+        b = ShiftRight<precision>(Combine(d16, DemoteTo(dh16, bh), DemoteTo(dh16, bl)));
       }
 
       if (std::is_same<T, uint16_t>::value) {

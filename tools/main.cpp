@@ -150,18 +150,18 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
-    sparkyuv::RGBAToYCbCr444BT601(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBA8ToYDbDr444P8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_TV);
   });
 
 
   bench(1, ANSI_COLOR_GREEN, "YCbCr420 -> RGB", [&]() {
-    sparkyuv::YCbCr444BT601ToRGBA(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YDbDr444P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_TV);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);
