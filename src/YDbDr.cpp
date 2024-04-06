@@ -16,7 +16,7 @@
 
 
 #undef HWY_TARGET_INCLUDE
-#define HWY_TARGET_INCLUDE "src/YIQ.cpp"
+#define HWY_TARGET_INCLUDE "src/YDbDr.cpp"
 
 #include "hwy/foreach_target.h"
 #include "hwy/highway.h"
