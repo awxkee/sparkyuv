@@ -27,7 +27,7 @@ Due to nature of this transformation in those cases it is exceptionally fast.
 - YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space, however ITU-R provides implementation for any possible kr, kb.
 - YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower than other approximations. Against naive implementation current transformation about 400-600% faster.
 - YDbDr should be computed from linearized components, however library expect that content already linearized and won't do that
-- YDbDr required very high precision matrix for decoding, however low precision approximation is used, some color info loss is highly possible especially in TV range
+- YDbDr requires very high precision matrix for decoding, however low precision approximation is used, some color info loss is highly possible especially in TV range
 
 ## Performance
 
