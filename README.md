@@ -13,6 +13,7 @@ Library allows to convert RGB to Y'UV formats at high speed using platform SIMD 
 | YCgCo-Re | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YDzDx    | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YIQ      | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
+| YDbDr    | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 
 When encoding to NV12/NV21, NV12/N61, 420, 422 for chroma subsampling bi-linear scaling is automatically applied. There
 is no option to turn this off.
