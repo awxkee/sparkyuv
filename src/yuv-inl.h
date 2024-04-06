@@ -97,28 +97,6 @@ VH GetEven(D d, Vec<D> v) {
   return DemoteTo(dh, And(BitCast(du16, v), erase));
 }
 
-template<typename D, HWY_IF_U32_D(D), typename VW = Vec<D>, typename VL = Vec<Rebind<uint16_t, Twice<D>>>>
-void WidenMul(D d, VL v, VL o, VW &hiSum, VW &loSum) {
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
-  loSum = ReorderWidenMulAccumulate(d, v, o, o, hiSum);
-#else
-  const VW dw;
-  loSum = MulAdd(PromoteLowerTo(dw, v), lo, loSum);
-  hiSum = MulAdd(PromoteUpperTo(dw, v), hi, hiSum);
-#endif
-}
-
-template<typename D, HWY_IF_I32_D(D), typename VW = Vec<D>, typename VL = Vec<Rebind<int16_t, Twice<D>>>>
-void WidenMul(D d, VL v, VL o, VW &hiSum, VW &loSum) {
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
-  loSum = ReorderWidenMulAccumulate(d, v, o, loSum, hiSum);
-#else
-  const VW dw;
-  loSum = MulAdd(PromoteLowerTo(dw, v), lo, loSum);
-  hiSum = MulAdd(PromoteUpperTo(dw, v), hi, hiSum);
-#endif
-}
-
 // Hack for HWY EMU128.
 
 template<class D, HWY_IF_F16_D(D)>

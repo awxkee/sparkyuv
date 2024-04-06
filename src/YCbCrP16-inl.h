@@ -139,10 +139,9 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
 #if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
       V32 YRh = vBiasY;
-      V32 YRl = vBiasY;
-      WidenMul(d32, R, vYR, YRh, YRl);
-      WidenMul(d32, G, vYG, YRh, YRl);
-      WidenMul(d32, B, vYB, YRh, YRl);
+      V32 YRl = ReorderWidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
+      YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
+      YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto
           Y = BitCast(du16, Combine(d16, DemoteTo(dh16, ShiftRight<8>(YRh)), DemoteTo(dh16, ShiftRight<8>(YRl))));
