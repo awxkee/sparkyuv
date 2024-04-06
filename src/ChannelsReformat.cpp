@@ -258,6 +258,25 @@ PREMULTIPLY_ALPHA_DECLARATION_E(BGRA)
 
 #undef PREMULTIPLY_ALPHA_DECLARATION_E
 
+HWY_EXPORT(RGBAUnpremultiplyAlphaHWY);
+HWY_EXPORT(ARGBUnpremultiplyAlphaHWY);
+HWY_EXPORT(BGRAUnpremultiplyAlphaHWY);
+HWY_EXPORT(ABGRUnpremultiplyAlphaHWY);
+
+#define UNPREMULTIPLY_ALPHA_DECLARATION_R(pixelType) \
+    void pixelType##UnpremultiplyAlphaHWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride, \
+                                        uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                        const uint32_t width, const uint32_t height) {\
+        HWY_DYNAMIC_DISPATCH(pixelType##UnpremultiplyAlphaHWY)(src, srcStride, dst, dstStride, width, height); \
+    }
+
+UNPREMULTIPLY_ALPHA_DECLARATION_R(RGBA)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(ARGB)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(ABGR)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(BGRA)
+
+#undef UNPREMULTIPLY_ALPHA_DECLARATION_R
+
 }
 
 #endif

@@ -837,6 +837,21 @@ PREMULTIPLY_ALPHA_DECLARATION_H(BGRA)
 
 #undef PREMULTIPLY_ALPHA_DECLARATION_H
 
+#define UNPREMULTIPLY_ALPHA_DECLARATION_H(pixelType) \
+    /** \
+    * @brief Pre multiplies alpha for rendering \
+    */ \
+    void pixelType##UnpremultiplyAlpha(const uint8_t * src, const uint32_t srcStride, \
+                                        uint8_t * dst, const uint32_t dstStride,\
+                                        const uint32_t width, const uint32_t height);
+
+UNPREMULTIPLY_ALPHA_DECLARATION_H(RGBA)
+UNPREMULTIPLY_ALPHA_DECLARATION_H(ARGB)
+UNPREMULTIPLY_ALPHA_DECLARATION_H(ABGR)
+UNPREMULTIPLY_ALPHA_DECLARATION_H(BGRA)
+
+#undef UNPREMULTIPLY_ALPHA_DECLARATION_H
+
 // Mark scale U8
 
 #define SCALE_CHANNEL_DECLARE_H(channelName) \

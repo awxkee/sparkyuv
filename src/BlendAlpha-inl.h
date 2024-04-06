@@ -23,6 +23,7 @@
 #include "hwy/highway.h"
 #include "yuv-inl.h"
 #include "sparkyuv-internal.h"
+#include "math/fast_math-inl.h"
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -112,6 +113,65 @@ PREMULTIPLY_ALPHA_DECLARATION_R(ABGR)
 PREMULTIPLY_ALPHA_DECLARATION_R(BGRA)
 
 #undef PREMULTIPLY_ALPHA_DECLARATION_R
+
+template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
+void
+UnpremultiplyAlpha8HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                       uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
+                       const uint32_t width, const uint32_t height) {
+  static_assert(
+      PixelType == PIXEL_RGBA || PixelType == PIXEL_ARGB || PixelType == PIXEL_ABGR || PixelType == PIXEL_BGRA,
+      "Cannot be used on image without alpha");
+
+  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+
+  auto mSource = reinterpret_cast<const uint8_t *>(src);
+  auto mDestination = reinterpret_cast<uint8_t *>(dst);
+
+  for (int y = 0; y < height; ++y) {
+    auto store = reinterpret_cast<uint8_t *>(mDestination);
+    auto source = reinterpret_cast<const uint8_t *>(mSource);
+
+    uint32_t x = 0;
+
+    for (; x < width; ++x) {
+      uint16_t r;
+      uint16_t g;
+      uint16_t b;
+      uint16_t a;
+
+      LoadRGBA<uint8_t, uint16_t, PixelType>(source, r, g, b, a);
+
+      if (a != 0) {
+        r = (r * 255) / a;
+        g = (g * 255) / a;
+        b = (b * 255) / a;
+      }
+
+      StoreRGBA<uint8_t, uint16_t, PixelType>(store, r, g, b, a);
+
+      store += components;
+      source += components;
+    }
+
+    mDestination += dstStride;
+    mSource += srcStride;
+  }
+}
+
+#define UNPREMULTIPLY_ALPHA_DECLARATION_R(pixelType) \
+    void pixelType##UnpremultiplyAlphaHWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride, \
+                                        uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                        const uint32_t width, const uint32_t height) {\
+        UnpremultiplyAlpha8HWY<sparkyuv::PIXEL_##pixelType>(src, srcStride, dst, dstStride, width, height); \
+    }
+
+UNPREMULTIPLY_ALPHA_DECLARATION_R(RGBA)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(ARGB)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(ABGR)
+UNPREMULTIPLY_ALPHA_DECLARATION_R(BGRA)
+
+#undef UNPREMULTIPLY_ALPHA_DECLARATION_R
 
 }
 
