@@ -424,16 +424,16 @@ void YDzDxToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       const auto sRl = Add(Mul(PromoteLowerTo(di32, sDx), vCoeffPR1), Mul(yl, vCoeffPR2));
       const auto sRh = Add(Mul(PromoteUpperTo(di32, sDx), vCoeffPR1), Mul(yh, vCoeffPR2));
 
-      const auto Gl = ShiftRight<8>(sYl);
-      const auto Gh = ShiftRight<8>(sYh);
-      const auto Bl = ShiftRight<8>(sBl);
-      const auto Bh = ShiftRight<8>(sBh);
-      const auto Rl = ShiftRight<8>(sRl);
-      const auto Rh = ShiftRight<8>(sRh);
+      const auto Gl = ShiftRightDemote<8>(di32, sYl);
+      const auto Gh = ShiftRightDemote<8>(di32, sYh);
+      const auto Bl = ShiftRightDemote<8>(di32, sBl);
+      const auto Bh = ShiftRightDemote<8>(di32, sBh);
+      const auto Rl = ShiftRightDemote<8>(di32, sRl);
+      const auto Rh = ShiftRightDemote<8>(di32, sRh);
 
-      G16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Gh), DemoteTo(dhi16, Gl)), viZeros, vMaxColors));
-      B16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Bh), DemoteTo(dhi16, Bl)), viZeros, vMaxColors));
-      R16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Rh), DemoteTo(dhi16, Rl)), viZeros, vMaxColors));
+      G16 = BitCast(du16, Clamp(Combine(di16, Gh, Gl), viZeros, vMaxColors));
+      B16 = BitCast(du16, Clamp(Combine(di16, Bh, Bl), viZeros, vMaxColors));
+      R16 = BitCast(du16, Clamp(Combine(di16, Rh, Rl), viZeros, vMaxColors));
       if (std::is_same<T, uint16_t>::value) {
         StoreRGBA<PixelType>(du16, reinterpret_cast<uint16_t *>(store), R16, G16, B16, A16);
       } else if (std::is_same<T, uint8_t>::value) {

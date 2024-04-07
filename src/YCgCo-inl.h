@@ -129,19 +129,19 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           Gh = Mul(Gh, viRangeReduction);
           Bh = Mul(Bh, viRangeReduction);
 
-          const auto Yl = ShiftRight<6>(Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
-          const auto Yh = ShiftRight<6>(Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
-          Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, Yh), DemoteTo(dhi16, Yl)));
-          const auto Cgl = ShiftRight<6>(Add(viBiasUV,
-                                             Sub(ShiftRight<1>(Gl),
-                                                 ShiftRight<2>(Add(Rl, Bl)))));
-          const auto Cgh = ShiftRight<6>(Add(viBiasUV,
-                                             Sub(ShiftRight<1>(Gh),
-                                                 ShiftRight<2>(Add(Rh, Bh)))));
-          Cg = BitCast(du16, Combine(di16, DemoteTo(dhi16, Cgh), DemoteTo(dhi16, Cgl)));
-          const auto Col = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
-          const auto Coh = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
-          Co = BitCast(du16, Combine(di16, DemoteTo(dhi16, Coh), DemoteTo(dhi16, Col)));
+          const auto Yl = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
+          const auto Yh = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
+          Y = BitCast(du16, Combine(di16, Yh, Yl));
+          const auto Cgl = ShiftRightDemote<6>(di32, Add(viBiasUV,
+                                                         Sub(ShiftRight<1>(Gl),
+                                                             ShiftRight<2>(Add(Rl, Bl)))));
+          const auto Cgh = ShiftRightDemote<6>(di32, Add(viBiasUV,
+                                                         Sub(ShiftRight<1>(Gh),
+                                                             ShiftRight<2>(Add(Rh, Bh)))));
+          Cg = BitCast(du16, Combine(di16, Cgh, Cgl));
+          const auto Col = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
+          const auto Coh = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
+          Co = BitCast(du16, Combine(di16, Coh, Col));
         }
 
         if (std::is_same<T, uint16_t>::value) {
@@ -191,19 +191,19 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           Gh = Mul(Gh, viRangeReduction);
           Bh = Mul(Bh, viRangeReduction);
 
-          const auto Yl = ShiftRight<6>(Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
-          const auto Yh = ShiftRight<6>(Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
-          Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, Yh), DemoteTo(dhi16, Yl)));
-          const auto Cgl = ShiftRight<6>(Add(viBiasUV,
-                                             Sub(ShiftRight<1>(Gl),
-                                                 ShiftRight<2>(Add(Rl, Bl)))));
-          const auto Cgh = ShiftRight<6>(Add(viBiasUV,
-                                             Sub(ShiftRight<1>(Gh),
-                                                 ShiftRight<2>(Add(Rh, Bh)))));
-          Cg = BitCast(dhu16, DemoteTo(dhi16, ShiftRight<1>(Add(Cgh, Cgl))));
-          const auto Col = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
-          const auto Coh = ShiftRight<6>(Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
-          Co = BitCast(dhu16, DemoteTo(dhi16, ShiftRight<1>(Add(Coh, Col))));
+          const auto Yl = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
+          const auto Yh = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
+          Y = BitCast(du16, Combine(di16, Yh, Yl));
+          const auto Cgl = ShiftRightDemote<6>(di32, Add(viBiasUV,
+                                                         Sub(ShiftRight<1>(Gl),
+                                                             ShiftRight<2>(Add(Rl, Bl)))));
+          const auto Cgh = ShiftRightDemote<6>(di32, Add(viBiasUV,
+                                                         Sub(ShiftRight<1>(Gh),
+                                                             ShiftRight<2>(Add(Rh, Bh)))));
+          Cg = BitCast(dhu16, ShiftRight<1>(Add(Cgh, Cgl)));
+          const auto Col = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
+          const auto Coh = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
+          Co = BitCast(dhu16, ShiftRight<1>(Add(Coh, Col)));
         }
 
         if (std::is_same<T, uint16_t>::value) {
@@ -519,13 +519,13 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       if (std::is_same<T, uint16_t>::value) {
         Y = LoadU(du16, reinterpret_cast<const uint16_t *>(ySrc));
         if (chromaSubsample == YUV_SAMPLE_444) {
-          Cg = LoadU(du16, reinterpret_cast<const uint16_t*>(CgSource));
-          Co = LoadU(du16, reinterpret_cast<const uint16_t*>(CoSource));
+          Cg = LoadU(du16, reinterpret_cast<const uint16_t *>(CgSource));
+          Co = LoadU(du16, reinterpret_cast<const uint16_t *>(CoSource));
         } else if (chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420) {
-          const auto hCg = LoadU(dhu16, reinterpret_cast<const uint16_t*>(CgSource));
+          const auto hCg = LoadU(dhu16, reinterpret_cast<const uint16_t *>(CgSource));
           Cg = Combine(du16, hCg, hCg);
           Cg = InterleaveLower(Cg, Cg);
-          const auto hCo = LoadU(dhu16, reinterpret_cast<const uint16_t*>(CoSource));
+          const auto hCo = LoadU(dhu16, reinterpret_cast<const uint16_t *>(CoSource));
           Co = Combine(du16, hCo, hCo);
           Co = InterleaveLower(Co, Co);
         } else {
@@ -536,14 +536,14 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
         const Rebind<uint8_t, decltype(du16)> du8;
         Y = PromoteTo(du16, LoadU(du8, reinterpret_cast<const uint8_t *>(ySrc)));
         if (chromaSubsample == YUV_SAMPLE_444) {
-          Cg = PromoteTo(du16, LoadU(du8, reinterpret_cast<const uint8_t*>(CgSource)));
-          Co = PromoteTo(du16, LoadU(du8, reinterpret_cast<const uint8_t*>(CoSource)));
+          Cg = PromoteTo(du16, LoadU(du8, reinterpret_cast<const uint8_t *>(CgSource)));
+          Co = PromoteTo(du16, LoadU(du8, reinterpret_cast<const uint8_t *>(CoSource)));
         } else if (chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420) {
           const Half<decltype(du8)> dhu8;
-          const auto hCg = LoadU(dhu8, reinterpret_cast<const uint8_t*>(CgSource));
+          const auto hCg = LoadU(dhu8, reinterpret_cast<const uint8_t *>(CgSource));
           Cg = PromoteTo(du16, Combine(du8, hCg, hCg));
           Cg = InterleaveLower(Cg, Cg);
-          const auto hCo = LoadU(dhu8, reinterpret_cast<const uint8_t*>(CoSource));
+          const auto hCo = LoadU(dhu8, reinterpret_cast<const uint8_t *>(CoSource));
           Co = PromoteTo(du16, Combine(du8, hCo, hCo));
           Co = InterleaveLower(Co, Co);
         } else {

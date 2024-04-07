@@ -63,40 +63,38 @@ void SaturateSurfaceFromNBitTo8(const uint16_t *SPARKYUV_RESTRICT src, const uin
       V16 A;
       LoadRGBA<PixelType>(du16, source, R, G, B, A);
 
+      V8 R8, G8, B8, A8;
+
       if (diff == 2) {
-        R = ShiftRight<2>(R);
-        G = ShiftRight<2>(G);
-        B = ShiftRight<2>(B);
+        R8 = ShiftRightDemote<2>(du16, R);
+        G8 = ShiftRightDemote<2>(du16, G);
+        B8 = ShiftRightDemote<2>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftRight<2>(A);
+          A8 = ShiftRightDemote<2>(du16, A);
         }
       } else if (diff == 4) {
-        R = ShiftRight<4>(R);
-        G = ShiftRight<4>(G);
-        B = ShiftRight<4>(B);
+        R8 = ShiftRightDemote<4>(du16, R);
+        G8 = ShiftRightDemote<4>(du16, G);
+        B8 = ShiftRightDemote<4>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftRight<4>(A);
+          A8 = ShiftRightDemote<4>(du16, A);
         }
       } else if (diff == 8) {
-        R = ShiftRight<8>(R);
-        G = ShiftRight<8>(G);
-        B = ShiftRight<8>(B);
+        R8 = ShiftRightDemote<8>(du16, R);
+        G8 = ShiftRightDemote<8>(du16, G);
+        B8 = ShiftRightDemote<8>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftRight<8>(A);
+          A8 = ShiftRightDemote<8>(du16, A);
         }
       } else {
-        R = ShiftRightSame(R, diff);
-        G = ShiftRightSame(G, diff);
-        B = ShiftRightSame(B, diff);
+        R8 = DemoteTo(du8, ShiftRightSame(R, diff));
+        G8 = DemoteTo(du8, ShiftRightSame(G, diff));
+        B8 = DemoteTo(du8, ShiftRightSame(B, diff));
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftRightSame(A, diff);
+          A8 = DemoteTo(du8, ShiftRightSame(A, diff));
         }
       }
 
-      const V8 R8 = DemoteTo(du8, R);
-      const V8 G8 = DemoteTo(du8, G);
-      const V8 B8 = DemoteTo(du8, B);
-      V8 A8;
       if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
         A8 = DemoteTo(du8, A);
       }

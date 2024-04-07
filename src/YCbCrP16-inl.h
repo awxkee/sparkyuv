@@ -30,11 +30,11 @@ namespace sparkyuv::HWY_NAMESPACE {
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample, int bitDepth>
 void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                        const uint32_t width, const uint32_t height,
-                        uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                        uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
-                        uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
-                        const float kr, const float kb, const SparkYuvColorRange colorRange) {
+                          const uint32_t width, const uint32_t height,
+                          uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                          uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
+                          uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
+                          const float kr, const float kb, const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
   uint16_t biasY;
   uint16_t biasUV;
@@ -72,6 +72,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
   const RebindToUnsigned<decltype(d16)> du16;
   const Half<decltype(d16)> dh16;
   const Rebind<int32_t, decltype(dh16)> d32;
+  const RebindToUnsigned<decltype(d32)> du32;
   const Half<decltype(du16)> dhu16;
   using V16 = Vec<decltype(d16)>;
   using V32 = Vec<decltype(d32)>;
@@ -144,7 +145,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto
-          Y = BitCast(du16, Combine(d16, DemoteTo(dh16, ShiftRight<8>(YRh)), DemoteTo(dh16, ShiftRight<8>(YRl))));
+          Y = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, YRh), ShiftRightDemote<8>(d32, YRl)));
 
       if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
@@ -170,7 +171,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
       const auto
-          Cb = BitCast(du16, Combine(d16, DemoteTo(dh16, ShiftRight<8>(Cbh)), DemoteTo(dh16, ShiftRight<8>(Cbl))));
+          Cb = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, Cbh), ShiftRightDemote<8>(d32, Cbl)));
 
       V32 Crh = vBiasUV;
       V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
@@ -178,7 +179,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
       const auto
-          Cr = BitCast(du16, Combine(d16, DemoteTo(dh16, ShiftRight<8>(Crh)), DemoteTo(dh16, ShiftRight<8>(Crl))));
+          Cr = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, Crh), ShiftRightDemote<8>(d32, Crl)));
 #else
       V32 Rl = PromoteLowerTo(d32, R);
       V32 Rh = PromoteUpperTo(d32, R);
@@ -186,37 +187,24 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       V32 Bh = PromoteUpperTo(d32, B);
       V32 Gl = PromoteLowerTo(d32, G);
       V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRight<8>(MulAdd(Rl, vYR,
-                                           MulAdd(Gl, vYG,
-                                                  MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRight<8>(MulAdd(Rh, vYR,
-                                           MulAdd(Gh, vYG,
-                                                  MulAdd(Bh, vYB, vBiasY))));
+      const auto Yl = ShiftRightDemote<8>(d32, MulAdd(Rl, vYR,
+                                                      MulAdd(Gl, vYG,
+                                                             MulAdd(Bl, vYB, vBiasY))));
+      const auto Yh = ShiftRightDemote<8>(d32, MulAdd(Rh, vYR,
+                                                      MulAdd(Gh, vYG,
+                                                             MulAdd(Bh, vYB, vBiasY))));
 
       if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
-         auto nextRow = reinterpret_cast<const uint16_t *>(mSrc);
+          auto nextRow = reinterpret_cast<const uint16_t *>(mSrc);
           if (y + 1 < height - 1) {
-              nextRow = reinterpret_cast<const uint16_t *>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
+            nextRow = reinterpret_cast<const uint16_t *>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
           }
           V16 R1;
           V16 G1;
           V16 B1;
           V16 A1;
-          switch (PixelType) {
-            case PIXEL_RGB:LoadInterleaved3(d16, reinterpret_cast<const int16_t *>(nextRow), R1, G1, B1);
-              break;
-            case PIXEL_BGR:LoadInterleaved3(d16, reinterpret_cast<const int16_t *>(nextRow), B1, G1, R1);
-              break;
-            case PIXEL_RGBA:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(nextRow), R1, G1, B1, A1);
-              break;
-            case PIXEL_BGRA:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(nextRow), B1, G1, R1, A1);
-              break;
-            case PIXEL_ARGB:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(nextRow), A1, R1, G1, B1);
-              break;
-            case PIXEL_ABGR:LoadInterleaved4(d16, reinterpret_cast<const int16_t *>(nextRow), A1, B1, G1, R1);
-              break;
-          }
+          LoadRGBA<PixelType>(d16, reinterpret_cast<const int16_t *>(nextRow), R1, G1, B1, A1);
 
           Rl = ShiftRight<1>(Add(Rl, PromoteLowerTo(d32, R1)));
           Gl = ShiftRight<1>(Add(Gl, PromoteLowerTo(d32, G1)));
@@ -228,24 +216,24 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
         }
       }
 
-      const auto Cbl = ShiftRight<8>(Add(MulAdd(Bl, vCbB,
-                                                MulSub(Gl, vCbG,
-                                                       Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRight<8>(Add(MulAdd(Bh, vCbB,
-                                                MulSub(Gh, vCbG,
-                                                       Mul(Rh, vCbR))), vBiasUV));
+      const auto Cbl = ShiftRightDemote<8>(d32, Add(MulAdd(Bl, vCbB,
+                                                           MulSub(Gl, vCbG,
+                                                                  Mul(Rl, vCbR))), vBiasUV));
+      const auto Cbh = ShiftRightDemote<8>(d32, Add(MulAdd(Bh, vCbB,
+                                                           MulSub(Gh, vCbG,
+                                                                  Mul(Rh, vCbR))), vBiasUV));
 
-      const auto Crh = ShiftRight<8>(Add(MulAdd(Rh, vCrR,
-                                                MulSub(Gh, vCrG,
-                                                       Mul(Bh, vCrB))), vBiasUV));
+      const auto Crh = ShiftRightDemote<8>(d32, Add(MulAdd(Rh, vCrR,
+                                                           MulSub(Gh, vCrG,
+                                                                  Mul(Bh, vCrB))), vBiasUV));
 
-      const auto Crl = ShiftRight<8>(Add(MulAdd(Rl, vCrR,
-                                                MulSub(Gl, vCrG,
-                                                       Mul(Bl, vCrB))), vBiasUV));
+      const auto Crl = ShiftRightDemote<8>(d32, Add(MulAdd(Rl, vCrR,
+                                                           MulSub(Gl, vCrG,
+                                                                  Mul(Bl, vCrB))), vBiasUV));
 
-      const auto Y = BitCast(du16, Combine(d16, DemoteTo(dh16, Yh), DemoteTo(dh16, Yl)));
-      const auto Cb = BitCast(du16, Combine(d16, DemoteTo(dh16, Cbh), DemoteTo(dh16, Cbl)));
-      const auto Cr = BitCast(du16, Combine(d16, DemoteTo(dh16, Crh), DemoteTo(dh16, Crl)));
+      const auto Y = BitCast(du16, Combine(d16, Yh, Yl));
+      const auto Cb = BitCast(du16, Combine(d16, Cbh, Cbl));
+      const auto Cr = BitCast(du16, Combine(d16, Crh, Crl));
 #endif
 
       StoreU(Y, du16, yDst);
@@ -253,14 +241,14 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
         StoreU(Cb, du16, uDst);
         StoreU(Cr, du16, vDst);
       } else if (chromaSubsample == YUV_SAMPLE_422) {
-        const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-        const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+        const auto cbh = ShiftRightDemote<1>(du32, SumsOf2(Cb));
+        const auto crh = ShiftRightDemote<1>(du32, SumsOf2(Cr));
         StoreU(cbh, dhu16, uDst);
         StoreU(crh, dhu16, vDst);
       } else if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
-          const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-          const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+          const auto cbh = ShiftRightDemote<1>(du32, SumsOf2(Cb));
+          const auto crh = ShiftRightDemote<1>(du32, SumsOf2(Cr));
           StoreU(cbh, dhu16, uDst);
           StoreU(crh, dhu16, vDst);
         }
@@ -458,11 +446,11 @@ XXXXToYCbCr444PHWY_DECLARATION_R(BGR, 12, YCbCr420, sparkyuv::YUV_SAMPLE_420)
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample, int bitDepth>
 void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
-                     const uint32_t width, const uint32_t height,
-                     const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                     const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
-                     const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
-                     const float kr, const float kb, const SparkYuvColorRange colorRange) {
+                       const uint32_t width, const uint32_t height,
+                       const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                       const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
+                       const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
+                       const float kr, const float kb, const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
   const ScalableTag<uint16_t> d16;
   const RebindToSigned<decltype(d16)> di16;
@@ -606,29 +594,16 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
       if (bitDepth == 12) {
-        r = Combine(d16, DemoteTo(dh16, ShiftRight<6>(rh)), DemoteTo(dh16, ShiftRight<6>(rl)));
-        g = Combine(d16, DemoteTo(dh16, ShiftRight<6>(gh)), DemoteTo(dh16, ShiftRight<6>(gl)));
-        b = Combine(d16, DemoteTo(dh16, ShiftRight<6>(bh)), DemoteTo(dh16, ShiftRight<6>(bl)));
+        r = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, rh)), BitCast(dh16, ShiftRightDemote<6>(d32, rl)));
+        g = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, gh)), BitCast(dh16, ShiftRightDemote<6>(d32, gl)));
+        b = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, bh)), BitCast(dh16, ShiftRightDemote<6>(d32, bl)));
       } else {
         r = ShiftRight<6>(Combine(d16, DemoteTo(dh16, rh), DemoteTo(dh16, rl)));
         g = ShiftRight<6>(Combine(d16, DemoteTo(dh16, gh), DemoteTo(dh16, gl)));
         b = ShiftRight<6>(Combine(d16, DemoteTo(dh16, bh), DemoteTo(dh16, bl)));
       }
 
-      switch (PixelType) {
-        case PIXEL_RGBA:StoreInterleaved4(r, g, b, vAlpha, d16, store);
-          break;
-        case PIXEL_ABGR:StoreInterleaved4(vAlpha, b, g, r, d16, store);
-          break;
-        case PIXEL_BGR:StoreInterleaved3(b, g, r, d16, store);
-          break;
-        case PIXEL_RGB:StoreInterleaved3(r, g, b, d16, store);
-          break;
-        case PIXEL_BGRA:StoreInterleaved4(b, g, r, vAlpha, d16, store);
-          break;
-        case PIXEL_ARGB:StoreInterleaved4(vAlpha, r, g, b, d16, store);
-          break;
-      }
+      StoreRGBA<PixelType>(d16, store, r, g, b, vAlpha);
 
       store += lanes * components;
       ySrc += lanes;

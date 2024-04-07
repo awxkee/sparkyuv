@@ -135,6 +135,61 @@ HWY_API VFromD<D> PromoteTo(D df, Vec<Rebind<uint8_t, D>> v) {
   return ConvertTo(df, PromoteTo(du32, v));
 }
 
+#if (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES) && HWY_ARCH_ARM_A64
+template<int n, class D, HWY_IF_U16_D(D), typename D8 = Rebind<uint8_t, D>, typename V8 = Vec<D8>>
+HWY_API V8 ShiftRightDemote(D d, Vec<D> v) {
+  return Vec64<uint8_t>(vshrn_n_u16(v.raw, n));
+}
+
+template<int n, class D, HWY_IF_I32_D(D), typename DN = Rebind<int16_t, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+  return Vec64<int16_t>(vshrn_n_s32(v.raw, n));
+}
+
+template<int n, class D, HWY_IF_U32_D(D), typename DN = Rebind<uint16_t, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+  return Vec64<uint16_t>(vshrn_n_u32(v.raw, n));
+}
+
+template<int n, class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
+HWY_API VW ShiftLeftPromote(D d, Vec<D> v) {
+  return Vec128<uint16_t>(vshll_n_u8(v.raw, n));
+}
+#else
+template<int n, class D, HWY_IF_U16_D(D), typename D8 = Rebind<uint8_t, D>, typename VN = Vec<D8>>
+HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+  const D8 d8;
+  return DemoteTo(d8, ShiftRight<n>(v));
+}
+
+template<int n, class D, HWY_IF_U8_D(D), typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>,
+    std::enable_if<n >= 8, int>::type = 0>
+HWY_API V16 ShiftLeftPromote(D d, Vec<D> v) {
+  const D16 d16;
+  return ShiftLeft<n>(PromoteTo(d16, v));
+}
+
+template<int n, class D, HWY_IF_U8_D(D), typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>,
+    std::enable_if<n < 8, int>::type = 0>
+HWY_API V16 ShiftLeftPromote(D d, Vec<D> v) {
+  const D16 d16;
+  return PromoteTo(d16, ShiftLeft<n>(v));
+}
+
+template<int n, class D, HWY_IF_I32_D(D), typename DN = Rebind<int16_t, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+  const Rebind<int16_t, D> d16;
+  return DemoteTo(d16, ShiftRight<n>(v));
+}
+
+template<int n, class D, HWY_IF_U32_D(D), typename DN = Rebind<uint16_t, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+  const Rebind<uint16_t, D> d16;
+  return DemoteTo(d16, ShiftRight<n>(v));
+}
+
+#endif
+
 template<sparkyuv::SparkYuvDefaultPixelType PixelType,
     class D, typename V = Vec<D>, HWY_IF_U8_D(D),
     typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>>

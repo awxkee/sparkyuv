@@ -59,41 +59,35 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
       V8 A8;
       LoadRGBA<PixelType>(du8, source, R8, G8, B8, A8);
 
-      V16 R = PromoteTo(du16, R8);
-      V16 G = PromoteTo(du16, G8);
-      V16 B = PromoteTo(du16, B8);
-      V16 A;
-      if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-        A = PromoteTo(du16, A8);
-      }
+      V16 R, G, B, A;
 
       if (diff == 2) {
-        R = ShiftLeft<2>(R);
-        G = ShiftLeft<2>(G);
-        B = ShiftLeft<2>(B);
+        R = ShiftLeftPromote<2>(du8, R8);
+        G = ShiftLeftPromote<2>(du8, G8);
+        B = ShiftLeftPromote<2>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeft<2>(A);
+          A = ShiftLeftPromote<2>(du8, A8);
         }
       } else if (diff == 4) {
-        R = ShiftLeft<4>(R);
-        G = ShiftLeft<4>(G);
-        B = ShiftLeft<4>(B);
+        R = ShiftLeftPromote<4>(du8, R8);
+        G = ShiftLeftPromote<4>(du8, G8);
+        B = ShiftLeftPromote<4>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeft<4>(A);
+          A = ShiftLeftPromote<4>(du8, A8);
         }
       } else if (diff == 8) {
-        R = ShiftLeft<8>(R);
-        G = ShiftLeft<8>(G);
-        B = ShiftLeft<8>(B);
+        R = ShiftLeftPromote<8>(du8, R8);
+        G = ShiftLeftPromote<8>(du8, G8);
+        B = ShiftLeftPromote<8>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeft<8>(A);
+          A = ShiftLeftPromote<8>(du8, A8);
         }
       } else {
-        R = ShiftLeftSame(R, diff);
-        G = ShiftLeftSame(G, diff);
-        B = ShiftLeftSame(B, diff);
+        R = ShiftLeftSame(PromoteTo(du16, R8), diff);
+        G = ShiftLeftSame(PromoteTo(du16, G8), diff);
+        B = ShiftLeftSame(PromoteTo(du16, B8), diff);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeftSame(A, diff);
+          A = ShiftLeftSame(PromoteTo(du16, A8), diff);
         }
       }
 
