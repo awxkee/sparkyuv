@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__YUVBT2020CL_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__YUVBT2020CL_INL_H
-#undef SPARKYUV__YUVBT2020CL_INL_H
+#if defined(SPARKYUV_YCCBCCRC_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_YCCBCCRC_INL_H
+#undef SPARKYUV_YCCBCCRC_INL_H
 #else
-#define SPARKYUV__YUVBT2020CL_INL_H
+#define SPARKYUV_YCCBCCRC_INL_H
 #endif
 
 #include "hwy/highway.h"

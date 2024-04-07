@@ -62,7 +62,8 @@ if (BUILD_TOOLS)
             tools/bench/YuvBenchmarkYIQ.cpp
             tools/bench/YuvBenchmarkYIQ.h
             tools/bench/YuvBenchmarkYDbDr.cpp
-            tools/bench/YuvBenchmarkYDbDr.h)
+            tools/bench/YuvBenchmarkYDbDr.h
+            tools/bench/YuvBenchmarkBase.cpp)
 
     add_library(libyuv STATIC IMPORTED)
     set_target_properties(yuvtools libyuv PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libyuv.a)

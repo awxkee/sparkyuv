@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__CHANNELS_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__CHANNELS_INL_H
-#undef SPARKYUV__CHANNELS_INL_H
+#if defined(SPARKYUV_CHANNELS_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_CHANNELS_INL_H
+#undef SPARKYUV_CHANNELS_INL_H
 #else
-#define SPARKYUV__CHANNELS_INL_H
+#define SPARKYUV_CHANNELS_INL_H
 #endif
 
 #include "hwy/highway.h"

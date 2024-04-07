@@ -30,6 +30,7 @@
 #include "bench/YuvBenchmarkYDzDx.h"
 #include "bench/YuvBenchmarkYIQ.h"
 #include "bench/YuvBenchmarkYDbDr.h"
+#include "bench/YuvBenchmarkBase.h"
 
 static std::string filename = "filirovska.jpeg";
 
@@ -505,5 +506,9 @@ BENCHMARK(SparkyuvRGBA8ToYDbDr444);
 
 BENCHMARK(LibyuvPremultiply);
 BENCHMARK(SparkyuvPremultiply);
+BENCHMARK(SparkyuvWide8To10Fixed);
+BENCHMARK(SparkyuvWide8To10Dynamic);
+BENCHMARK(SparkyuvSaturate10To8Fixed);
+BENCHMARK(SparkyuvSaturate10To8Dynamic);
 
 BENCHMARK_MAIN();

@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__NV24_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__NV24_INL_H
-#undef SPARKYUV__NV24_INL_H
+#if defined(SPARKYUV_NV24_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_NV24_INL_H
+#undef SPARKYUV_NV24_INL_H
 #else
-#define SPARKYUV__NV24_INL_H
+#define SPARKYUV_NV24_INL_H
 #endif
 
 #include "hwy/highway.h"

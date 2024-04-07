@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__WIDE_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__WIDE_INL_H
-#undef SPARKYUV__WIDE_INL_H
+#if defined(SPARKYUV_WIDE_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_WIDE_INL_H
+#undef SPARKYUV_WIDE_INL_H
 #else
-#define SPARKYUV__WIDE_INL_H
+#define SPARKYUV_WIDE_INL_H
 #endif
 
 #include "hwy/highway.h"
@@ -138,27 +138,130 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
     }
 
 WideXXXXFrom8ToN_DECLARATION_R(RGBA, 10)
+WideXXXXFrom8ToN_DECLARATION_R(RGB, 10)
+#if SPARKYUV_FULL_CHANNELS
 WideXXXXFrom8ToN_DECLARATION_R(ARGB, 10)
 WideXXXXFrom8ToN_DECLARATION_R(ABGR, 10)
 WideXXXXFrom8ToN_DECLARATION_R(BGRA, 10)
-WideXXXXFrom8ToN_DECLARATION_R(RGB, 10)
 WideXXXXFrom8ToN_DECLARATION_R(BGR, 10)
+#endif
 
 WideXXXXFrom8ToN_DECLARATION_R(RGBA, 12)
+WideXXXXFrom8ToN_DECLARATION_R(RGB, 12)
+#if SPARKYUV_FULL_CHANNELS
 WideXXXXFrom8ToN_DECLARATION_R(ARGB, 12)
 WideXXXXFrom8ToN_DECLARATION_R(ABGR, 12)
 WideXXXXFrom8ToN_DECLARATION_R(BGRA, 12)
-WideXXXXFrom8ToN_DECLARATION_R(RGB, 12)
 WideXXXXFrom8ToN_DECLARATION_R(BGR, 12)
+#endif
 
 WideXXXXFrom8ToN_DECLARATION_R(RGBA, 16)
+WideXXXXFrom8ToN_DECLARATION_R(RGB, 16)
+#if SPARKYUV_FULL_CHANNELS
 WideXXXXFrom8ToN_DECLARATION_R(ARGB, 16)
 WideXXXXFrom8ToN_DECLARATION_R(ABGR, 16)
 WideXXXXFrom8ToN_DECLARATION_R(BGRA, 16)
-WideXXXXFrom8ToN_DECLARATION_R(RGB, 16)
 WideXXXXFrom8ToN_DECLARATION_R(BGR, 16)
+#endif
 
 #undef WideXXXXFrom8ToN_DECLARATION_R
+
+template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA>
+void WideSurfaceFrom8BitToGEN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                            uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
+                            const uint32_t width, const uint32_t height, const int targetBitDepth) {
+  const ScalableTag<uint16_t> du16;
+  const Rebind<uint8_t, decltype(du16)> du8;
+  using V8 = Vec<decltype(du8)>;
+  using V16 = Vec<decltype(du16)>;
+
+  const int lanes = Lanes(du8);
+
+  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+
+  const int diff = targetBitDepth - 8;
+
+  auto mSource = reinterpret_cast<const uint8_t *>(src);
+  auto mDestination = reinterpret_cast<uint8_t *>(dst);
+
+  for (int y = 0; y < height; ++y) {
+    auto store = reinterpret_cast<uint16_t *>(mDestination);
+    auto source = reinterpret_cast<const uint8_t *>(mSource);
+
+    uint32_t x = 0;
+
+    for (; x + lanes < width; x += lanes) {
+      V8 R8;
+      V8 G8;
+      V8 B8;
+      V8 A8;
+      LoadRGBA<PixelType>(du8, source, R8, G8, B8, A8);
+
+      V16 R = PromoteTo(du16, R8);
+      V16 G = PromoteTo(du16, G8);
+      V16 B = PromoteTo(du16, B8);
+      V16 A;
+      if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
+        A = PromoteTo(du16, A8);
+      }
+
+      R = ShiftLeftSame(R, diff);
+      G = ShiftLeftSame(G, diff);
+      B = ShiftLeftSame(B, diff);
+      if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
+        A = ShiftLeftSame(A, diff);
+      }
+
+      StoreRGBA<PixelType>(du16, store, R, G, B, A);
+
+      store += lanes * components;
+      source += lanes * components;
+    }
+
+    for (; x < width; ++x) {
+      uint16_t r;
+      uint16_t g;
+      uint16_t b;
+      uint16_t a;
+
+      LoadRGBA<uint8_t, uint16_t, PixelType>(source, r, g, b, a);
+
+      r = r << diff;
+      g = g << diff;
+      b = b << diff;
+      if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
+        a = a << diff;
+      }
+
+      StoreRGBA<uint16_t, uint16_t, PixelType>(store, r, g, b, a);
+
+      store += components;
+      source += components;
+    }
+
+    mDestination += dstStride;
+    mSource += srcStride;
+  }
+}
+
+#define WideXXXXFrom8ToN_DECLARATION_GEN_R(pixelType) \
+    void Wide##pixelType##8##HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride, \
+                                                   uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                                   const uint32_t width, const uint32_t height, const int targetBitDepth) {\
+        WideSurfaceFrom8BitToGEN<sparkyuv::PIXEL_##pixelType>(src, srcStride, dst, dstStride,\
+                                                                            width, height, targetBitDepth); \
+    }
+
+WideXXXXFrom8ToN_DECLARATION_GEN_R(RGBA)
+WideXXXXFrom8ToN_DECLARATION_GEN_R(RGB)
+#if SPARKYUV_FULL_CHANNELS
+WideXXXXFrom8ToN_DECLARATION_GEN_R(ARGB)
+WideXXXXFrom8ToN_DECLARATION_GEN_R(ABGR)
+WideXXXXFrom8ToN_DECLARATION_GEN_R(BGRA)
+WideXXXXFrom8ToN_DECLARATION_GEN_R(BGR)
+#endif
+
+#undef WideXXXXFrom8ToN_DECLARATION_GEN_R
 
 }
 HWY_AFTER_NAMESPACE();

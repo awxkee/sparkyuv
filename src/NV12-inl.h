@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__NV12_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__NV12_INL_H
-#undef SPARKYUV__NV12_INL_H
+#if defined(SPARKYUV_NV12_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_NV12_INL_H
+#undef SPARKYUV_NV12_INL_H
 #else
-#define SPARKYUV__NV12_INL_H
+#define SPARKYUV_NV12_INL_H
 #endif
 
 #include "hwy/highway.h"
@@ -29,10 +29,8 @@ HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvNVLoadOrder LoadOrder = sparkyuv::YUV_ORDER_UV>
-void NV21ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
-                  const uint32_t dstStride,
-                  const uint32_t width,
-                  const uint32_t height,
+void NV21ToPixel8(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
+                  const uint32_t width, const uint32_t height,
                   const uint8_t *SPARKYUV_RESTRICT yPlane,
                   const uint32_t yStride,
                   const uint8_t *SPARKYUV_RESTRICT uvPlane,
@@ -117,7 +115,8 @@ void NV21ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
       const auto light = Mul(luma, ivLumaCoeff);
       const VU16 r = ShiftRight<6>(Max(SaturatedAdd(Mul(ivCrCoeff, cr), light), vZero));
       const VU16 b = ShiftRight<6>(Max(SaturatedAdd(Mul(ivCbCoeff, cb), light), vZero));
-      const VU16 g = ShiftRight<6>(Max(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb))), vZero));
+      const VU16
+          g = ShiftRight<6>(Max(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb))), vZero));
 
       StoreRGBA<PixelType>(du16x8, reinterpret_cast<uint8_t *>(store), r, g, b, A);
 
@@ -198,10 +197,10 @@ NVXXToXXXXHWY_DECLARATION_R(BGR, NV12, YUV_ORDER_UV)
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
     SparkYuvNVLoadOrder LoadOrder = sparkyuv::YUV_ORDER_UV>
 void Pixel8ToNV21HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                    const uint32_t width, const uint32_t height,
-                    uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                    uint8_t *SPARKYUV_RESTRICT uvPlane, const uint32_t uvStride,
-                    const float kr, const float kb, const SparkYuvColorRange colorRange) {
+                     const uint32_t width, const uint32_t height,
+                     uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                     uint8_t *SPARKYUV_RESTRICT uvPlane, const uint32_t uvStride,
+                     const float kr, const float kb, const SparkYuvColorRange colorRange) {
   uint16_t biasY;
   uint16_t biasUV;
   uint16_t rangeY;
@@ -295,7 +294,8 @@ void Pixel8ToNV21HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
       YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
       YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
-      const auto Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(YRh)), DemoteTo(dhi16, ShiftRight<8>(YRl))));
+      const auto
+          Y = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(YRh)), DemoteTo(dhi16, ShiftRight<8>(YRl))));
       if (!(y & 1)) {
         if (y + 1 < height) {
           switch (PixelType) {
@@ -326,14 +326,16 @@ void Pixel8ToNV21HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
         Cbl = ReorderWidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
         Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
-        const auto Cbf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Cbh)), DemoteTo(dhi16, ShiftRight<8>(Cbl))));
+        const auto Cbf =
+            BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Cbh)), DemoteTo(dhi16, ShiftRight<8>(Cbl))));
 
         V32 Crh = vBiasUV;
         V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
         Crl = ReorderWidenMulAccumulate(d32, G, vCrG, Crl, Crh);
         Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
-        const auto Crf = BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Crh)), DemoteTo(dhi16, ShiftRight<8>(Crl))));
+        const auto Crf =
+            BitCast(du16, Combine(di16, DemoteTo(dhi16, ShiftRight<8>(Crh)), DemoteTo(dhi16, ShiftRight<8>(Crl))));
 
         const auto Cb = DemoteTo(du8h, ShiftRight<1>(SumsOf2(Cbf)));
         const auto Cr = DemoteTo(du8h, ShiftRight<1>(SumsOf2(Crf)));

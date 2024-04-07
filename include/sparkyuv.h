@@ -20,6 +20,7 @@
 #include <vector>
 #include "sparkyuv-def.h"
 #include "sparkyuv-nv.h"
+#include "sparkyuv-basic.h"
 #include "sparkyuv-rgb565.h"
 #include "sparkyuv-eotf.h"
 #include "sparkyuv-yccbccrc.h"
@@ -483,62 +484,6 @@ XXXXToYCbCr420GEN2020(BGR)
 
 #undef XXXXToYCbCr420GEN2020
 #undef XXXXToYCbCr420GEN
-
-#define WideXXXXFrom8ToN_DECLARATION_H(pixelType, targetBitDepth) \
-   void Wide##pixelType##8To##targetBitDepth(uint8_t* src, const uint32_t srcStride, \
-                                             uint16_t* dst, const uint32_t dstStride,\
-                                             const uint32_t width, const uint32_t height);
-
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 10)
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 10)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 10)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 10)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 10)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 10)
-
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 12)
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 12)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 12)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 12)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 12)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 12)
-
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 16)
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 16)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 16)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 16)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 16)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 16)
-
-#undef WideXXXXFrom8ToN_DECLARATION_H
-
-#define SaturateXXXXFrom8ToN_DECLARATION_H(pixelType, sourceBitDepth) \
-   void Saturate##pixelType##sourceBitDepth##To8(const uint16_t* src, const uint32_t srcStride, \
-                                                 uint8_t* dst, const uint32_t dstStride,\
-                                                 const uint32_t width, const uint32_t height);
-
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 10)
-
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 12)
-
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 16)
-
-#undef SaturateXXXXFrom8ToN_DECLARATION_H
 
 #define YCbCr444PXToXXXX_DECLARATION_H(yuvname, pixelType, bit) \
     void yuvname##P##bit##To##pixelType##bit(uint16_t * src, const uint32_t srcStride,\
