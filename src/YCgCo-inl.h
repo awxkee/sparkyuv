@@ -129,18 +129,18 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           Gh = Mul(Gh, viRangeReduction);
           Bh = Mul(Bh, viRangeReduction);
 
-          const auto Yl = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
-          const auto Yh = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
+          const auto Yl = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
+          const auto Yh = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
           Y = BitCast(du16, Combine(di16, Yh, Yl));
-          const auto Cgl = ShiftRightDemote<6>(di32, Add(viBiasUV,
+          const auto Cgl = ShiftRightNarrow<6>(di32, Add(viBiasUV,
                                                          Sub(ShiftRight<1>(Gl),
                                                              ShiftRight<2>(Add(Rl, Bl)))));
-          const auto Cgh = ShiftRightDemote<6>(di32, Add(viBiasUV,
+          const auto Cgh = ShiftRightNarrow<6>(di32, Add(viBiasUV,
                                                          Sub(ShiftRight<1>(Gh),
                                                              ShiftRight<2>(Add(Rh, Bh)))));
           Cg = BitCast(du16, Combine(di16, Cgh, Cgl));
-          const auto Col = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
-          const auto Coh = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
+          const auto Col = ShiftRightNarrow<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
+          const auto Coh = ShiftRightNarrow<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
           Co = BitCast(du16, Combine(di16, Coh, Col));
         }
 
@@ -191,18 +191,18 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           Gh = Mul(Gh, viRangeReduction);
           Bh = Mul(Bh, viRangeReduction);
 
-          const auto Yl = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
-          const auto Yh = ShiftRightDemote<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
+          const auto Yl = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
+          const auto Yh = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
           Y = BitCast(du16, Combine(di16, Yh, Yl));
-          const auto Cgl = ShiftRightDemote<6>(di32, Add(viBiasUV,
+          const auto Cgl = ShiftRightNarrow<6>(di32, Add(viBiasUV,
                                                          Sub(ShiftRight<1>(Gl),
                                                              ShiftRight<2>(Add(Rl, Bl)))));
-          const auto Cgh = ShiftRightDemote<6>(di32, Add(viBiasUV,
+          const auto Cgh = ShiftRightNarrow<6>(di32, Add(viBiasUV,
                                                          Sub(ShiftRight<1>(Gh),
                                                              ShiftRight<2>(Add(Rh, Bh)))));
           Cg = BitCast(dhu16, ShiftRight<1>(Add(Cgh, Cgl)));
-          const auto Col = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
-          const auto Coh = ShiftRightDemote<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
+          const auto Col = ShiftRightNarrow<6>(di32, Add(ShiftRight<1>(Sub(Rl, Bl)), viBiasUV));
+          const auto Coh = ShiftRightNarrow<6>(di32, Add(ShiftRight<1>(Sub(Rh, Bh)), viBiasUV));
           Co = BitCast(dhu16, ShiftRight<1>(Add(Coh, Col)));
         }
 

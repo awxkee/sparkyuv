@@ -13,11 +13,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#if defined(SPARKYUV__BALPHA_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__BALPHA_INL_H
-#undef SPARKYUV__BALPHA_INL_H
+#if defined(SPARKYUV_BALPHA_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_BALPHA_INL_H
+#undef SPARKYUV_BALPHA_INL_H
 #else
-#define SPARKYUV__BALPHA_INL_H
+#define SPARKYUV_BALPHA_INL_H
 #endif
 
 #include "hwy/highway.h"
@@ -39,8 +39,9 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       PixelType == PIXEL_RGBA || PixelType == PIXEL_ARGB || PixelType == PIXEL_ABGR || PixelType == PIXEL_BGRA,
       "Cannot be used on image without alpha");
 
-  const ScalableTag<uint16_t> du16;
-  const Rebind<uint8_t, decltype(du16)> du8;
+  const ScalableTag<uint8_t> du8;
+  const Half<decltype(du8)> dhu8;
+  const Rebind<uint16_t, decltype(dhu8)> du16;
   using V8 = Vec<decltype(du8)>;
 
   const int lanes = Lanes(du8);
@@ -65,11 +66,19 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       V8 A;
       LoadRGBA<PixelType>(du8, source, R, G, B, A);
 
-      const auto A16 = PromoteTo(du16, A);
+      const auto Rh = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMulHigh(du8, R, A), vExpand));
+      const auto Gh = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMulHigh(du8, G, A), vExpand));
+      const auto Bh = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMulHigh(du8, B, A), vExpand));
 
-      R = DemoteTo(du8, ShiftRight<8>(SaturatedAdd(Mul(PromoteTo(du16, R), A16), vExpand)));
-      G = DemoteTo(du8, ShiftRight<8>(SaturatedAdd(Mul(PromoteTo(du16, G), A16), vExpand)));
-      B = DemoteTo(du8, ShiftRight<8>(SaturatedAdd(Mul(PromoteTo(du16, B), A16), vExpand)));
+      auto Alow = LowerHalf(A);
+
+      const auto Rl = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMul(dhu8, LowerHalf(R), Alow), vExpand));
+      const auto Gl = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMul(dhu8, LowerHalf(G), Alow), vExpand));
+      const auto Bl = ShiftRightNarrow<8>(du16, SaturatedAdd(WidenMul(dhu8, LowerHalf(B), Alow), vExpand));
+
+      R = Combine(du8, Rh, Rl);
+      G = Combine(du8, Gh, Gl);
+      B = Combine(du8, Bh, Bl);
 
       StoreRGBA<PixelType>(du8, store, R, G, B, A);
 

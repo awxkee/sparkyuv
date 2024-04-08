@@ -424,12 +424,12 @@ void YDzDxToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       const auto sRl = Add(Mul(PromoteLowerTo(di32, sDx), vCoeffPR1), Mul(yl, vCoeffPR2));
       const auto sRh = Add(Mul(PromoteUpperTo(di32, sDx), vCoeffPR1), Mul(yh, vCoeffPR2));
 
-      const auto Gl = ShiftRightDemote<8>(di32, sYl);
-      const auto Gh = ShiftRightDemote<8>(di32, sYh);
-      const auto Bl = ShiftRightDemote<8>(di32, sBl);
-      const auto Bh = ShiftRightDemote<8>(di32, sBh);
-      const auto Rl = ShiftRightDemote<8>(di32, sRl);
-      const auto Rh = ShiftRightDemote<8>(di32, sRh);
+      const auto Gl = ShiftRightNarrow<8>(di32, sYl);
+      const auto Gh = ShiftRightNarrow<8>(di32, sYh);
+      const auto Bl = ShiftRightNarrow<8>(di32, sBl);
+      const auto Bh = ShiftRightNarrow<8>(di32, sBh);
+      const auto Rl = ShiftRightNarrow<8>(di32, sRl);
+      const auto Rh = ShiftRightNarrow<8>(di32, sRh);
 
       G16 = BitCast(du16, Clamp(Combine(di16, Gh, Gl), viZeros, vMaxColors));
       B16 = BitCast(du16, Clamp(Combine(di16, Bh, Bl), viZeros, vMaxColors));

@@ -62,25 +62,25 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
       V16 R, G, B, A;
 
       if (diff == 2) {
-        R = ShiftLeftPromote<2>(du8, R8);
-        G = ShiftLeftPromote<2>(du8, G8);
-        B = ShiftLeftPromote<2>(du8, B8);
+        R = ShiftLeftWide<2>(du8, R8);
+        G = ShiftLeftWide<2>(du8, G8);
+        B = ShiftLeftWide<2>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeftPromote<2>(du8, A8);
+          A = ShiftLeftWide<2>(du8, A8);
         }
       } else if (diff == 4) {
-        R = ShiftLeftPromote<4>(du8, R8);
-        G = ShiftLeftPromote<4>(du8, G8);
-        B = ShiftLeftPromote<4>(du8, B8);
+        R = ShiftLeftWide<4>(du8, R8);
+        G = ShiftLeftWide<4>(du8, G8);
+        B = ShiftLeftWide<4>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeftPromote<4>(du8, A8);
+          A = ShiftLeftWide<4>(du8, A8);
         }
       } else if (diff == 8) {
-        R = ShiftLeftPromote<8>(du8, R8);
-        G = ShiftLeftPromote<8>(du8, G8);
-        B = ShiftLeftPromote<8>(du8, B8);
+        R = ShiftLeftWide<8>(du8, R8);
+        G = ShiftLeftWide<8>(du8, G8);
+        B = ShiftLeftWide<8>(du8, B8);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A = ShiftLeftPromote<8>(du8, A8);
+          A = ShiftLeftWide<8>(du8, A8);
         }
       } else {
         R = ShiftLeftSame(PromoteTo(du16, R8), diff);

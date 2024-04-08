@@ -75,6 +75,7 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   const Half<decltype(d16)> dhu16;
   using V16 = Vec<decltype(d16)>;
   using V32 = Vec<decltype(d32)>;
+  const RebindToUnsigned<decltype(d32)> du32;
 
   const auto iBiasY = static_cast<int>((static_cast<float>(biasY) + 0.5f) * scale);
   const auto iBiasUV = static_cast<int>((static_cast<float>(biasUV) + 0.5f) * scale);
@@ -139,10 +140,10 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
       V32 Bh = PromoteUpperTo(d32, B);
       V32 Gl = PromoteLowerTo(d32, G);
       V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRightDemote<precision>(d32, MulAdd(Rl, vYR,
+      const auto Yl = ShiftRightNarrow<precision>(d32, MulAdd(Rl, vYR,
                                                               MulAdd(Gl, vYG,
                                                                      MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRightDemote<precision>(d32, MulAdd(Rh, vYR,
+      const auto Yh = ShiftRightNarrow<precision>(d32, MulAdd(Rh, vYR,
                                                               MulAdd(Gh, vYG,
                                                                      MulAdd(Bh, vYB, vBiasY))));
 
@@ -173,18 +174,18 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
         }
       }
 
-      const auto Cbl = ShiftRightDemote<precision>(d32, Add(MulAdd(Bl, vCbB,
+      const auto Cbl = ShiftRightNarrow<precision>(d32, Add(MulAdd(Bl, vCbB,
                                                                    MulAdd(Gl, vCbG,
                                                                           Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRightDemote<precision>(d32, Add(MulAdd(Bh, vCbB,
+      const auto Cbh = ShiftRightNarrow<precision>(d32, Add(MulAdd(Bh, vCbB,
                                                                    MulAdd(Gh, vCbG,
                                                                           Mul(Rh, vCbR))), vBiasUV));
 
-      const auto Crh = ShiftRightDemote<precision>(d32, Add(MulAdd(Rh, vCrR,
+      const auto Crh = ShiftRightNarrow<precision>(d32, Add(MulAdd(Rh, vCrR,
                                                                    MulAdd(Gh, vCrG,
                                                                           Mul(Bh, vCrB))), vBiasUV));
 
-      const auto Crl = ShiftRightDemote<precision>(d32, Add(MulAdd(Rl, vCrR,
+      const auto Crl = ShiftRightNarrow<precision>(d32, Add(MulAdd(Rl, vCrR,
                                                                    MulAdd(Gl, vCrG,
                                                                           Mul(Bl, vCrB))), vBiasUV));
 
@@ -198,14 +199,14 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
           StoreU(Cb, d16, reinterpret_cast<uint16_t *>(uDst));
           StoreU(Cr, d16, reinterpret_cast<uint16_t *>(vDst));
         } else if (chromaSubsample == YUV_SAMPLE_422) {
-          const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-          const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+          const auto cbh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cb)));
+          const auto crh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cr)));
           StoreU(cbh, dhu16, reinterpret_cast<uint16_t *>(uDst));
           StoreU(crh, dhu16, reinterpret_cast<uint16_t *>(vDst));
         } else if (chromaSubsample == YUV_SAMPLE_420) {
           if (!(y & 1)) {
-            const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-            const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+            const auto cbh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cb)));
+            const auto crh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cr)));
             StoreU(cbh, dhu16, reinterpret_cast<uint16_t *>(uDst));
             StoreU(crh, dhu16, reinterpret_cast<uint16_t *>(vDst));
           }
@@ -218,14 +219,14 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
           StoreU(DemoteTo(d8, Cb), d8, reinterpret_cast<uint8_t *>(uDst));
           StoreU(DemoteTo(d8, Cr), d8, reinterpret_cast<uint8_t *>(vDst));
         } else if (chromaSubsample == YUV_SAMPLE_422) {
-          const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-          const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+          const auto cbh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cb)));
+          const auto crh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cr)));
           StoreU(DemoteTo(dh8, cbh), dh8, reinterpret_cast<uint8_t *>(uDst));
           StoreU(DemoteTo(dh8, crh), dh8, reinterpret_cast<uint8_t *>(vDst));
         } else if (chromaSubsample == YUV_SAMPLE_420) {
           if (!(y & 1)) {
-            const auto cbh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cb)));
-            const auto crh = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cr)));
+            const auto cbh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cb)));
+            const auto crh = BitCast(dhu16, ShiftRightNarrow<1>(du32, SumsOf2(Cr)));
             StoreU(DemoteTo(dh8, cbh), dh8, reinterpret_cast<uint8_t *>(uDst));
             StoreU(DemoteTo(dh8, crh), dh8, reinterpret_cast<uint8_t *>(vDst));
           }
@@ -302,6 +303,17 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
           r = (r + r1 + r2 + r3) >> 2;
           g = (g + g1 + g2 + g3) >> 2;
           b = (b + b1 + b2 + b3) >> 2;
+        } else {
+          if (x + 1 < width) {
+            int r1 = r, g1 = g, b1 = b;
+            LoadRGB<T, int, PixelType>(mSrc, r1, g1, b1);
+
+            int Y1 = ((r1 * static_cast<int>(YR) + g1 * static_cast<int>(YG) + b1 * static_cast<int>(YB) + iBiasY)
+                >> precision);
+            yDst[0] = std::clamp(Y1, static_cast<int>(biasY), cutOffY);
+            yDst += 1;
+            mSrc += components;
+          }
         }
       }
 
@@ -329,15 +341,8 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
         }
       }
 
-      if (chromaSubsample == YUV_SAMPLE_444 || chromaSubsample == YUV_SAMPLE_422) {
-        uDst += 1;
-        vDst += 1;
-      } else if (chromaSubsample == YUV_SAMPLE_420) {
-        if (!(y & 1)) {
-          uDst += 1;
-          vDst += 1;
-        }
-      }
+      uDst += 1;
+      vDst += 1;
     }
 
     yStore += yStride;
@@ -388,20 +393,22 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   const auto uvCorrection = Set(di16, biasUV);
   const V16 vAlpha = Set(d16, maxColors);
   const auto uvCorrIY = Set(di16, biasY);
+  const auto vMaxColors = Set(di16, maxColors);
+  const auto zeros = Zero(di16);
 
   const auto scale = static_cast<float>(1 << precision);
   const float rangeReformatY = static_cast<float>(maxColors) / static_cast<float>(rangeY);
   const float rangeReformatUV = static_cast<float>(maxColors) / static_cast<float>(rangeUV);
 
-  auto YR = static_cast<int16_t>(std::roundf(matrix.Y1 * scale * rangeReformatY)),
-      YG = static_cast<int16_t>(std::roundf(matrix.Y2 * scale * rangeReformatY)),
-      YB = static_cast<int16_t>(std::roundf(matrix.Y3 * scale * rangeReformatY));
-  auto CbR = static_cast<int16_t>(std::roundf(matrix.U1 * scale * rangeReformatUV)),
-      CbG = static_cast<int16_t>(std::roundf(matrix.U2 * scale * rangeReformatUV)),
-      CbB = static_cast<int16_t>(std::roundf(matrix.U3 * scale * rangeReformatUV));
-  auto CrR = static_cast<int16_t>(std::roundf(matrix.V1 * scale * rangeReformatUV)),
-      CrG = static_cast<int16_t>(std::roundf(matrix.V2 * scale * rangeReformatUV)),
-      CrB = static_cast<int16_t>(std::roundf(matrix.V3 * scale * rangeReformatUV));
+  int YR = static_cast<int>(std::roundf(matrix.Y1 * scale * rangeReformatY)),
+      YG = static_cast<int>(std::roundf(matrix.Y2 * scale * rangeReformatY)),
+      YB = static_cast<int>(std::roundf(matrix.Y3 * scale * rangeReformatY));
+  int CbR = static_cast<int>(std::roundf(matrix.U1 * scale * rangeReformatUV)),
+      CbG = static_cast<int>(std::roundf(matrix.U2 * scale * rangeReformatUV)),
+      CbB = static_cast<int>(std::roundf(matrix.U3 * scale * rangeReformatUV));
+  int CrR = static_cast<int>(std::roundf(matrix.V1 * scale * rangeReformatUV)),
+      CrG = static_cast<int>(std::roundf(matrix.V2 * scale * rangeReformatUV)),
+      CrB = static_cast<int>(std::roundf(matrix.V3 * scale * rangeReformatUV));
 
   const auto vYR = Set(d32, YR);
   const auto vYG = Set(d32, YG);
@@ -499,13 +506,19 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
       if (bitDepth == 12 || precision > 8) {
-        r = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, rh), ShiftRightDemote<precision>(d32, rl)));
-        g = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, gh), ShiftRightDemote<precision>(d32, gl)));
-        b = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, bh), ShiftRightDemote<precision>(d32, bl)));
+        r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
+                                       ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
+        g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),
+                                       ShiftRightNarrow<precision>(d32, gl)), zeros, vMaxColors));
+        b = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, bh),
+                                       ShiftRightNarrow<precision>(d32, bl)), zeros, vMaxColors));
       } else {
-        r = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, rh), ShiftRightDemote<precision>(d32, rl)));
-        g = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, gh), ShiftRightDemote<precision>(d32, gl)));
-        b = BitCast(d16, Combine(di16, ShiftRightDemote<precision>(d32, bh), ShiftRightDemote<precision>(d32, bl)));
+        r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
+                                       ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
+        g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),
+                                       ShiftRightNarrow<precision>(d32, gl)), zeros, vMaxColors));
+        b = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, bh),
+                                       ShiftRightNarrow<precision>(d32, bl)), zeros, vMaxColors));
       }
 
       if (std::is_same<T, uint16_t>::value) {
@@ -524,8 +537,8 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
     }
 
     for (; x < width; x += lanesForward) {
-      const T uValue = reinterpret_cast<const T *>(CbSource)[0];
-      const T vValue = reinterpret_cast<const T *>(CrSource)[0];
+      const int uValue = reinterpret_cast<const T *>(CbSource)[0];
+      const int vValue = reinterpret_cast<const T *>(CrSource)[0];
 
       int Y = (static_cast<int>(ySrc[0]) - biasY);
       const int U = (static_cast<int>(uValue) - biasUV);
@@ -544,8 +557,8 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
         if (x + 1 < width) {
           int Y1 = (static_cast<int>(ySrc[0]) - biasY);
           int R1 = (Y1 * YR + U * YG + V * YB) >> precision;
-          int B1 = (Y1 * CbR + U * CbG + V * CbB) >> precision;
-          int G1 = (Y1 * CrR + U * CrG + V * CrB) >> precision;
+          int G1 = (Y1 * CbR + U * CbG + V * CbB) >> precision;
+          int B1 = (Y1 * CrR + U * CrG + V * CrB) >> precision;
           SaturatedStoreRGBA<T, int, PixelType>(store, R1, G1, B1, maxColors, maxColors);
           store += components;
           ySrc += 1;

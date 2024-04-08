@@ -145,7 +145,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto
-          Y = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, YRh), ShiftRightDemote<8>(d32, YRl)));
+          Y = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
 
       if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
@@ -171,7 +171,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
       const auto
-          Cb = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, Cbh), ShiftRightDemote<8>(d32, Cbl)));
+          Cb = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
       V32 Crh = vBiasUV;
       V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
@@ -179,7 +179,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
       const auto
-          Cr = BitCast(du16, Combine(d16, ShiftRightDemote<8>(d32, Crh), ShiftRightDemote<8>(d32, Crl)));
+          Cr = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
 #else
       V32 Rl = PromoteLowerTo(d32, R);
       V32 Rh = PromoteUpperTo(d32, R);
@@ -187,10 +187,10 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       V32 Bh = PromoteUpperTo(d32, B);
       V32 Gl = PromoteLowerTo(d32, G);
       V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRightDemote<8>(d32, MulAdd(Rl, vYR,
+      const auto Yl = ShiftRightNarrow<8>(d32, MulAdd(Rl, vYR,
                                                       MulAdd(Gl, vYG,
                                                              MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRightDemote<8>(d32, MulAdd(Rh, vYR,
+      const auto Yh = ShiftRightNarrow<8>(d32, MulAdd(Rh, vYR,
                                                       MulAdd(Gh, vYG,
                                                              MulAdd(Bh, vYB, vBiasY))));
 
@@ -216,18 +216,18 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
         }
       }
 
-      const auto Cbl = ShiftRightDemote<8>(d32, Add(MulAdd(Bl, vCbB,
+      const auto Cbl = ShiftRightNarrow<8>(d32, Add(MulAdd(Bl, vCbB,
                                                            MulSub(Gl, vCbG,
                                                                   Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRightDemote<8>(d32, Add(MulAdd(Bh, vCbB,
+      const auto Cbh = ShiftRightNarrow<8>(d32, Add(MulAdd(Bh, vCbB,
                                                            MulSub(Gh, vCbG,
                                                                   Mul(Rh, vCbR))), vBiasUV));
 
-      const auto Crh = ShiftRightDemote<8>(d32, Add(MulAdd(Rh, vCrR,
+      const auto Crh = ShiftRightNarrow<8>(d32, Add(MulAdd(Rh, vCrR,
                                                            MulSub(Gh, vCrG,
                                                                   Mul(Bh, vCrB))), vBiasUV));
 
-      const auto Crl = ShiftRightDemote<8>(d32, Add(MulAdd(Rl, vCrR,
+      const auto Crl = ShiftRightNarrow<8>(d32, Add(MulAdd(Rl, vCrR,
                                                            MulSub(Gl, vCrG,
                                                                   Mul(Bl, vCrB))), vBiasUV));
 
@@ -241,14 +241,14 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
         StoreU(Cb, du16, uDst);
         StoreU(Cr, du16, vDst);
       } else if (chromaSubsample == YUV_SAMPLE_422) {
-        const auto cbh = ShiftRightDemote<1>(du32, SumsOf2(Cb));
-        const auto crh = ShiftRightDemote<1>(du32, SumsOf2(Cr));
+        const auto cbh = ShiftRightNarrow<1>(du32, SumsOf2(Cb));
+        const auto crh = ShiftRightNarrow<1>(du32, SumsOf2(Cr));
         StoreU(cbh, dhu16, uDst);
         StoreU(crh, dhu16, vDst);
       } else if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
-          const auto cbh = ShiftRightDemote<1>(du32, SumsOf2(Cb));
-          const auto crh = ShiftRightDemote<1>(du32, SumsOf2(Cr));
+          const auto cbh = ShiftRightNarrow<1>(du32, SumsOf2(Cb));
+          const auto crh = ShiftRightNarrow<1>(du32, SumsOf2(Cr));
           StoreU(cbh, dhu16, uDst);
           StoreU(crh, dhu16, vDst);
         }
@@ -594,9 +594,9 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
       if (bitDepth == 12) {
-        r = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, rh)), BitCast(dh16, ShiftRightDemote<6>(d32, rl)));
-        g = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, gh)), BitCast(dh16, ShiftRightDemote<6>(d32, gl)));
-        b = Combine(d16, BitCast(dh16, ShiftRightDemote<6>(d32, bh)), BitCast(dh16, ShiftRightDemote<6>(d32, bl)));
+        r = Combine(d16, BitCast(dh16, ShiftRightNarrow<6>(d32, rh)), BitCast(dh16, ShiftRightNarrow<6>(d32, rl)));
+        g = Combine(d16, BitCast(dh16, ShiftRightNarrow<6>(d32, gh)), BitCast(dh16, ShiftRightNarrow<6>(d32, gl)));
+        b = Combine(d16, BitCast(dh16, ShiftRightNarrow<6>(d32, bh)), BitCast(dh16, ShiftRightNarrow<6>(d32, bl)));
       } else {
         r = ShiftRight<6>(Combine(d16, DemoteTo(dh16, rh), DemoteTo(dh16, rl)));
         g = ShiftRight<6>(Combine(d16, DemoteTo(dh16, gh), DemoteTo(dh16, gl)));

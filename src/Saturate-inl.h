@@ -66,25 +66,25 @@ void SaturateSurfaceFromNBitTo8(const uint16_t *SPARKYUV_RESTRICT src, const uin
       V8 R8, G8, B8, A8;
 
       if (diff == 2) {
-        R8 = ShiftRightDemote<2>(du16, R);
-        G8 = ShiftRightDemote<2>(du16, G);
-        B8 = ShiftRightDemote<2>(du16, B);
+        R8 = ShiftRightNarrow<2>(du16, R);
+        G8 = ShiftRightNarrow<2>(du16, G);
+        B8 = ShiftRightNarrow<2>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A8 = ShiftRightDemote<2>(du16, A);
+          A8 = ShiftRightNarrow<2>(du16, A);
         }
       } else if (diff == 4) {
-        R8 = ShiftRightDemote<4>(du16, R);
-        G8 = ShiftRightDemote<4>(du16, G);
-        B8 = ShiftRightDemote<4>(du16, B);
+        R8 = ShiftRightNarrow<4>(du16, R);
+        G8 = ShiftRightNarrow<4>(du16, G);
+        B8 = ShiftRightNarrow<4>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A8 = ShiftRightDemote<4>(du16, A);
+          A8 = ShiftRightNarrow<4>(du16, A);
         }
       } else if (diff == 8) {
-        R8 = ShiftRightDemote<8>(du16, R);
-        G8 = ShiftRightDemote<8>(du16, G);
-        B8 = ShiftRightDemote<8>(du16, B);
+        R8 = ShiftRightNarrow<8>(du16, R);
+        G8 = ShiftRightNarrow<8>(du16, G);
+        B8 = ShiftRightNarrow<8>(du16, B);
         if (PixelType != PIXEL_BGR && PixelType != PIXEL_RGB) {
-          A8 = ShiftRightDemote<8>(du16, A);
+          A8 = ShiftRightNarrow<8>(du16, A);
         }
       } else {
         R8 = DemoteTo(du8, ShiftRightSame(R, diff));

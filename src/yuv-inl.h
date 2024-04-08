@@ -136,56 +136,107 @@ HWY_API VFromD<D> PromoteTo(D df, Vec<Rebind<uint8_t, D>> v) {
 }
 
 #if (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES) && HWY_ARCH_ARM_A64
+
 template<int n, class D, HWY_IF_U16_D(D), typename D8 = Rebind<uint8_t, D>, typename V8 = Vec<D8>>
-HWY_API V8 ShiftRightDemote(D d, Vec<D> v) {
+HWY_API V8 ShiftRightNarrow(D d, Vec<D> v) {
   return Vec64<uint8_t>(vshrn_n_u16(v.raw, n));
 }
 
 template<int n, class D, HWY_IF_I32_D(D), typename DN = Rebind<int16_t, D>, typename VN = Vec<DN>>
-HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {
   return Vec64<int16_t>(vshrn_n_s32(v.raw, n));
 }
 
 template<int n, class D, HWY_IF_U32_D(D), typename DN = Rebind<uint16_t, D>, typename VN = Vec<DN>>
-HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {
   return Vec64<uint16_t>(vshrn_n_u32(v.raw, n));
 }
 
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW AddWide(D d, Vec<D> v, Vec<D> x) {
+  return Vec128<uint16_t>(vaddl_u8(v.raw, x.raw));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW AddHighWide(D d, Vec<D> v, Vec<D> x) {
+  return Vec128<uint16_t>(vaddl_high_u8(v.raw, x.raw));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW WidenMulHigh(D d, Vec<D> v, Vec<D> x) {
+  return Vec128<uint16_t>(vmull_high_u8(v.raw, x.raw));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
+HWY_API VW WidenMul(D d, Vec<D> v, Vec<D> x) {
+  return Vec128<uint16_t>(vmull_u8(v.raw, x.raw));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
+HWY_API VW WidenMulW(D d, Vec<D> v, VW x) {
+  const DW dw;
+  return Mul(PromoteTo(dw, v), x);
+}
+
 template<int n, class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
-HWY_API VW ShiftLeftPromote(D d, Vec<D> v) {
+HWY_API VW ShiftLeftWide(D d, Vec<D> v) {
   return Vec128<uint16_t>(vshll_n_u8(v.raw, n));
 }
 #else
 template<int n, class D, HWY_IF_U16_D(D), typename D8 = Rebind<uint8_t, D>, typename VN = Vec<D8>>
-HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {
   const D8 d8;
   return DemoteTo(d8, ShiftRight<n>(v));
 }
 
 template<int n, class D, HWY_IF_U8_D(D), typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>,
     std::enable_if<n >= 8, int>::type = 0>
-HWY_API V16 ShiftLeftPromote(D d, Vec<D> v) {
+HWY_API V16 ShiftLeftWide(D d, Vec<D> v) {
   const D16 d16;
   return ShiftLeft<n>(PromoteTo(d16, v));
 }
 
 template<int n, class D, HWY_IF_U8_D(D), typename D16 = Rebind<uint16_t, D>, typename V16 = Vec<D16>,
     std::enable_if<n < 8, int>::type = 0>
-HWY_API V16 ShiftLeftPromote(D d, Vec<D> v) {
+HWY_API V16 ShiftLeftWide(D d, Vec<D> v) {
   const D16 d16;
   return PromoteTo(d16, ShiftLeft<n>(v));
 }
 
 template<int n, class D, HWY_IF_I32_D(D), typename DN = Rebind<int16_t, D>, typename VN = Vec<DN>>
-HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {
   const Rebind<int16_t, D> d16;
   return DemoteTo(d16, ShiftRight<n>(v));
 }
 
 template<int n, class D, HWY_IF_U32_D(D), typename DN = Rebind<uint16_t, D>, typename VN = Vec<DN>>
-HWY_API VN ShiftRightDemote(D d, Vec<D> v) {
+HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {
   const Rebind<uint16_t, D> d16;
   return DemoteTo(d16, ShiftRight<n>(v));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW WidenMulHigh(D d, Vec<D> v, Vec<D> x) {
+  const DW dw;
+  return Mul(PromoteUpperTo(dw, v), PromoteUpperTo(dw, x));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
+HWY_API VW WidenMul(D d, Vec<D> v, Vec<D> x) {
+  const DW dw;
+  return Mul(PromoteTo(dw, v), PromoteTo(dw, x));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW AddWide(D d, Vec<D> v, Vec<D> x) {
+  const DW dw;
+  return Add(PromoteTo(dw, v), PromoteTo(dw, x));
+}
+
+template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
+HWY_API VW AddHighWide(D d, Vec<D> v, Vec<D> x) {
+  const DW dw;
+  return Add(PromoteUpperTo(dw, v), PromoteUpperTo(dw, x));
 }
 
 #endif
@@ -679,7 +730,7 @@ SPARKYUV_INLINE static void StoreRGBA(T *store, C r, C g, C b, C a) {
 template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
 SPARKYUV_INLINE static void SaturatedStoreRGBA(T *store, C r, C g, C b, C a, C max) {
   switch (PixelType) {
-    case PIXEL_RGBA:store[3] = a;
+    case PIXEL_RGBA:store[3] = static_cast<T>(a);
     case PIXEL_RGB:store[0] = static_cast<T>(std::clamp(r, 0, max));
       store[1] = static_cast<T>(std::clamp(g, 0, max));
       store[2] = static_cast<T>(std::clamp(b, 0, max));

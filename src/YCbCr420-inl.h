@@ -135,7 +135,7 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
       YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
       YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
-      const auto Y = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, YRh), ShiftRightDemote<8>(d32, YRl)));
+      const auto Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
       if (!(y & 1)) {
         if (y + 1 < height) {
           LoadRGBA<PixelType>(du8, mSrc, R8, G8, B8, A8);
@@ -153,17 +153,17 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
         Cbl = ReorderWidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
         Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
-        const auto Cbf = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, Cbh), ShiftRightDemote<8>(d32, Cbl)));
+        const auto Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
         V32 Crh = vBiasUV;
         V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
         Crl = ReorderWidenMulAccumulate(d32, G, vCrG, Crl, Crh);
         Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
-        const auto Crf = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, Crh), ShiftRightDemote<8>(d32, Crl)));
+        const auto Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
 
-        const auto Cb = DemoteTo(du8h, ShiftRightDemote<1>(du32, SumsOf2(Cbf)));
-        const auto Cr = DemoteTo(du8h, ShiftRightDemote<1>(du32, SumsOf2(Crf)));
+        const auto Cb = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Cbf)));
+        const auto Cr = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Crf)));
 
         StoreU(Cb, du8h, uDst);
         StoreU(Cr, du8h, vDst);
@@ -182,7 +182,7 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
                              MulAdd(Gh, vYG,
                                     MulAdd(Bh, vYB, vBiasY)));
 
-      const auto Y = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, Yh), ShiftRightDemote<8>(d32, Yl)));
+      const auto Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Yh), ShiftRightNarrow<8>(d32, Yl)));
 
       if (!(y & 1)) {
         const auto Cbl = Add(MulAdd(Bl, vCbB,
@@ -200,11 +200,11 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
                                     MulSub(Gl, vCrG,
                                            Mul(Bl, vCrB))), vBiasUV);
 
-        const auto Cbf = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, Cbh), ShiftRightDemote<8>(d32, Cbl)));
-        const auto Crf = BitCast(du16, Combine(di16, ShiftRightDemote<8>(d32, Crh), ShiftRightDemote<8>(d32, Crl)));
+        const auto Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
+        const auto Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
 
-        const auto Cb = DemoteTo(du8h, ShiftRightDemote<1>(du32, SumsOf2(Cbf)));
-        const auto Cr = DemoteTo(du8h, ShiftRightDemote<1>(du32, SumsOf2(Crf)));
+        const auto Cb = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Cbf)));
+        const auto Cr = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Crf)));
 
         StoreU(Cb, du8h, uDst);
         StoreU(Cr, du8h, vDst);
@@ -326,14 +326,12 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
                   const uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
                   const uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                   const float kr, const float kb, const SparkYuvColorRange colorRange) {
-  const ScalableTag<int16_t> di16;
-  const RebindToUnsigned<decltype(di16)> du16;
-  const Rebind<uint8_t, decltype(di16)> du8;
+  const ScalableTag<uint8_t> du8;
   const Half<decltype(du8)> du8h;
-  using VU8x8 = Vec<decltype(du8)>;
+  const Rebind<int16_t, decltype(du8h)> di16;
+  const RebindToUnsigned<decltype(di16)> du16;
   using VU16 = Vec<decltype(di16)>;
   const Half<decltype(di16)> du16h;
-  using VU16H = Vec<decltype(du16h)>;
 
   uint16_t biasY;
   uint16_t biasUV;
@@ -341,13 +339,14 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
   uint16_t rangeUV;
   GetYUVRange(colorRange, 8, biasY, biasUV, rangeY, rangeUV);
 
+  const VU16 uvCorrection = Set(di16, biasUV);
+  const auto uvCorrIY = Set(du8, biasY);
+
   auto mYSrc = reinterpret_cast<const uint8_t *>(yPlane);
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
   auto mVSrc = reinterpret_cast<const uint8_t *>(vPlane);
 
   const auto A = Set(du8, 255);
-  const VU16H uvCorrection = Set(du16h, biasUV);
-  const auto uvCorrIY = Set(di16, biasY);
 
   float fCrCoeff = 0.f;
   float fCbCoeff = 0.f;
@@ -356,7 +355,7 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
   const float flumaCoeff = 255.f / static_cast<float>(rangeY);
   ComputeInverseTransform(kr, kb, 255.f, static_cast<float>(rangeUV), fCrCoeff, fCbCoeff, fGCoeff1, fGCoeff2);
 
-  const int precision = 6;
+  int precision = 6;
 
   const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
   const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
@@ -365,7 +364,8 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
 
   const int iLumaCoeff = static_cast<int>(std::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
 
-  const VU16 ivLumaCoeff = Set(di16, iLumaCoeff);
+  const auto ivLumaCoeff = Set(du8, iLumaCoeff);
+  const auto ivLumaCoeffh = Set(du8h, iLumaCoeff);
   const VU16 ivCrCoeff = Set(di16, CrCoeff);
   const VU16 ivCbCoeff = Set(di16, CbCoeff);
   const VU16 ivGCoeff1 = Set(di16, GCoeff1);
@@ -387,20 +387,33 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
     uint32_t x = 0;
 
     for (; x + lanes < width; x += lanes) {
-      const VU16 luma = Sub(PromoteTo(di16, LoadU(du8, ySrc)), uvCorrIY);
-      const VU16H ulFull = Sub(PromoteTo(du16h, LoadU(du8h, uSource)), uvCorrection);
-      const VU16H vlFull = Sub(PromoteTo(du16h, LoadU(du8h, vSource)), uvCorrection);
+      const auto luma8 = Sub(LoadU(du8, ySrc), uvCorrIY);
+      const VU16 ulFull = Sub(BitCast(di16, PromoteTo(du16, LoadU(du8h, uSource))), uvCorrection);
+      const VU16 vlFull = Sub(BitCast(di16, PromoteTo(du16, LoadU(du8h, vSource))), uvCorrection);
 
-      const auto ulc = Combine(di16, ulFull, ulFull);
-      const auto cb = InterleaveLower(ulc, ulc);
-      const auto vlc = Combine(di16, vlFull, vlFull);
-      const auto cr = InterleaveLower(vlc, vlc);
+      const auto cbl = InterleaveLower(ulFull, ulFull);
+      const auto cbh = InterleaveUpper(di16, ulFull, ulFull);
+      const auto crl = InterleaveLower(vlFull, vlFull);
+      const auto crh = InterleaveUpper(di16, vlFull, vlFull);
 
-      const auto light = Mul(luma, ivLumaCoeff);
-      const auto r = ShiftRightDemote<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCrCoeff, cr), light), vZero)));
-      const auto b = ShiftRightDemote<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCbCoeff, cb), light), vZero)));
+      const auto Yh = BitCast(di16, WidenMulHigh(du8, luma8, ivLumaCoeff));
+      const auto rh = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCrCoeff, crh), Yh), vZero)));
+      const auto bh = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCbCoeff, cbh), Yh), vZero)));
       const auto
-          g = ShiftRightDemote<6>(du16, BitCast(du16, Max(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb))), vZero)));
+          gh = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedSub(Yh,
+                                                                        SaturatedAdd(Mul(ivGCoeff1, crh),
+                                                                                     Mul(ivGCoeff2, cbh))), vZero)));
+
+      const auto Yl = BitCast(di16, WidenMul(du8h, LowerHalf(luma8), ivLumaCoeffh));
+      const auto rl = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCrCoeff, crl), Yl), vZero)));
+      const auto bl = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedAdd(Mul(ivCbCoeff, cbl), Yl), vZero)));
+      const auto
+          gl = ShiftRightNarrow<6>(du16, BitCast(du16, Max(SaturatedSub(Yl,
+                                                                        SaturatedAdd(Mul(ivGCoeff1, crl),
+                                                                                     Mul(ivGCoeff2, cbl))), vZero)));
+      const auto r = Combine(du8, rh, rl);
+      const auto g = Combine(du8, gh, gl);
+      const auto b = Combine(du8, bh, bl);
 
       StoreRGBA<PixelType>(du8, store, r, g, b, A);
 
