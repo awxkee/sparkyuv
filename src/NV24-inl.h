@@ -28,14 +28,10 @@
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvNVLoadOrder LoadOrder = sparkyuv::YUV_ORDER_UV>
-void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
-                  const uint32_t dstStride,
-                  const uint32_t width,
-                  const uint32_t height,
-                  const uint8_t *SPARKYUV_RESTRICT yPlane,
-                  const uint32_t yStride,
-                  const uint8_t *SPARKYUV_RESTRICT uvPlane,
-                  const uint32_t uvStride,
+void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
+                  const uint32_t width, const uint32_t height,
+                  const uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                  const uint8_t *SPARKYUV_RESTRICT uvPlane, const uint32_t uvStride,
                   const float kr, const float kb,
                   const SparkYuvColorRange colorRange) {
   const ScalableTag<int16_t> du16x8;
@@ -55,7 +51,7 @@ void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   GetYUVRange(colorRange, 8, biasY, biasUV, rangeY, rangeUV);
 
   const VU16 uvCorrection = Set(du16x8, biasUV);
-  const auto A = Set(du8, 255);
+  const auto a = Set(du8, 255);
 
   float fCrCoeff = 0.f;
   float fCbCoeff = 0.f;
@@ -64,7 +60,7 @@ void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   const float flumaCoeff = 255.f / static_cast<float>(rangeY);
   ComputeInverseTransform(kr, kb, 255.f, static_cast<float>(rangeUV), fCrCoeff, fCbCoeff, fGCoeff1, fGCoeff2);
 
-  int precision = 6;
+  const int precision = 6;
 
   const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
   const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
@@ -117,7 +113,7 @@ void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
                                           Max(SaturatedSub(light, SaturatedAdd(Mul(ivGCoeff1, cr), Mul(ivGCoeff2, cb))),
                                               vZero)));
 
-      StoreRGBA<PixelType>(du8, reinterpret_cast<uint8_t *>(store), r, g, b, A);
+      StoreRGBA<PixelType>(du8, reinterpret_cast<uint8_t *>(store), r, g, b, a);
 
       store += lanes * components;
       ySrc += lanes;
@@ -227,31 +223,19 @@ void Pixel8ToNV24HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
   const auto vBiasY = Set(d32, iBiasY);
   const auto vBiasUV = Set(d32, iBiasUV);
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto coeffTag = di16;
-#else
-  const auto coeffTag = d32;
-#endif
 
   const auto vYR = Set(coeffTag, YR);
   const auto vYG = Set(coeffTag, YG);
   const auto vYB = Set(coeffTag, YB);
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto vCbR = Set(coeffTag, -CbR);
-#else
-  const auto vCbR = Set(coeffTag, CbR);
-#endif
   const auto vCbG = Set(coeffTag, -CbG);
   const auto vCbB = Set(coeffTag, CbB);
 
   const auto vCrR = Set(coeffTag, CrR);
   const auto vCrG = Set(coeffTag, -CrG);
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto vCrB = Set(coeffTag, -CrB);
-#else
-  const auto vCrB = Set(coeffTag, CrB);
-#endif
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
@@ -274,26 +258,26 @@ void Pixel8ToNV24HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
       auto G = BitCast(di16, PromoteTo(du16, G8));
       auto B = BitCast(di16, PromoteTo(du16, B8));
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
       V32 YRh = vBiasY;
-      V32 YRl = ReorderWidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
-      YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
-      YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
+      V32 YRl = WidenMulAccumulate(di16, R, vYR, vBiasY, YRh);
+      YRl = WidenMulAccumulate(di16, G, vYG, YRl, YRh);
+      YRl = WidenMulAccumulate(di16, B, vYB, YRl, YRh);
 
       const auto
           Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
+
       V32 Cbh = vBiasUV;
-      V32 Cbl = ReorderWidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
-      Cbl = ReorderWidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
-      Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
+      V32 Cbl = WidenMulAccumulate(di16, R, vCbR, vBiasUV, Cbh);
+      Cbl = WidenMulAccumulate(di16, G, vCbG, Cbl, Cbh);
+      Cbl = WidenMulAccumulate(di16, B, vCbB, Cbl, Cbh);
 
       const auto
           Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
       V32 Crh = vBiasUV;
-      V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
-      Crl = ReorderWidenMulAccumulate(d32, G, vCrG, Crl, Crh);
-      Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
+      V32 Crl = WidenMulAccumulate(di16, R, vCrR, vBiasUV, Crh);
+      Crl = WidenMulAccumulate(di16, G, vCrG, Crl, Crh);
+      Crl = WidenMulAccumulate(di16, B, vCrB, Crl, Crh);
 
       const auto
           Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
@@ -306,49 +290,6 @@ void Pixel8ToNV24HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
       } else {
         StoreInterleaved2(Cr, Cb, du8, uvDestination);
       }
-#else
-      V32 Rl = PromoteLowerTo(d32, R);
-      V32 Rh = PromoteUpperTo(d32, R);
-      V32 Bl = PromoteLowerTo(d32, B);
-      V32 Bh = PromoteUpperTo(d32, B);
-      V32 Gl = PromoteLowerTo(d32, G);
-      V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRightNarrow<8>(d32, MulAdd(Rl, vYR,
-                                                      MulAdd(Gl, vYG,
-                                                             MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRightNarrow<8>(d32, MulAdd(Rh, vYR,
-                                                      MulAdd(Gh, vYG,
-                                                             MulAdd(Bh, vYB, vBiasY))));
-
-      const auto Y = BitCast(du16, Combine(di16, Yh, Yl));
-
-      const auto Cbl = ShiftRightNarrow<8>(d32, Add(MulAdd(Bl, vCbB,
-                                                           MulSub(Gl, vCbG,
-                                                                  Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRightNarrow<8>(d32, Add(MulAdd(Bh, vCbB,
-                                                           MulSub(Gh, vCbG,
-                                                                  Mul(Rh, vCbR))), vBiasUV));
-
-      const auto Crh = ShiftRightNarrow<8>(d32, Add(MulAdd(Rh, vCrR,
-                                                           MulSub(Gh, vCrG,
-                                                                  Mul(Bh, vCrB))), vBiasUV));
-
-      const auto Crl = ShiftRightNarrow<8>(d32, Add(MulAdd(Rl, vCrR,
-                                                           MulSub(Gl, vCrG,
-                                                                  Mul(Bl, vCrB))), vBiasUV));
-
-      const auto Cbf = BitCast(du16, Combine(di16, Cbh, Cbl));
-      const auto Crf = BitCast(du16, Combine(di16, Crh, Crl));
-
-      const auto Cb = DemoteTo(du8, Cbf);
-      const auto Cr = DemoteTo(du8, Crf);
-
-      if (LoadOrder == YUV_ORDER_UV) {
-        StoreInterleaved2(Cb, Cr, du8, uvDestination);
-      } else {
-        StoreInterleaved2(Cr, Cb, du8, uvDestination);
-      }
-#endif
 
       StoreU(DemoteTo(du8, Y), du8, yDst);
 

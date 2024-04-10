@@ -63,7 +63,9 @@ if (BUILD_TOOLS)
             tools/bench/YuvBenchmarkYIQ.h
             tools/bench/YuvBenchmarkYDbDr.cpp
             tools/bench/YuvBenchmarkYDbDr.h
-            tools/bench/YuvBenchmarkBase.cpp)
+            tools/bench/YuvBenchmarkBase.cpp
+            tools/bench/YuvBenchmarkNV.cpp
+            tools/bench/YuvBenchmarkNV.h)
 
     add_library(libyuv STATIC IMPORTED)
     set_target_properties(yuvtools libyuv PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libyuv.a)
@@ -73,6 +75,8 @@ if (BUILD_TOOLS)
     find_package(JPEG REQUIRED)
 
     find_package(benchmark REQUIRED)
+
+    add_subdirectory(highway)
 
     target_link_libraries(yuvtools PRIVATE JPEG::JPEG libyuv sparkyuv)
 

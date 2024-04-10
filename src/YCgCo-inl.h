@@ -47,10 +47,10 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   const int precision = 6;
   const float maxColors = std::powf(2.f, bitDepth) - 1.f;
-  int rangeReduction = static_cast<int>(std::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
+  const int rangeReduction = static_cast<int>(std::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
       * static_cast<float>(1 << precision))));
-  int biasY = static_cast<int>(bY) * (1 << precision);
-  int biasUV = static_cast<int>(bUV) * (1 << precision);
+  const int biasY = static_cast<int>(bY) * (1 << precision);
+  const int biasUV = static_cast<int>(bUV) * (1 << precision);
 
   auto yStore = reinterpret_cast<uint8_t *>(yPlane);
   auto uStore = reinterpret_cast<uint8_t *>(uPlane);
@@ -71,6 +71,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const auto vhBiasUV = Set(dhi16, biasUV);
   const auto vRangeReduction = Set(du16, rangeReduction);
   const Rebind<int32_t, decltype(dhu16)> di32;
+  const RebindToUnsigned<decltype(di32)> d32;
   const auto viRangeReduction = Set(di32, rangeReduction);
   const auto viBiasY = Set(di32, biasY);
   const auto viBiasUV = Set(di32, biasUV);
@@ -129,8 +130,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           Gh = Mul(Gh, viRangeReduction);
           Bh = Mul(Bh, viRangeReduction);
 
-          const auto Yl = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gl), ShiftRight<2>(Add(Rl, Bl))), viBiasY));
-          const auto Yh = ShiftRightNarrow<6>(di32, Add(Add(ShiftRight<1>(Gh), ShiftRight<2>(Add(Rh, Bh))), viBiasY));
+          const auto Yl = ShiftRightNarrow<6>(di32, Add(AddAndHalf(di32, Gl, AddAndHalf(di32, Rl, Bl)), viBiasY));
+          const auto Yh = ShiftRightNarrow<6>(di32, Add(AddAndHalf(di32, Gh, AddAndHalf(di32, Rh, Bh)), viBiasY));
           Y = BitCast(du16, Combine(di16, Yh, Yl));
           const auto Cgl = ShiftRightNarrow<6>(di32, Add(viBiasUV,
                                                          Sub(ShiftRight<1>(Gl),
@@ -168,10 +169,10 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           G = Mul(G, vRangeReduction);
           B = Mul(B, vRangeReduction);
 
-          Y = ShiftRight<6>(Add(Add(ShiftRight<1>(G), ShiftRight<2>(Add(R, B))), vBiasY));
-          const auto sR = BitCast(dhi16, DemoteTo(dhu16, ShiftRight<1>(SumsOf2(R))));
-          const auto sG = BitCast(dhi16, DemoteTo(dhu16, ShiftRight<1>(SumsOf2(G))));
-          const auto sB = BitCast(dhi16, DemoteTo(dhu16, ShiftRight<1>(SumsOf2(B))));
+          Y = ShiftRight<6>(Add(AddAndHalf(du16, G, AddAndHalf(du16, R, B)), vBiasY));
+          const auto sR = BitCast(dhi16, ShiftRightNarrow<1>(d32, SumsOf2(R)));
+          const auto sG = BitCast(dhi16, ShiftRightNarrow<1>(d32, SumsOf2(G)));
+          const auto sB = BitCast(dhi16, ShiftRightNarrow<1>(d32, SumsOf2(B)));
 
           Cg = BitCast(dhu16, ShiftRight<6>(Add(vhBiasUV,
                                                 Sub(ShiftRight<1>(sG), BitCast(dhi16, ShiftRight<2>(Add(sR, sB)))))));
@@ -578,16 +579,16 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
         const auto tl = Sub(sYl, sCgl);
         const auto th = Sub(sYh, sCgh);
 
-        const auto Gl = ShiftRight<6>(Add(sYl, sCgl));
-        const auto Gh = ShiftRight<6>(Add(sYh, sCgh));
-        const auto Bl = ShiftRight<6>(Sub(tl, sCol));
-        const auto Bh = ShiftRight<6>(Sub(th, sCoh));
-        const auto Rl = ShiftRight<6>(Add(tl, sCol));
-        const auto Rh = ShiftRight<6>(Add(th, sCoh));
+        const auto Gl = ShiftRightNarrow<6>(di32, Add(sYl, sCgl));
+        const auto Gh = ShiftRightNarrow<6>(di32, Add(sYh, sCgh));
+        const auto Bl = ShiftRightNarrow<6>(di32, Sub(tl, sCol));
+        const auto Bh = ShiftRightNarrow<6>(di32, Sub(th, sCoh));
+        const auto Rl = ShiftRightNarrow<6>(di32, Add(tl, sCol));
+        const auto Rh = ShiftRightNarrow<6>(di32, Add(th, sCoh));
 
-        G16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Gh), DemoteTo(dhi16, Gl)), viZeros, vMaxColors));
-        B16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Bh), DemoteTo(dhi16, Bl)), viZeros, vMaxColors));
-        R16 = BitCast(du16, Clamp(Combine(di16, DemoteTo(dhi16, Rh), DemoteTo(dhi16, Rl)), viZeros, vMaxColors));
+        G16 = BitCast(du16, Clamp(Combine(di16, Gh, Gl), viZeros, vMaxColors));
+        B16 = BitCast(du16, Clamp(Combine(di16, Bh, Bl), viZeros, vMaxColors));
+        R16 = BitCast(du16, Clamp(Combine(di16, Rh, Rl), viZeros, vMaxColors));
       }
 
       if (std::is_same<T, uint16_t>::value) {

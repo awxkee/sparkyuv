@@ -153,6 +153,7 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
           if (y + 1 < height - 1) {
             nextRow = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
           }
+
           V16 R1;
           V16 G1;
           V16 B1;
@@ -164,13 +165,13 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
             LoadRGBTo16<PixelType>(d8, reinterpret_cast<const uint8_t *>(mSrc), R1, G1, B1);
           }
 
-          Rl = ShiftRight<1>(Add(Rl, PromoteLowerTo(d32, R1)));
-          Gl = ShiftRight<1>(Add(Gl, PromoteLowerTo(d32, G1)));
-          Bl = ShiftRight<1>(Add(Bl, PromoteLowerTo(d32, B1)));
+          Rl = AddAndHalf(d32, Rl, PromoteLowerTo(d32, R1));
+          Gl = AddAndHalf(d32, Gl, PromoteLowerTo(d32, G1));
+          Bl = AddAndHalf(d32, Bl, PromoteLowerTo(d32, B1));
 
-          Rh = ShiftRight<1>(Add(Rh, PromoteUpperTo(d32, R1)));
-          Gh = ShiftRight<1>(Add(Gh, PromoteUpperTo(d32, G1)));
-          Bh = ShiftRight<1>(Add(Bh, PromoteUpperTo(d32, B1)));
+          Rh = AddAndHalf(d32, Rh, PromoteUpperTo(d32, R1));
+          Gh = AddAndHalf(d32, Gh, PromoteUpperTo(d32, G1));
+          Bh = AddAndHalf(d32, Bh, PromoteUpperTo(d32, B1));
         }
       }
 
@@ -360,7 +361,8 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   }
 }
 
-template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample, int bitDepth, int precision>
+template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
+    SparkYuvChromaSubsample chromaSubsample, int bitDepth, int precision>
 void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                              const uint32_t width, const uint32_t height,
                              const T *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,

@@ -84,7 +84,7 @@ int main() {
 
   int yPlaneStride = width;
   int uvPlaneStride = (width + 1) / 2;
-  int uvPlaneHeight = (height + 1) / 2;
+  int uvPlaneHeight = height;
   yPlane.resize(yPlaneStride * height);
   uPlane.resize(uvPlaneStride * uvPlaneHeight);
   vPlane.resize(uvPlaneStride * uvPlaneHeight);
@@ -106,14 +106,14 @@ int main() {
 //
 //    sparkyuv::RGBToNV24BT601(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, inWidth, inHeight, yNVPlane.data(),
 //                             nvWidth, uvPlane.data(), uvPlaneStride);
-    sparkyuv::NV16BT601ToRGBA(rgbaNVData.data(),
+    sparkyuv::NV16ToRGBA(rgbaNVData.data(),
                               rgbaNVStride,
                               nvWidth,
                               nvHeight,
                               yNVPlane.data(),
                               nvWidth,
                               uvPlane.data(),
-                              uvPlaneStride);
+                              uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
   });
 
 //
@@ -150,10 +150,10 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
-    sparkyuv::RGBA8ToYIQ420P8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBAToYCbCr422BT601(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_TV);
+                                vPlane.data(), uvPlaneStride);
 //    libyuv::ABGRToI420(rgbaData.data(), rgbaStride, yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride, width, height );
@@ -165,10 +165,10 @@ int main() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
-    sparkyuv::YIQ420P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YCbCr422BT601ToRGBA(rgbaData.data(), rgbaStride, width, height,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_TV);
+                                vPlane.data(), uvPlaneStride);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);

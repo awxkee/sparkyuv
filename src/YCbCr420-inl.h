@@ -80,32 +80,19 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
   const auto vBiasY = Set(d32, iBiasY);
   const auto vBiasUV = Set(d32, iBiasUV);
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto coeffTag = di16;
-  const auto zeros32 = Zero(d32);
-#else
-  const auto coeffTag = d32;
-#endif
 
   const auto vYR = Set(coeffTag, YR);
   const auto vYG = Set(coeffTag, YG);
   const auto vYB = Set(coeffTag, YB);
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto vCbR = Set(coeffTag, -CbR);
-#else
-  const auto vCbR = Set(coeffTag, CbR);
-#endif
   const auto vCbG = Set(coeffTag, -CbG);
   const auto vCbB = Set(coeffTag, CbB);
 
   const auto vCrR = Set(coeffTag, CrR);
   const auto vCrG = Set(coeffTag, -CrG);
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto vCrB = Set(coeffTag, -CrB);
-#else
-  const auto vCrB = Set(coeffTag, CrB);
-#endif
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
@@ -129,11 +116,10 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
       auto G = BitCast(di16, PromoteTo(du16, G8));
       auto B = BitCast(di16, PromoteTo(du16, B8));
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
       V32 YRh = vBiasY;
-      V32 YRl = ReorderWidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
-      YRl = ReorderWidenMulAccumulate(d32, G, vYG, YRl, YRh);
-      YRl = ReorderWidenMulAccumulate(d32, B, vYB, YRl, YRh);
+      V32 YRl = WidenMulAccumulate(di16, R, vYR, vBiasY, YRh);
+      YRl = WidenMulAccumulate(di16, G, vYG, YRl, YRh);
+      YRl = WidenMulAccumulate(di16, B, vYB, YRl, YRh);
 
       const auto Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
       if (!(y & 1)) {
@@ -143,22 +129,22 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
           const auto R1 = BitCast(di16, PromoteTo(du16, R8));
           const auto G1 = BitCast(di16, PromoteTo(du16, G8));
           const auto B1 = BitCast(di16, PromoteTo(du16, B8));
-          R = ShiftRight<1>(Add(R, R1));
-          G = ShiftRight<1>(Add(G, G1));
-          B = ShiftRight<1>(Add(B, B1));
+          R = AddAndHalf(di16, R, R1);
+          G = AddAndHalf(di16, G, G1);
+          B = AddAndHalf(di16, B, B1);
         }
 
         V32 Cbh = vBiasUV;
-        V32 Cbl = ReorderWidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
-        Cbl = ReorderWidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
-        Cbl = ReorderWidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
+        V32 Cbl = WidenMulAccumulate(di16, R, vCbR, vBiasUV, Cbh);
+        Cbl = WidenMulAccumulate(di16, G, vCbG, Cbl, Cbh);
+        Cbl = WidenMulAccumulate(di16, B, vCbB, Cbl, Cbh);
 
         const auto Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
         V32 Crh = vBiasUV;
-        V32 Crl = ReorderWidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
-        Crl = ReorderWidenMulAccumulate(d32, G, vCrG, Crl, Crh);
-        Crl = ReorderWidenMulAccumulate(d32, B, vCrB, Crl, Crh);
+        V32 Crl = WidenMulAccumulate(di16, R, vCrR, vBiasUV, Crh);
+        Crl = WidenMulAccumulate(di16, G, vCrG, Crl, Crh);
+        Crl = WidenMulAccumulate(di16, B, vCrB, Crl, Crh);
 
         const auto Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
 
@@ -168,48 +154,6 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
         StoreU(Cb, du8h, uDst);
         StoreU(Cr, du8h, vDst);
       }
-#else
-      V32 Rl = PromoteLowerTo(d32, R);
-      V32 Rh = PromoteUpperTo(d32, R);
-      V32 Bl = PromoteLowerTo(d32, B);
-      V32 Bh = PromoteUpperTo(d32, B);
-      V32 Gl = PromoteLowerTo(d32, G);
-      V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = MulAdd(Rl, vYR,
-                             MulAdd(Gl, vYG,
-                                    MulAdd(Bl, vYB, vBiasY)));
-      const auto Yh = MulAdd(Rh, vYR,
-                             MulAdd(Gh, vYG,
-                                    MulAdd(Bh, vYB, vBiasY)));
-
-      const auto Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Yh), ShiftRightNarrow<8>(d32, Yl)));
-
-      if (!(y & 1)) {
-        const auto Cbl = Add(MulAdd(Bl, vCbB,
-                                    MulSub(Gl, vCbG,
-                                           Mul(Rl, vCbR))), vBiasUV);
-        const auto Cbh = Add(MulAdd(Bh, vCbB,
-                                    MulSub(Gh, vCbG,
-                                           Mul(Rh, vCbR))), vBiasUV);
-
-        const auto Crh = Add(MulAdd(Rh, vCrR,
-                                    MulSub(Gh, vCrG,
-                                           Mul(Bh, vCrB))), vBiasUV);
-
-        const auto Crl = Add(MulAdd(Rl, vCrR,
-                                    MulSub(Gl, vCrG,
-                                           Mul(Bl, vCrB))), vBiasUV);
-
-        const auto Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
-        const auto Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
-
-        const auto Cb = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Cbf)));
-        const auto Cr = DemoteTo(du8h, ShiftRightNarrow<1>(du32, SumsOf2(Crf)));
-
-        StoreU(Cb, du8h, uDst);
-        StoreU(Cr, du8h, vDst);
-      }
-#endif
 
       StoreU(DemoteTo(du8, Y), du8, yDst);
 

@@ -60,6 +60,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const Half<decltype(di16)> dhi16;
   const Half<decltype(d)> dh;
   const Half<decltype(du16)> dhu16;
+  const Rebind<uint32_t, decltype(dhu16)> du32;
   const auto vBiasY = Set(di16, biasY);
   const auto vBiasUV = Set(di16, biasUV);
 
@@ -91,7 +92,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       const auto iB = BitCast(di16, B);
 
       const auto iCo = Sub(iR, iB);
-      const auto t = Add(iB, ShiftRight<1>(iCo));
+      const auto t =  Add(iB, ShiftRight<1>(iCo));
       const auto iCg = Sub(iG, t);
       const auto iY = Add(Add(t, ShiftRight<1>(iCg)), vBiasY);
 
@@ -114,8 +115,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         }
       } else if (chromaSubsample == YUV_SAMPLE_420 || chromaSubsample == YUV_SAMPLE_422) {
         // uint16_t 12 bit max colors 4096 then 4096*2 < 2^16 so overflowing is not possible in uint16_t domain
-        const auto hCg = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Cg)));
-        const auto hCo = DemoteTo(dhu16, ShiftRight<1>(SumsOf2(Co)));
+        const auto hCg = ShiftRightNarrow<1>(du32, SumsOf2(Cg));
+        const auto hCo = ShiftRightNarrow<1>(du32, SumsOf2(Co));
 
         if (std::is_same<T, uint16_t>::value) {
           StoreU(Y, du16, reinterpret_cast<uint16_t *>(yDst));
