@@ -43,7 +43,6 @@ jobs:
                   git \
                   ;
           run: |
-            git config --global http.sslverify false
             git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
             export CMAKE_BUILD_PARALLEL_LEVEL=2
             export CTEST_PARALLEL_LEVEL=2
