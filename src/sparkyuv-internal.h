@@ -20,6 +20,7 @@
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 #define SPARKYUV_RESTRICT __restrict__
 

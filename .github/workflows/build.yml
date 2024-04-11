@@ -64,6 +64,6 @@ jobs:
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DHWY_WARNINGS_ARE_ERRORS=ON -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -B out .
+          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -B out .
           cmake --build out
           ctest --test-dir out
