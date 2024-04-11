@@ -43,7 +43,7 @@ jobs:
                   cmake \
                   ninja-build \
                   ;
-            deps.sh
+            bash deps.sh
           run: |
             export CMAKE_BUILD_PARALLEL_LEVEL=2
             export CTEST_PARALLEL_LEVEL=2
