@@ -52,16 +52,14 @@ jobs:
         with:
           egress-policy: audit  # cannot be block - runner does git checkout
 
-      - name: Install Github Token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
 
       - name: Install deps
         run: sudo apt-get install ${{ matrix.extra_deps }} git
 
       - name: Build and test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2

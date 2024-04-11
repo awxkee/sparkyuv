@@ -22,13 +22,12 @@ jobs:
           - arch: ppc64le
             distro: ubuntu_latest
     steps:
-      - name: Install Github Token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Build and test
         uses: uraimo/run-on-arch-action@v2.7.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: build
         with:
           arch: ${{ matrix.arch }}
