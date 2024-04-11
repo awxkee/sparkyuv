@@ -42,6 +42,7 @@ jobs:
                   build-essential \
                   cmake \
                   ninja-build \
+                  git
                   ;
           run: |
             bash deps.sh
