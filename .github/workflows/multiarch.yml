@@ -45,6 +45,7 @@ jobs:
                   git \
                   ;
           run: |
+            git config --global http.sslverify false
             bash deps.sh
             export CMAKE_BUILD_PARALLEL_LEVEL=2
             export CTEST_PARALLEL_LEVEL=2
