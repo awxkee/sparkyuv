@@ -35,7 +35,9 @@ set(SPARKYUV_SOURCES
         src/YIQ.cpp
         src/YDbDr.cpp)
 
-set(HWY_SOURCES hwy/aligned_allocator.cc hwy/targets.cc hwy/targets.cc hwy/nanobenchmark.cc hwy/per_target.cc hwy/timer.cc
+set(HWY_SOURCES
+        highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc
+        highway/hwy/nanobenchmark.cc highway/hwy/per_target.cc highway/hwy/timer.cc
         src/Eotf.cpp
         src/Eotf-inl.h)
 
