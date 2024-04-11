@@ -16,15 +16,14 @@
 
 // Fast SIMD math ops (log2, encoder only, cos, erf for splines)
 
-#if defined(LIB_JXL_BASE_FAST_MATH_INL_H_) == defined(HWY_TARGET_TOGGLE)
-#ifdef LIB_JXL_BASE_FAST_MATH_INL_H_
-#undef LIB_JXL_BASE_FAST_MATH_INL_H_
+#if defined(SPARKYUV_FAST_MATH_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_FAST_MATH_INL_H
+#undef SPARKYUV_FAST_MATH_INL_H
 #else
-#define LIB_JXL_BASE_FAST_MATH_INL_H_
+#define SPARKYUV_FAST_MATH_INL_H
 #endif
 
 #include <hwy/highway.h>
-
 #include "common.h"
 #include "rational_polynomial-inl.h"
 
@@ -385,11 +384,11 @@ HWY_FAST_MATH_INLINE V CubeRootAndAdd(const V x, const V add) {
 }  // namespace jxl
 HWY_AFTER_NAMESPACE();
 
-#endif  // LIB_JXL_BASE_FAST_MATH_INL_H_
+#endif  // SPARKYUV_FAST_MATH_INL_H
 
 #if HWY_ONCE
-#ifndef LIB_JXL_BASE_FAST_MATH_ONCE
-#define LIB_JXL_BASE_FAST_MATH_ONCE
+#ifndef SPARKYUV_FAST_MATH_ONCE
+#define SPARKYUV_FAST_MATH_ONCE
 
 namespace sparkyuv {
 inline float FastLog2f(float f) { return HWY_STATIC_DISPATCH(FastLog2f)(f); }
@@ -405,5 +404,5 @@ inline float FastCosf(float f) { return HWY_STATIC_DISPATCH(FastCosf)(f); }
 inline float FastErff(float f) { return HWY_STATIC_DISPATCH(FastErff)(f); }
 }  // namespace jxl
 
-#endif  // LIB_JXL_BASE_FAST_MATH_ONCE
+#endif  // SPARKYUV_FAST_MATH_ONCE
 #endif  // HWY_ONCE

@@ -47,19 +47,19 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
   const auto scale = static_cast<float>(1 << precision);
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
   const float rangeReformatY = static_cast<float>(rangeY) / static_cast<float>(maxColors);
   const float rangeReformatUV = static_cast<float>(rangeUV) / static_cast<float>(maxColors);
 
-  auto YR = static_cast<int16_t>(std::roundf(matrix.Y1 * scale * rangeReformatY)),
-      YG = static_cast<int16_t>(std::roundf(matrix.Y2 * scale * rangeReformatY)),
-      YB = static_cast<int16_t>(std::roundf(matrix.Y3 * scale * rangeReformatY));
-  auto CbR = static_cast<int16_t>(std::roundf(matrix.U1 * scale * rangeReformatUV)),
-      CbG = static_cast<int16_t>(std::roundf(matrix.U2 * scale * rangeReformatUV)),
-      CbB = static_cast<int16_t>(std::roundf(matrix.U3 * scale * rangeReformatUV));
-  auto CrR = static_cast<int16_t>(std::roundf(matrix.V1 * scale * rangeReformatUV)),
-      CrG = static_cast<int16_t>(std::roundf(matrix.V2 * scale * rangeReformatUV)),
-      CrB = static_cast<int16_t>(std::roundf(matrix.V3 * scale * rangeReformatUV));
+  auto YR = static_cast<int16_t>(::roundf(matrix.Y1 * scale * rangeReformatY)),
+      YG = static_cast<int16_t>(::roundf(matrix.Y2 * scale * rangeReformatY)),
+      YB = static_cast<int16_t>(::roundf(matrix.Y3 * scale * rangeReformatY));
+  auto CbR = static_cast<int16_t>(::roundf(matrix.U1 * scale * rangeReformatUV)),
+      CbG = static_cast<int16_t>(::roundf(matrix.U2 * scale * rangeReformatUV)),
+      CbB = static_cast<int16_t>(::roundf(matrix.U3 * scale * rangeReformatUV));
+  auto CrR = static_cast<int16_t>(::roundf(matrix.V1 * scale * rangeReformatUV)),
+      CrG = static_cast<int16_t>(::roundf(matrix.V2 * scale * rangeReformatUV)),
+      CrB = static_cast<int16_t>(::roundf(matrix.V3 * scale * rangeReformatUV));
 
   auto yStore = reinterpret_cast<uint8_t *>(yPlane);
   auto uStore = reinterpret_cast<uint8_t *>(uPlane);
@@ -83,19 +83,17 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   const int lanes = Lanes(d16);
   const int uvLanes = chromaSubsample == YUV_SAMPLE_444 ? Lanes(d16) : Lanes(dh16);
 
-  const auto coeffTag = d32;
+  const auto vYR = Set(di16, YR);
+  const auto vYG = Set(di16, YG);
+  const auto vYB = Set(di16, YB);
 
-  const auto vYR = Set(coeffTag, YR);
-  const auto vYG = Set(coeffTag, YG);
-  const auto vYB = Set(coeffTag, YB);
+  const auto vCbR = Set(di16, CbR);
+  const auto vCbG = Set(di16, CbG);
+  const auto vCbB = Set(di16, CbB);
 
-  const auto vCbR = Set(coeffTag, CbR);
-  const auto vCbG = Set(coeffTag, CbG);
-  const auto vCbB = Set(coeffTag, CbB);
-
-  const auto vCrR = Set(coeffTag, CrR);
-  const auto vCrG = Set(coeffTag, CrG);
-  const auto vCrB = Set(coeffTag, CrB);
+  const auto vCrR = Set(di16, CrR);
+  const auto vCrG = Set(di16, CrG);
+  const auto vCrB = Set(di16, CrB);
 
   const auto vBiasY = Set(d32, iBiasY);
   const auto vBiasUV = Set(d32, iBiasUV);
@@ -134,18 +132,11 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
         LoadRGBA<PixelType>(d16, reinterpret_cast<const uint16_t *>(mSrc), R, G, B, A);
       }
 
-      V32 Rl = PromoteLowerTo(d32, R);
-      V32 Rh = PromoteUpperTo(d32, R);
-      V32 Bl = PromoteLowerTo(d32, B);
-      V32 Bh = PromoteUpperTo(d32, B);
-      V32 Gl = PromoteLowerTo(d32, G);
-      V32 Gh = PromoteUpperTo(d32, G);
-      const auto Yl = ShiftRightNarrow<precision>(d32, MulAdd(Rl, vYR,
-                                                              MulAdd(Gl, vYG,
-                                                                     MulAdd(Bl, vYB, vBiasY))));
-      const auto Yh = ShiftRightNarrow<precision>(d32, MulAdd(Rh, vYR,
-                                                              MulAdd(Gh, vYG,
-                                                                     MulAdd(Bh, vYB, vBiasY))));
+      V32 Yl = vBiasY;
+      V32 Yh = vBiasY;
+      Yl = WidenMulAccumulate(d32, BitCast(di16, R), vYR, Yl, Yh);
+      Yl = WidenMulAccumulate(d32, BitCast(di16, G), vYG, Yl, Yh);
+      Yl = WidenMulAccumulate(d32, BitCast(di16, B), vYB, Yl, Yh);
 
       if (chromaSubsample == YUV_SAMPLE_420) {
         if (!(y & 1)) {
@@ -165,34 +156,36 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
             LoadRGBTo16<PixelType>(d8, reinterpret_cast<const uint8_t *>(mSrc), R1, G1, B1);
           }
 
-          Rl = AddAndHalf(d32, Rl, PromoteLowerTo(d32, R1));
-          Gl = AddAndHalf(d32, Gl, PromoteLowerTo(d32, G1));
-          Bl = AddAndHalf(d32, Bl, PromoteLowerTo(d32, B1));
-
-          Rh = AddAndHalf(d32, Rh, PromoteUpperTo(d32, R1));
-          Gh = AddAndHalf(d32, Gh, PromoteUpperTo(d32, G1));
-          Bh = AddAndHalf(d32, Bh, PromoteUpperTo(d32, B1));
+          R = AddAndHalf(d16, R, R1);
+          G = AddAndHalf(d16, G, G1);
+          B = AddAndHalf(d16, B, B1);
         }
       }
 
-      const auto Cbl = ShiftRightNarrow<precision>(d32, Add(MulAdd(Bl, vCbB,
-                                                                   MulAdd(Gl, vCbG,
-                                                                          Mul(Rl, vCbR))), vBiasUV));
-      const auto Cbh = ShiftRightNarrow<precision>(d32, Add(MulAdd(Bh, vCbB,
-                                                                   MulAdd(Gh, vCbG,
-                                                                          Mul(Rh, vCbR))), vBiasUV));
+      V32 Cbl = vBiasUV;
+      V32 Cbh = vBiasUV;
+      Cbl = WidenMulAccumulate(d32, BitCast(di16, R), vCbR, Cbl, Cbh);
+      Cbl = WidenMulAccumulate(d32, BitCast(di16, G), vCbG, Cbl, Cbh);
+      Cbl = WidenMulAccumulate(d32, BitCast(di16, B), vCbB, Cbl, Cbh);
 
-      const auto Crh = ShiftRightNarrow<precision>(d32, Add(MulAdd(Rh, vCrR,
-                                                                   MulAdd(Gh, vCrG,
-                                                                          Mul(Bh, vCrB))), vBiasUV));
+      V32 Crl = vBiasUV;
+      V32 Crh = vBiasUV;
+      Crl = WidenMulAccumulate(d32, BitCast(di16, R), vCrR, Crl, Crh);
+      Crl = WidenMulAccumulate(d32, BitCast(di16, G), vCrG, Crl, Crh);
+      Crl = WidenMulAccumulate(d32, BitCast(di16, B), vCrB, Crl, Crh);
 
-      const auto Crl = ShiftRightNarrow<precision>(d32, Add(MulAdd(Rl, vCrR,
-                                                                   MulAdd(Gl, vCrG,
-                                                                          Mul(Bl, vCrB))), vBiasUV));
-
-      const auto Y = BitCast(d16, Clamp(Combine(di16, Yh, Yl), vLowCutOffY, vCutOffY));
-      const auto Cb = BitCast(d16, Clamp(Combine(di16, Cbh, Cbl), viZeros, vCutOffUV));
-      const auto Cr = BitCast(d16, Clamp(Combine(di16, Crh, Crl), viZeros, vCutOffUV));
+      const auto Y = BitCast(d16,
+                             Clamp(Combine(di16,
+                                           ShiftRightNarrow<precision>(d32, Yh),
+                                           ShiftRightNarrow<precision>(d32, Yl)), vLowCutOffY, vCutOffY));
+      const auto Cb = BitCast(d16,
+                              Clamp(Combine(di16,
+                                            ShiftRightNarrow<precision>(d32, Cbh),
+                                            ShiftRightNarrow<precision>(d32, Cbl)), viZeros, vCutOffUV));
+      const auto Cr = BitCast(d16,
+                              Clamp(Combine(di16,
+                                            ShiftRightNarrow<precision>(d32, Crh),
+                                            ShiftRightNarrow<precision>(d32, Crl)), viZeros, vCutOffUV));
 
       if (std::is_same<T, uint16_t>::value) {
         StoreU(Y, d16, reinterpret_cast<uint16_t *>(yDst));
@@ -390,37 +383,38 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   const auto uvCorrection = Set(di16, biasUV);
   const V16 vAlpha = Set(d16, maxColors);
   const auto uvCorrIY = Set(di16, biasY);
   const auto vMaxColors = Set(di16, maxColors);
   const auto zeros = Zero(di16);
+  const auto v32Zeros = Zero(d32);
 
   const auto scale = static_cast<float>(1 << precision);
   const float rangeReformatY = static_cast<float>(maxColors) / static_cast<float>(rangeY);
   const float rangeReformatUV = static_cast<float>(maxColors) / static_cast<float>(rangeUV);
 
-  int YR = static_cast<int>(std::roundf(matrix.Y1 * scale * rangeReformatY)),
-      YG = static_cast<int>(std::roundf(matrix.Y2 * scale * rangeReformatY)),
-      YB = static_cast<int>(std::roundf(matrix.Y3 * scale * rangeReformatY));
-  int CbR = static_cast<int>(std::roundf(matrix.U1 * scale * rangeReformatUV)),
-      CbG = static_cast<int>(std::roundf(matrix.U2 * scale * rangeReformatUV)),
-      CbB = static_cast<int>(std::roundf(matrix.U3 * scale * rangeReformatUV));
-  int CrR = static_cast<int>(std::roundf(matrix.V1 * scale * rangeReformatUV)),
-      CrG = static_cast<int>(std::roundf(matrix.V2 * scale * rangeReformatUV)),
-      CrB = static_cast<int>(std::roundf(matrix.V3 * scale * rangeReformatUV));
+  int YR = static_cast<int>(::roundf(matrix.Y1 * scale * rangeReformatY)),
+      YG = static_cast<int>(::roundf(matrix.Y2 * scale * rangeReformatY)),
+      YB = static_cast<int>(::roundf(matrix.Y3 * scale * rangeReformatY));
+  int CbR = static_cast<int>(::roundf(matrix.U1 * scale * rangeReformatUV)),
+      CbG = static_cast<int>(::roundf(matrix.U2 * scale * rangeReformatUV)),
+      CbB = static_cast<int>(::roundf(matrix.U3 * scale * rangeReformatUV));
+  int CrR = static_cast<int>(::roundf(matrix.V1 * scale * rangeReformatUV)),
+      CrG = static_cast<int>(::roundf(matrix.V2 * scale * rangeReformatUV)),
+      CrB = static_cast<int>(::roundf(matrix.V3 * scale * rangeReformatUV));
 
-  const auto vYR = Set(d32, YR);
-  const auto vYG = Set(d32, YG);
-  const auto vYB = Set(d32, YB);
-  const auto vCbR = Set(d32, CbR);
-  const auto vCbG = Set(d32, CbG);
-  const auto vCbB = Set(d32, CbB);
-  const auto vCrR = Set(d32, CrR);
-  const auto vCrG = Set(d32, CrG);
-  const auto vCrB = Set(d32, CrB);
+  const auto vYR = Set(di16, YR);
+  const auto vYG = Set(di16, YG);
+  const auto vYB = Set(di16, YB);
+  const auto vCbR = Set(di16, CbR);
+  const auto vCbG = Set(di16, CbG);
+  const auto vCbB = Set(di16, CbB);
+  const auto vCrR = Set(di16, CrR);
+  const auto vCrG = Set(di16, CrG);
+  const auto vCrB = Set(di16, CrB);
 
   const int lanes = Lanes(d16);
   const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
@@ -481,33 +475,35 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
         }
       }
 
-      const auto Yh = PromoteUpperTo(d32, Y);
-      const auto Yl = PromoteLowerTo(d32, Y);
-
-      const auto ul = PromoteLowerTo(d32, U);
-      const auto uh = PromoteUpperTo(d32, U);
-
-      const auto vl = PromoteLowerTo(d32, V);
-      const auto vh = PromoteUpperTo(d32, V);
-
       /*
        *       int R = (Y * YR + U * YG + V * YB) >> precision;
       int G = (Y * CbR + U * CbG + V * CbB) >> precision;
       int B = (Y * CrR + U * CrG + V * CrB) >> precision;
        */
 
-      const auto rl = MulAdd(Yl, vYR, MulAdd(ul, vYG, Mul(vl, vYB)));
-      const auto rh = MulAdd(Yh, vYR, MulAdd(uh, vYG, Mul(vh, vYB)));
+      V32 rl = v32Zeros;
+      V32 rh = v32Zeros;
+      rl = WidenMulAccumulate(d32, Y, vYR, rl, rh);
+      rl = WidenMulAccumulate(d32, U, vYG, rl, rh);
+      rl = WidenMulAccumulate(d32, V, vYB, rl, rh);
 
-      const auto bl = MulAdd(Yl, vCrR, MulAdd(ul, vCrG, Mul(vl, vCrB)));
-      const auto bh = MulAdd(Yh, vCrR, MulAdd(uh, vCrG, Mul(vh, vCrB)));
+      V32 bl = v32Zeros;
+      V32 bh = v32Zeros;
 
-      const auto gl = MulAdd(Yl, vCbR, MulAdd(ul, vCbG, Mul(vl, vCbB)));
-      const auto gh = MulAdd(Yh, vCbR, MulAdd(uh, vCbG, Mul(vh, vCbB)));
+      bl = WidenMulAccumulate(d32, Y, vCrR, bl, bh);
+      bl = WidenMulAccumulate(d32, U, vCrG, bl, bh);
+      bl = WidenMulAccumulate(d32, V, vCrB, bl, bh);
+
+      V32 gl = v32Zeros;
+      V32 gh = v32Zeros;
+
+      gl = WidenMulAccumulate(d32, Y, vCbR, gl, gh);
+      gl = WidenMulAccumulate(d32, U, vCbG, gl, gh);
+      gl = WidenMulAccumulate(d32, V, vCbB, gl, gh);
 
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
-      if (bitDepth == 12 || precision > 8) {
+      if (bitDepth > 12 || precision > 6) {
         r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
                                        ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
         g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),

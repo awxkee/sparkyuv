@@ -23,5 +23,6 @@ void SparkyuvWide8To10Fixed(benchmark::State &state);
 void SparkyuvWide8To10Dynamic(benchmark::State &state);
 void SparkyuvSaturate10To8Fixed(benchmark::State &state);
 void SparkyuvSaturate10To8Dynamic(benchmark::State &state);
+void SparkyuvRGB10BitToF16(benchmark::State &state);
 
 #endif //YUV_TOOLS_BENCH_YUVBENCHMARKBASE_H_

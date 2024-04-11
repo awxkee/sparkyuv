@@ -59,7 +59,7 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
   auto mSrcPixels = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);
 
-  const float scale = (std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const float scale = (::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
 #if SPARKYUV_ALLOW_FLOAT16
   const VF vScale = Set(f16, hwy::F16FromF32(scale));
@@ -339,19 +339,19 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
         case SURFACE_RGBA1010102: {
           uint16_t bits0 = srcPixels[0];
           float s1 = hwy::F32FromF16(hwy::float16_t::FromBits(bits0));
-          r = std::roundf(s1 * scale);
+          r = ::roundf(s1 * scale);
           out0 = static_cast<uint16_t>(r);
           uint16_t bits1 = srcPixels[1];
           float s2 = hwy::F32FromF16(hwy::float16_t::FromBits(bits1));
-          g = std::roundf(s2 * scale);
+          g = ::roundf(s2 * scale);
           out1 = static_cast<uint16_t>(g);
           uint16_t bits2 = srcPixels[2];
           float s3 = hwy::F32FromF16(hwy::float16_t::FromBits(bits2));
-          b = std::roundf(s3 * scale);
+          b = ::roundf(s3 * scale);
           out2 = static_cast<uint16_t>(b);
           uint16_t bits3 = srcPixels[3];
           float s4 = hwy::F32FromF16(hwy::float16_t::FromBits(bits3));
-          a = std::min(std::roundf(s4 * 3.f), 3.f);
+          a = std::min(::roundf(s4 * 3.f), 3.f);
           out3 = static_cast<uint16_t>(a);
         }
           break;
@@ -419,7 +419,7 @@ ReformatSurfaceToF16(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   auto mSrcPixels = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);
 
-  const float scale = 1.f / (std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const float scale = 1.f / (::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
 #if SPARKYUV_ALLOW_FLOAT16
   const VF vScale = Set(f16, hwy::F16FromF32(scale));
@@ -793,7 +793,7 @@ ChannelsReformat(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const ScalableTag<T> d;
   using V = Vec<decltype(d)>;
 
-  const T maxColors = static_cast<T>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const T maxColors = static_cast<T>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   const int srcPixelsComponents = (InputPixelType == REFORMAT_BGR || InputPixelType == REFORMAT_RGB) ? 3 : 4;
   const int

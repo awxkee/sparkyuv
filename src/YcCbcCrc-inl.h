@@ -61,6 +61,7 @@ EOTF_INLINE float computeYcCbcCrcEquation(float dx, float low, float high, float
   }
   return Eb;
 }
+
 /**
 * @brief It will be good to declare a type of transfer function
  * and compile each variant separately however increase of binary size about 400%
@@ -85,7 +86,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   using SignedT = typename std::make_signed<T>::type;
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
   const float linearScale = 1.f / static_cast<float>(maxColors);
 
   float Nb, Pb, Nr, Pr;
@@ -330,7 +331,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       const float dE = Eotf(r, TransferFunction) * kr + Eotf(g, TransferFunction) * kg + Eotf(b, TransferFunction) * kb;
       const float E = Oetf(dE, TransferFunction);
 
-      T Yc = static_cast<T>(static_cast<SignedT>(std::roundf(E * static_cast<float>(rangeY))) + biasY);
+      T Yc = static_cast<T>(static_cast<SignedT>(::roundf(E * static_cast<float>(rangeY))) + biasY);
       yDst[0] = Yc;
       yDst += 1;
 
@@ -353,7 +354,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
               dE1 = Eotf(r1, TransferFunction) * kr + Eotf(g1, TransferFunction) * kg + Eotf(b1, TransferFunction) * kb;
           const float E1 = Oetf(dE1, TransferFunction);
 
-          T Yc1 = static_cast<T>(std::roundf(E1 * static_cast<float>(rangeY))) + biasY;
+          T Yc1 = static_cast<T>(::roundf(E1 * static_cast<float>(rangeY))) + biasY;
           yDst[0] = Yc1;
           yDst += 1;
           mSrc += components;
@@ -377,7 +378,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
               Eotf(r1, TransferFunction) * kr + Eotf(g1, TransferFunction) * kg + Eotf(b1, TransferFunction) * kb;
           const float E1 = Oetf(dE1, TransferFunction);
 
-          T Yc1 = static_cast<T>(std::roundf(E1 * static_cast<float>(rangeY))) + biasY;
+          T Yc1 = static_cast<T>(::roundf(E1 * static_cast<float>(rangeY))) + biasY;
           yDst[0] = Yc1;
           yDst += 1;
           mSrc += components;
@@ -416,8 +417,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         auto Eb = computeYcCbcCrcEquation(b - E, Nb, Pb, EpbLow, EpbHigh);
         auto Er = computeYcCbcCrcEquation(r - E, Nr, Pr, EprLow, EprHigh);
 
-        T Cbc = static_cast<T>(static_cast<SignedT>(std::roundf(Eb * static_cast<float>(rangeUV))) + biasUV);
-        T Crc = static_cast<T>(static_cast<SignedT>(std::roundf(Er * static_cast<float>(rangeUV))) + biasUV);
+        T Cbc = static_cast<T>(static_cast<SignedT>(::roundf(Eb * static_cast<float>(rangeUV))) + biasUV);
+        T Crc = static_cast<T>(static_cast<SignedT>(::roundf(Er * static_cast<float>(rangeUV))) + biasUV);
 
         uDst[0] = Cbc;
         vDst[0] = Crc;
@@ -425,8 +426,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         if (!(y & 1)) {
           auto Eb = computeYcCbcCrcEquation(b - E, Nb, Pb, EpbLow, EpbHigh);
           auto Er = computeYcCbcCrcEquation(r - E, Nr, Pr, EprLow, EprHigh);
-          T Cbc = static_cast<T>(static_cast<SignedT>(std::roundf(Eb * static_cast<float>(rangeUV))) + biasUV);
-          T Crc = static_cast<T>(static_cast<SignedT>(std::roundf(Er * static_cast<float>(rangeUV))) + biasUV);
+          T Cbc = static_cast<T>(static_cast<SignedT>(::roundf(Eb * static_cast<float>(rangeUV))) + biasUV);
+          T Crc = static_cast<T>(static_cast<SignedT>(::roundf(Er * static_cast<float>(rangeUV))) + biasUV);
 
           uDst[0] = Cbc;
           vDst[0] = Crc;
@@ -607,7 +608,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   float Nb, Pb, Nr, Pr;
   computeYcCbcCrcCutoffs(transferFunction, kr, kb, Nb, Pb, Nr, Pr);
@@ -846,9 +847,9 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       auto G = Oetf((Eotf(Y, transferFunction) - kr * Eotf(R, transferFunction) - kb * Eotf(B, transferFunction)) * ekg,
                     transferFunction);
 
-      R = std::clamp(std::roundf(R * fMaxColors), 0.f, fMaxColors);
-      B = std::clamp(std::roundf(B * fMaxColors), 0.f, fMaxColors);
-      G = std::clamp(std::roundf(G * fMaxColors), 0.f, fMaxColors);
+      R = std::clamp(::roundf(R * fMaxColors), 0.f, fMaxColors);
+      B = std::clamp(::roundf(B * fMaxColors), 0.f, fMaxColors);
+      G = std::clamp(::roundf(G * fMaxColors), 0.f, fMaxColors);
 
       StoreRGBA<T, float, PixelType>(store, R, G, B, maxColors);
       store += components;
@@ -864,9 +865,9 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                        * ekg,
                    transferFunction);
 
-          R1 = std::clamp(std::roundf(R1 * fMaxColors), 0.f, fMaxColors);
-          B1 = std::clamp(std::roundf(B1 * fMaxColors), 0.f, fMaxColors);
-          G1 = std::clamp(std::roundf(G1 * fMaxColors), 0.f, fMaxColors);
+          R1 = std::clamp(::roundf(R1 * fMaxColors), 0.f, fMaxColors);
+          B1 = std::clamp(::roundf(B1 * fMaxColors), 0.f, fMaxColors);
+          G1 = std::clamp(::roundf(G1 * fMaxColors), 0.f, fMaxColors);
 
           StoreRGBA<T, float, PixelType>(store, R1, G1, B1, maxColors);
           store += components;

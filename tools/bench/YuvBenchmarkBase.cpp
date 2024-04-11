@@ -139,7 +139,7 @@ void SparkyuvSaturate10To8Fixed(benchmark::State &state) {
                           inHeight);
   for (auto _ : state) {
     sparkyuv::SaturateRGBA10To8(reinterpret_cast<uint16_t *>(rgba16Data.data()), rgba16Stride,
-                              rgbaData.data(), rgbaStride, inWidth, inHeight);
+                                rgbaData.data(), rgbaStride, inWidth, inHeight);
   }
 }
 
@@ -181,5 +181,47 @@ void SparkyuvSaturate10To8Dynamic(benchmark::State &state) {
   for (auto _ : state) {
     sparkyuv::SaturateRGBATo8(reinterpret_cast<uint16_t *>(rgba16Data.data()), rgba16Stride,
                               rgbaData.data(), rgbaStride, inWidth, inHeight, 10);
+  }
+}
+
+void SparkyuvRGB10BitToF16(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> yPlane;
+  std::vector<uint8_t> uPlane;
+  std::vector<uint8_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int uvPlaneHeight;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+  uvPlaneStride = inWidth;
+  uvPlaneHeight = inHeight;
+
+  yPlane.resize(yPlaneStride * inHeight * sizeof(uint16_t));
+  uPlane.resize(uvPlaneStride * uvPlaneHeight * sizeof(uint16_t));
+  vPlane.resize(uvPlaneStride * uvPlaneHeight * sizeof(uint16_t));
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  int rgba16Stride = sizeof(uint16_t) * inWidth * 4;
+  std::vector<uint8_t> rgbaF16Data(rgba16Stride * inHeight);
+  std::vector<uint8_t> rgba16Data(rgba16Stride * inHeight);
+  sparkyuv::WideRGBA8(rgbaData.data(),
+                      rgbaStride,
+                      reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                      rgba16Stride,
+                      inWidth,
+                      inHeight, 10);
+  for (auto _ : state) {
+    sparkyuv::RGBA16ToRGBAF16(reinterpret_cast<uint16_t *>(rgba16Data.data()), rgba16Stride,
+                              reinterpret_cast<uint16_t *>(rgbaF16Data.data()), rgba16Stride, inWidth, inHeight, 10);
   }
 }

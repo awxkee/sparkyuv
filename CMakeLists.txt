@@ -1,8 +1,21 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22)
 
 project(yuv)
 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
+
+add_definitions(-DHWY_DISABLED_TARGETS=\(HWY_SVE|HWY_SVE2|HWY_SVE_256|HWY_SVE2_128|HWY_SCALAR\))
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-pthread" COMPILER_SUPPORTS_THREADS)
+
+set(HIGHWAY_DIRECTORY "highway")
+file(GLOB DIRECTORY_EXIST "${HIGHWAY_DIRECTORY}")
+
+if(NOT HIGHWAY_DIRECTORY)
+    message(FATAL_ERROR "Error: The directory ${HIGHWAY_DIRECTORY} does not exist. Did you run `deps.sh`?")
+endif()
 
 set(SPARKYUV_SOURCES
         src/sparkyuv.cpp
@@ -42,6 +55,13 @@ endif ()
 
 target_include_directories(sparkyuv PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/hwy ${CMAKE_SOURCE_DIR}/highway ${CMAKE_SOURCE_DIR}/highway/hwy)
+
+if (COMPILER_SUPPORTS_THREADS)
+    message(STATUS "Threads are supported. Adding multithreading when needed.")
+    add_definitions(-DTHREADS_SUPPORTED=1)
+else ()
+    message(STATUS "Threads are not supported")
+endif ()
 
 if (BUILD_TOOLS)
     add_executable(yuvtools tools/main.cpp tools/JPEGEncoder.cpp)
@@ -90,4 +110,15 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DHWY_COMPILE_ONLY_STATIC)
     add_definitions(-DNOACCELERATED_SAMPLER)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+endif ()
+
+if (NOT APPLE)
+    install(TARGETS sparkyuv
+            LIBRARY DESTINATION libsparkyuv
+    )
+
+    install(DIRECTORY include/
+            DESTINATION include/sparkyuv
+            FILES_MATCHING PATTERN "*.h"
+    )
 endif ()

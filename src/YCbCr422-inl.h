@@ -23,6 +23,8 @@
 
 #include "hwy/highway.h"
 #include "yuv-inl.h"
+#include <algorithm>
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -79,11 +81,7 @@ void Pixel8ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src,
   const auto vBiasY = Set(d32, iBiasY);
   const auto vBiasUV = Set(d32, iBiasUV);
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
   const auto coeffTag = di16;
-#else
-  const auto coeffTag = d32;
-#endif
 
   const auto vYR = Set(coeffTag, YR);
   const auto vYG = Set(coeffTag, YG);
@@ -123,119 +121,54 @@ void Pixel8ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src,
       const auto Gl = BitCast(di16, PromoteLowerTo(du16, G8));
       const auto Bl = BitCast(di16, PromoteLowerTo(du16, B8));
 
-#if SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE
       V32 YhRh = vBiasY;
-      V32 YhRl = WidenMulAccumulate(di16, Rh, vYR, vBiasY, YhRh);
-      YhRl = WidenMulAccumulate(di16, Gh, vYG, YhRl, YhRh);
-      YhRl = WidenMulAccumulate(di16, Bh, vYB, YhRl, YhRh);
+      V32 YhRl = WidenMulAccumulate(d32, Rh, vYR, vBiasY, YhRh);
+      YhRl = WidenMulAccumulate(d32, Gh, vYG, YhRl, YhRh);
+      YhRl = WidenMulAccumulate(d32, Bh, vYB, YhRl, YhRh);
 
       const auto
           Yh = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YhRh), ShiftRightNarrow<8>(d32, YhRl)));
 
       V32 Chbh = vBiasUV;
-      V32 Chbl = WidenMulAccumulate(di16, Rh, vCbR, vBiasUV, Chbh);
-      Chbl = WidenMulAccumulate(di16, Gh, vCbG, Chbl, Chbh);
-      Chbl = WidenMulAccumulate(di16, Bh, vCbB, Chbl, Chbh);
+      V32 Chbl = WidenMulAccumulate(d32, Rh, vCbR, vBiasUV, Chbh);
+      Chbl = WidenMulAccumulate(d32, Gh, vCbG, Chbl, Chbh);
+      Chbl = WidenMulAccumulate(d32, Bh, vCbB, Chbl, Chbh);
 
       const auto
           Chbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Chbh), ShiftRightNarrow<8>(d32, Chbl)));
 
       V32 Chrh = vBiasUV;
-      V32 Chrl = WidenMulAccumulate(di16, Rh, vCrR, vBiasUV, Chrh);
-      Chrl = WidenMulAccumulate(di16, Gh, vCrG, Chrl, Chrh);
-      Chrl = WidenMulAccumulate(di16, Bh, vCrB, Chrl, Chrh);
+      V32 Chrl = WidenMulAccumulate(d32, Rh, vCrR, vBiasUV, Chrh);
+      Chrl = WidenMulAccumulate(d32, Gh, vCrG, Chrl, Chrh);
+      Chrl = WidenMulAccumulate(d32, Bh, vCrB, Chrl, Chrh);
 
       const auto
           Chrf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Chrh), ShiftRightNarrow<8>(d32, Chrl)));
 
       V32 YlRh = vBiasY;
-      V32 YlRl = WidenMulAccumulate(di16, Rl, vYR, vBiasY, YlRh);
-      YlRl = WidenMulAccumulate(di16, Gl, vYG, YlRl, YlRh);
-      YlRl = WidenMulAccumulate(di16, Bl, vYB, YlRl, YlRh);
+      V32 YlRl = WidenMulAccumulate(d32, Rl, vYR, vBiasY, YlRh);
+      YlRl = WidenMulAccumulate(d32, Gl, vYG, YlRl, YlRh);
+      YlRl = WidenMulAccumulate(d32, Bl, vYB, YlRl, YlRh);
 
       const auto
           Yl = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YlRh), ShiftRightNarrow<8>(d32, YlRl)));
 
       V32 Clbh = vBiasUV;
-      V32 Clbl = WidenMulAccumulate(di16, Rl, vCbR, vBiasUV, Clbh);
-      Clbl = WidenMulAccumulate(di16, Gl, vCbG, Clbl, Clbh);
-      Clbl = WidenMulAccumulate(di16, Bl, vCbB, Clbl, Clbh);
+      V32 Clbl = WidenMulAccumulate(d32, Rl, vCbR, vBiasUV, Clbh);
+      Clbl = WidenMulAccumulate(d32, Gl, vCbG, Clbl, Clbh);
+      Clbl = WidenMulAccumulate(d32, Bl, vCbB, Clbl, Clbh);
 
       const auto
           Clbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Clbh), ShiftRightNarrow<8>(d32, Clbl)));
 
       V32 Clrh = vBiasUV;
-      V32 Clrl = WidenMulAccumulate(di16, Rl, vCrR, vBiasUV, Clrh);
-      Clrl = WidenMulAccumulate(di16, Gl, vCrG, Clrl, Clrh);
-      Clrl = WidenMulAccumulate(di16, Bl, vCrB, Clrl, Clrh);
+      V32 Clrl = WidenMulAccumulate(d32, Rl, vCrR, vBiasUV, Clrh);
+      Clrl = WidenMulAccumulate(d32, Gl, vCrG, Clrl, Clrh);
+      Clrl = WidenMulAccumulate(d32, Bl, vCrB, Clrl, Clrh);
 
       const auto
           Clrf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Clrh), ShiftRightNarrow<8>(d32, Clrl)));
-#else
-      V32 R32l = PromoteLowerTo(d32, Rh);
-      V32 R32h = PromoteUpperTo(d32, Rh);
-      V32 B32l = PromoteLowerTo(d32, Bh);
-      V32 B32h = PromoteUpperTo(d32, Bh);
-      V32 G32l = PromoteLowerTo(d32, Gh);
-      V32 G32h = PromoteUpperTo(d32, Gh);
-      const auto Yhl = MulAdd(R32l, vYR,
-                              MulAdd(G32l, vYG,
-                                     MulAdd(B32l, vYB, vBiasY)));
-      const auto Yhh = MulAdd(R32h, vYR,
-                              MulAdd(G32h, vYG,
-                                     MulAdd(B32h, vYB, vBiasY)));
 
-      const auto Chbl = MulAdd(B32l, vCbB,
-                               MulAdd(G32l, vCbG,
-                                      MulAdd(R32l, vCbR, vBiasUV)));
-      const auto Chbh = MulAdd(B32h, vCbB,
-                               MulAdd(G32h, vCbG,
-                                      MulAdd(R32h, vCbR, vBiasUV)));
-
-      const auto Chrh = MulAdd(R32h, vCrR,
-                               MulAdd(G32h, vCrG,
-                                      MulAdd(B32h, vCrB, vBiasUV)));
-
-      const auto Chrl = MulAdd(R32l, vCrR,
-                                   MulAdd(G32l, vCrG,
-                                          MulAdd(B32l, vCrB, vBiasUV)));
-
-      const auto Yh = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Yhh), ShiftRightNarrow<8>(d32, Yhl)));
-      const auto Chbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Chbh), ShiftRightNarrow<8>(d32, Chbl)));
-      const auto Chrf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Chrh), ShiftRightNarrow<8>(d32, Chrl)));
-
-      V32 R32ll = PromoteLowerTo(d32, Rl);
-      V32 R32lh = PromoteUpperTo(d32, Rl);
-      V32 B32ll = PromoteLowerTo(d32, Bl);
-      V32 B32lh = PromoteUpperTo(d32, Bl);
-      V32 G32ll = PromoteLowerTo(d32, Gl);
-      V32 G32lh = PromoteUpperTo(d32, Gl);
-      const auto Yll = MulAdd(R32ll, vYR,
-                              MulAdd(G32ll, vYG,
-                                     MulAdd(B32ll, vYB, vBiasY)));
-      const auto Ylh = MulAdd(R32lh, vYR,
-                              MulAdd(G32lh, vYG,
-                                     MulAdd(B32lh, vYB, vBiasY)));
-
-      const auto Clbl = MulAdd(B32ll, vCbB,
-                                   MulAdd(G32ll, vCbG,
-                                          MulAdd(R32ll, vCbR, vBiasUV)));
-      const auto Clbh = MulAdd(B32lh, vCbB,
-                                   MulAdd(G32lh, vCbG,
-                                          MulAdd(R32lh, vCbR, vBiasUV)));
-
-      const auto Clrh = MulAdd(R32lh, vCrR,
-                                   MulAdd(G32lh, vCrG,
-                                          MulAdd(B32lh, vCrB, vBiasUV)));
-
-      const auto Clrl = MulAdd(R32ll, vCrR,
-                                   MulAdd(G32ll, vCrG,
-                                          MulAdd(B32ll, vCrB, vBiasUV)));
-
-      const auto Yl = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Ylh), ShiftRightNarrow<8>(d32, Yll)));
-      const auto Clbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Clbh), ShiftRightNarrow<8>(d32, Clbl)));
-      const auto Clrf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Clrh), ShiftRightNarrow<8>(d32, Clrl)));
-#endif
       const auto Cb = ShiftRightNarrow<1>(du16, SumsOf2(Combine(du8, DemoteTo(du8h, Chbf), DemoteTo(du8h, Clbf))));
       const auto Cr = ShiftRightNarrow<1>(du16, SumsOf2(Combine(du8, DemoteTo(du8h, Chrf), DemoteTo(du8h, Clrf))));
 
@@ -368,12 +301,12 @@ void YCbCr422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
 
   const int precision = 6;
 
-  const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
-  const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
-  const int GCoeff1 = static_cast<int>(std::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
-  const int GCoeff2 = static_cast<int>(std::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
+  const int CrCoeff = static_cast<int>(::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
+  const int CbCoeff = static_cast<int>(::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
+  const int GCoeff1 = static_cast<int>(::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
+  const int GCoeff2 = static_cast<int>(::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
 
-  const int iLumaCoeff = static_cast<int>(std::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
+  const int iLumaCoeff = static_cast<int>(::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
 
   const auto ivLumaCoeff = Set(du8, iLumaCoeff);
   const auto ivLumaCoeffh = Set(du8h, iLumaCoeff);

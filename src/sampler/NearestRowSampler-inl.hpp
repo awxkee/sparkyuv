@@ -27,6 +27,7 @@
 #include "sampler.h"
 #include <cstdint>
 #include <algorithm>
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -62,8 +63,8 @@ class NearestRowSampler : public ScaleRowSampler<uint8_t> {
         auto srcX = static_cast<float>(x * this->xScale);
         auto srcY = static_cast<float>(row * this->yScale);
 
-        const int x1 = std::clamp(static_cast<int>(std::floorf(srcX)), 0, this->inputWidth - 1);
-        const int y1 = std::clamp(static_cast<int>(std::floorf(srcY)), 0, this->inputHeight - 1);
+        const int x1 = std::clamp(static_cast<int>(::floorf(srcX)), 0, this->inputWidth - 1);
+        const int y1 = std::clamp(static_cast<int>(::floorf(srcY)), 0, this->inputHeight - 1);
         auto srcRow = reinterpret_cast<const uint8_t *>(this->mSource + y1 * this->srcStride);
         uint32_t px = reinterpret_cast<const uint32_t *>(srcRow)[x1];
         reinterpret_cast<uint32_t *>(dst)[x] = px;
@@ -73,8 +74,8 @@ class NearestRowSampler : public ScaleRowSampler<uint8_t> {
         auto srcX = static_cast<float>(x * this->xScale);
         auto srcY = static_cast<float>(row * this->yScale);
 
-        const int x1 = std::clamp(static_cast<int>(std::floorf(srcX)), 0, this->inputWidth - 1);
-        const int y1 = std::clamp(static_cast<int>(std::floorf(srcY)), 0, this->inputHeight - 1);
+        const int x1 = std::clamp(static_cast<int>(::floorf(srcX)), 0, this->inputWidth - 1);
+        const int y1 = std::clamp(static_cast<int>(::floorf(srcY)), 0, this->inputHeight - 1);
         auto srcRow = reinterpret_cast<const uint8_t *>(this->mSource + y1 * this->srcStride);
         auto srcPtr = &srcRow[x1 * components];
         std::copy(srcPtr, srcPtr + sizeof(uint8_t) * components, &dst[x * components]);
@@ -85,7 +86,7 @@ class NearestRowSampler : public ScaleRowSampler<uint8_t> {
   ~NearestRowSampler() override = default;
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
 };
 
 template<int Components>
@@ -117,8 +118,8 @@ class NearestRowSampler16Bit : public ScaleRowSampler<uint16_t> {
       const float srcX = (float) x * this->xScale;
       const float srcY = (float) row * this->yScale;
 
-      const int x1 = std::clamp(static_cast<int>(std::floorf(srcX)), 0, this->inputWidth - 1);
-      const int y1 = std::clamp(static_cast<int>(std::floorf(srcY)), 0, this->inputHeight - 1);
+      const int x1 = std::clamp(static_cast<int>(::floorf(srcX)), 0, this->inputWidth - 1);
+      const int y1 = std::clamp(static_cast<int>(::floorf(srcY)), 0, this->inputHeight - 1);
       auto srcRow =
           reinterpret_cast<const uint16_t *>(reinterpret_cast<const uint8_t *>(this->mSource) + y1 * this->srcStride);
       auto srcPtr = &srcRow[x1 * components];
@@ -157,8 +158,8 @@ class NearestRowSampler10Bit : public ScaleRowSampler<uint32_t> {
       const float srcX = (float) x * xScale;
       const float srcY = (float) row * yScale;
 
-      const int x1 = std::clamp(static_cast<int>(std::floorf(srcX)), 0, inputWidth - 1);
-      const int y1 = std::clamp(static_cast<int>(std::floorf(srcY)), 0, inputHeight - 1);
+      const int x1 = std::clamp(static_cast<int>(::floorf(srcX)), 0, inputWidth - 1);
+      const int y1 = std::clamp(static_cast<int>(::floorf(srcY)), 0, inputHeight - 1);
       auto srcRow = reinterpret_cast<const uint32_t *>(reinterpret_cast<const uint8_t *>(mSource) + y1 * srcStride);
       dst[x] = srcRow[x1];
     }

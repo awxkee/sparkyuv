@@ -137,11 +137,53 @@ UnpremultiplyAlpha8HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);
 
+  const ScalableTag<uint8_t> du8;
+  const Half<decltype(du8)> dhu8;
+  const Rebind<uint16_t, decltype(dhu8)> du16;
+  const int lanes = Lanes(du8);
+  using V8 = Vec<decltype(du8)>;
+  const auto scale = Set(du8, 255);
+  const auto lScale = Set(dhu8, 255);
+  const auto zeros = Set(du16, 0);
+  const auto mScale = Set(du16, 255);
+
   for (int y = 0; y < height; ++y) {
     auto store = reinterpret_cast<uint8_t *>(mDestination);
     auto source = reinterpret_cast<const uint8_t *>(mSource);
 
     uint32_t x = 0;
+
+    for (; x + lanes < width; x += lanes) {
+      V8 R, G, B, A;
+      LoadRGBA<PixelType>(du8, source, R, G, B, A);
+
+      auto Ah = PromoteUpperTo(du16, A);
+      auto Al = PromoteLowerTo(du16, A);
+
+      const auto ahMask = Ah == zeros;
+      const auto alMask = Ah == zeros;
+
+      Ah = IfThenElse(ahMask, mScale, Ah);
+      Al = IfThenElse(alMask, mScale, Al);
+
+      const auto Rh = Div(WidenMulHigh(du8, R, scale), Ah);
+      const auto Rl = Div(WidenMul(dhu8, LowerHalf(R), lScale), Al);
+
+      const auto Bh = Div(WidenMulHigh(du8, B, scale), Ah);
+      const auto Bl = Div(WidenMul(dhu8, LowerHalf(B), lScale), Al);
+
+      const auto Gh = Div(WidenMulHigh(du8, G, scale), Ah);
+      const auto Gl = Div(WidenMul(dhu8, LowerHalf(G), lScale), Al);
+
+      const auto RR = Combine(du8, DemoteTo(dhu8, Rh), DemoteTo(dhu8, Rl));
+      const auto GG = Combine(du8, DemoteTo(dhu8, Gh), DemoteTo(dhu8, Gl));
+      const auto BB = Combine(du8, DemoteTo(dhu8, Bh), DemoteTo(dhu8, Bl));
+
+      StoreRGBA<PixelType>(du8, store, RR, GG, BB, A);
+
+      store += components * lanes;
+      source += components * lanes;
+    }
 
     for (; x < width; ++x) {
       uint16_t r;

@@ -46,10 +46,10 @@ PixelToYDzDxHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   GetYUVRange(colorRange, bitDepth, bY, bUV, rangeY, rangeUV);
 
   const int precision = 8;
-  const float maxColors = std::powf(2.f, bitDepth) - 1.f;
-  const float frangeReductionY = std::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
+  const float maxColors = ::powf(2.f, bitDepth) - 1.f;
+  const float frangeReductionY = ::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
       * static_cast<float>(1 << precision)));
-  const float frangeReductionUV = std::roundf((static_cast<float>(rangeUV) / static_cast<float>(maxColors)
+  const float frangeReductionUV = ::roundf((static_cast<float>(rangeUV) / static_cast<float>(maxColors)
       * static_cast<float>(1 << precision)));
   const int rangeReductionY = static_cast<int>(frangeReductionY);
   const int rangeReductionUV = static_cast<int>(frangeReductionUV);
@@ -305,11 +305,11 @@ void YDzDxToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
   const int precision = 8;
-  const float frangeReductionY = std::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeY)
+  const float frangeReductionY = ::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeY)
       * static_cast<float>(1 << precision)));
-  const float frangeReductionUV = std::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeUV)
+  const float frangeReductionUV = ::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeUV)
       * static_cast<float>(1 << precision)));
   const int rangeReductionY = static_cast<int>(frangeReductionY);
   const int rangeReductionUV = static_cast<int>(frangeReductionUV);

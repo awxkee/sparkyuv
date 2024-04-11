@@ -28,6 +28,7 @@
 #include "../sparkyuv-internal.h"
 #include <cstdint>
 #include <algorithm>
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -77,8 +78,8 @@ class BoxSampler : public ScaleRowSampler<T> {
         auto srcX = static_cast<float>(x * this->xScale);
         auto srcY = static_cast<float>(row * this->yScale);
 
-        const int x1 = static_cast<int>(std::floorf(srcX));
-        const int y1 = static_cast<int>(std::floorf(srcY));
+        const int x1 = static_cast<int>(::floorf(srcX));
+        const int y1 = static_cast<int>(::floorf(srcY));
 
         const int y2 = std::min(y1 + 1, this->inputHeight - 1);
 
@@ -102,8 +103,8 @@ class BoxSampler : public ScaleRowSampler<T> {
         auto srcX = static_cast<float>(x * this->xScale);
         auto srcY = static_cast<float>(row * this->yScale);
 
-        const int x1 = static_cast<int>(std::floorf(srcX));
-        const int y1 = static_cast<int>(std::floorf(srcY));
+        const int x1 = static_cast<int>(::floorf(srcX));
+        const int y1 = static_cast<int>(::floorf(srcY));
 
         const int y2 = std::min(y1 + 1, this->inputHeight - 1);
 
@@ -126,8 +127,8 @@ class BoxSampler : public ScaleRowSampler<T> {
         auto srcX = static_cast<float>(x * this->xScale);
         auto srcY = static_cast<float>(row * this->yScale);
 
-        const int x1 = static_cast<int>(std::floorf(srcX));
-        const int y1 = static_cast<int>(std::floorf(srcY));
+        const int x1 = static_cast<int>(::floorf(srcX));
+        const int y1 = static_cast<int>(::floorf(srcY));
 
         const int y2 = std::min(y1 + 1, this->inputHeight - 1);
 
@@ -167,8 +168,8 @@ class BoxSampler : public ScaleRowSampler<T> {
       const float srcX = (float) x * this->xScale;
       const float srcY = (float) row * this->yScale;
 
-      const int x1 = static_cast<int>(std::floorf(srcX));
-      const int y1 = static_cast<int>(std::floorf(srcY));
+      const int x1 = static_cast<int>(::floorf(srcX));
+      const int y1 = static_cast<int>(::floorf(srcY));
 
       int x2 = std::min(x1 + 1, this->inputWidth - 1);
       int y2 = std::min(y1 + 1, this->inputHeight - 1);

@@ -27,6 +27,7 @@
 #include "sampler-inl.h"
 #include "sampler.h"
 #include "src/math/math-inl.h"
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -76,8 +77,8 @@ class WeightedWindow6RowSampler10Bit : public ScaleRowSampler<uint32_t> {
 
       float rgb[4] = {0, 0, 0, 0};
 
-      float kx1 = floor(srcX);
-      float ky1 = floor(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float weightSum(0.0f);
 
@@ -114,10 +115,10 @@ class WeightedWindow6RowSampler10Bit : public ScaleRowSampler<uint32_t> {
         dst[px] = 0;
       } else {
         float revertScale = 1.f / weightSum * maxColors;
-        auto R10 = static_cast<uint32_t >(std::clamp(std::round(rgb[0] * revertScale), 0.0f, (float) maxColors));
-        auto G10 = static_cast<uint32_t >(std::clamp(std::round(rgb[1] * revertScale), 0.0f, (float) maxColors));
-        auto B10 = static_cast<uint32_t >(std::clamp(std::round(rgb[2] * revertScale), 0.0f, (float) maxColors));
-        auto A10 = static_cast<uint32_t >(std::clamp(std::round(rgb[3] / weightSum * 3.f), 0.0f, 3.0f));
+        auto R10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[0] * revertScale), 0.0f, (float) maxColors));
+        auto G10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[1] * revertScale), 0.0f, (float) maxColors));
+        auto B10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[2] * revertScale), 0.0f, (float) maxColors));
+        auto A10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[3] / weightSum * 3.f), 0.0f, 3.0f));
 
         dst[x] = (A10 << 30) | (R10 << 20) | (G10 << 10) | B10;
       }
@@ -127,7 +128,7 @@ class WeightedWindow6RowSampler10Bit : public ScaleRowSampler<uint32_t> {
   ~WeightedWindow6RowSampler10Bit() override = default;
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 10.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 10.f) - 1.0f;
   ScaleWeightSampler sampler;
 
   inline void parseToFloat(const uint32_t rgba1010102, float &r, float &g, float &b, float &a) {
@@ -197,8 +198,8 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
       // only kernel with size 3 is supported
       constexpr int kernelSize = 3;
 
-      float kx1 = std::floorf(srcX);
-      float ky1 = std::floorf(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float kWeightSum = 0;
       VF4 color = Set(dfx4, 0);
@@ -277,8 +278,8 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
       float rgb[components];
       std::fill(rgb, rgb + components, 0.0f);
 
-      float kx1 = std::floorf(srcX);
-      float ky1 = std::floorf(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float weightSum(0.0f);
 
@@ -314,7 +315,7 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {
-        dst[px + c] = static_cast<uint8_t>(std::clamp(std::roundf(rgb[c] * weightSum), 0.0f, maxColors));
+        dst[px + c] = static_cast<uint8_t>(std::clamp(::roundf(rgb[c] * weightSum), 0.0f, maxColors));
       }
     }
   }
@@ -324,7 +325,7 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
  private:
   typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
 
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
   ScaleWeightSampler sampler;
   ScaleWeightSamplerHWY samplerHWY;
 };
@@ -342,7 +343,7 @@ class WeightedWindow6RowSampler16Bit : public ScaleRowSampler<uint16_t> {
                                 inputWidth, inputHeight,
                                 mDestination, dstStride,
                                 outputWidth, outputHeight),
-      maxColors(std::powf(2.0f, static_cast<float>(depth)) - 1.0f) {
+      maxColors(::powf(2.0f, static_cast<float>(depth)) - 1.0f) {
     switch (op) {
       case WEIGHTED_ROW6_LANCZOS_SINC: {
         sampler = sparkyuv::Lanczos3Sinc;
@@ -364,8 +365,8 @@ class WeightedWindow6RowSampler16Bit : public ScaleRowSampler<uint16_t> {
       float rgb[components];
       std::fill(rgb, rgb + components, 0.0f);
 
-      float kx1 = std::floor(srcX);
-      float ky1 = std::floor(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float weightSum(0.0f);
 
@@ -401,7 +402,7 @@ class WeightedWindow6RowSampler16Bit : public ScaleRowSampler<uint16_t> {
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {
-        dst[px + c] = static_cast<uint8_t>(std::clamp(std::roundf(rgb[c] * invWeightScale), 0.0f, maxColors));
+        dst[px + c] = static_cast<uint8_t>(std::clamp(::roundf(rgb[c] * invWeightScale), 0.0f, maxColors));
       }
     }
   }
@@ -463,8 +464,8 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       float rgb[components];
       std::fill(rgb, rgb + components, 0.0f);
 
-      float kx1 = std::floor(srcX);
-      float ky1 = std::floor(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float kWeightSum = 0;
       VF4 color = Set(dfx4, 0);
@@ -532,8 +533,8 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       float rgb[components];
       std::fill(rgb, rgb + components, 0.0f);
 
-      float kx1 = std::floorf(srcX);
-      float ky1 = std::floorf(srcY);
+      float kx1 = ::floorf(srcX);
+      float ky1 = ::floorf(srcY);
 
       float weightSum(0.0f);
 
@@ -580,7 +581,7 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
  private:
   typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
 
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
   ScaleWeightSampler sampler;
   ScaleWeightSamplerHWY samplerHWY;
 };

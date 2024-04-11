@@ -46,8 +46,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   GetYUVRange(colorRange, bitDepth, bY, bUV, rangeY, rangeUV);
 
   const int precision = 6;
-  const float maxColors = std::powf(2.f, bitDepth) - 1.f;
-  const int rangeReduction = static_cast<int>(std::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
+  const float maxColors = ::powf(2.f, bitDepth) - 1.f;
+  const int rangeReduction = static_cast<int>(::roundf((static_cast<float>(rangeY) / static_cast<float>(maxColors)
       * static_cast<float>(1 << precision))));
   const int biasY = static_cast<int>(bY) * (1 << precision);
   const int biasUV = static_cast<int>(bUV) * (1 << precision);
@@ -477,9 +477,9 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
   const int precision = 6;
-  const int rangeReduction = static_cast<int>(std::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeY)
+  const int rangeReduction = static_cast<int>(::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeY)
       * static_cast<float>(1 << precision))));
 
   const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
@@ -498,7 +498,6 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const auto vMaxColors = Set(di16, maxColors);
   const auto viZeros = Zero(di16);
   const auto A16 = Set(du16, maxColors);
-  const Rebind<uint8_t, decltype(du16)> d8;
   const auto vRangeReduction = Set(di16, rangeReduction);
   const Rebind<int32_t, decltype(dhu16)> di32;
   const auto viRangeReduction = Set(di32, rangeReduction);

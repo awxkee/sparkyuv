@@ -16,4 +16,4 @@
 # limitations under the License.
 #
 
-git clone --branch 1.1.0 https://github.com/google/highway.git
+git clone --branch widen_mul https://github.com/awxkee/highway

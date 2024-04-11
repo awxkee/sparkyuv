@@ -180,8 +180,8 @@ RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   const int components = (PixelType == REFORMAT_BGR || PixelType == REFORMAT_RGB) ? 3 : 4;
 
-  const auto rbMaxColors = 1.f / static_cast<float >(std::powf(2.f, 5.f) - 1.f);
-  const auto gMaxColors = 1.f / static_cast<float>(std::powf(2.f, 6.f) - 1.f);
+  const auto rbMaxColors = 1.f / static_cast<float >(::powf(2.f, 5.f) - 1.f);
+  const auto gMaxColors = 1.f / static_cast<float>(::powf(2.f, 6.f) - 1.f);
   const uint16_t a = hwy::F16FromF32(1.0f).bits;
 
 #if SPARKYUV_ALLOW_FLOAT16
@@ -294,8 +294,8 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
 
   const int components = (PixelType == REFORMAT_BGR || PixelType == REFORMAT_RGB) ? 3 : 4;
 
-  const auto rbMaxColors = static_cast<float >(std::powf(2.f, 5.f) - 1.f);
-  const auto gMaxColors = static_cast<float>(std::powf(2.f, 6.f) - 1.f);
+  const auto rbMaxColors = static_cast<float >(::powf(2.f, 5.f) - 1.f);
+  const auto gMaxColors = static_cast<float>(::powf(2.f, 6.f) - 1.f);
 #if SPARKYUV_ALLOW_FLOAT16
   const ScalableTag<hwy::float16_t> df;
   const auto vRBScale = Set(df, hwy::F16FromF32(rbMaxColors));
@@ -369,9 +369,9 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
           break;
       }
 
-      uint16_t r565 = static_cast<uint16_t>(std::roundf(r * rbMaxColors)) & 0x1F;
-      uint16_t g565 = static_cast<uint16_t>(std::roundf(g * gMaxColors)) & 0x3F;
-      uint16_t b565 = static_cast<uint16_t>(std::roundf(b * rbMaxColors)) & 0x1F;
+      uint16_t r565 = static_cast<uint16_t>(::roundf(r * rbMaxColors)) & 0x1F;
+      uint16_t g565 = static_cast<uint16_t>(::roundf(g * gMaxColors)) & 0x3F;
+      uint16_t b565 = static_cast<uint16_t>(::roundf(b * rbMaxColors)) & 0x1F;
 
       uint16_t red565 = r565 << 11;
       uint16_t green565 = g565 << 5;
@@ -452,7 +452,7 @@ RGB565ReformatToSurfaceHWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(destination);
 
-  const T maxColors = static_cast<T>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const T maxColors = static_cast<T>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   const int components = (PixelType == REFORMAT_BGR || PixelType == REFORMAT_RGB) ? 3 : 4;
 

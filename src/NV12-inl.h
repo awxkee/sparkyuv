@@ -63,12 +63,12 @@ void NV21ToPixel8(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
 
   const int precision = 6;
 
-  const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
-  const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
-  const int GCoeff1 = static_cast<int>(std::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
-  const int GCoeff2 = static_cast<int>(std::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
+  const int CrCoeff = static_cast<int>(::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
+  const int CbCoeff = static_cast<int>(::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
+  const int GCoeff1 = static_cast<int>(::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
+  const int GCoeff2 = static_cast<int>(::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
 
-  const int iLumaCoeff = static_cast<int>(std::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
+  const int iLumaCoeff = static_cast<int>(::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
 
   const auto ivLumaCoeff = Set(du8, iLumaCoeff);
   const auto ivLumaCoeffh = Set(du8h, iLumaCoeff);
@@ -94,8 +94,8 @@ void NV21ToPixel8(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
     uint32_t x = 0;
 
     for (; x + lanes < width; x += lanes) {
-      using VU8x4 = Vec<decltype(du8h)>;
-      VU8x4 ulfh, vlfh;
+      using VUh = Vec<decltype(du8h)>;
+      VUh ulfh, vlfh;
       if (LoadOrder == YUV_ORDER_UV) {
         LoadInterleaved2(du8h, uvSource, ulfh, vlfh);
       } else {
@@ -292,9 +292,9 @@ void Pixel8ToNV21HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
       auto B = BitCast(di16, PromoteTo(du16, B8));
 
       V32 YRh = vBiasY;
-      V32 YRl = WidenMulAccumulate(di16, R, vYR, vBiasY, YRh);
-      YRl = WidenMulAccumulate(di16, G, vYG, YRl, YRh);
-      YRl = WidenMulAccumulate(di16, B, vYB, YRl, YRh);
+      V32 YRl = WidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
+      YRl = WidenMulAccumulate(d32, G, vYG, YRl, YRh);
+      YRl = WidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto
           Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
@@ -311,17 +311,17 @@ void Pixel8ToNV21HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
         }
 
         V32 Cbh = vBiasUV;
-        V32 Cbl = WidenMulAccumulate(di16, R, vCbR, vBiasUV, Cbh);
-        Cbl = WidenMulAccumulate(di16, G, vCbG, Cbl, Cbh);
-        Cbl = WidenMulAccumulate(di16, B, vCbB, Cbl, Cbh);
+        V32 Cbl = WidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
+        Cbl = WidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
+        Cbl = WidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
         const auto Cbf =
             BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
         V32 Crh = vBiasUV;
-        V32 Crl = WidenMulAccumulate(di16, R, vCrR, vBiasUV, Crh);
-        Crl = WidenMulAccumulate(di16, G, vCrG, Crl, Crh);
-        Crl = WidenMulAccumulate(di16, B, vCrB, Crl, Crh);
+        V32 Crl = WidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
+        Crl = WidenMulAccumulate(d32, G, vCrG, Crl, Crh);
+        Crl = WidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
         const auto Crf =
             BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));

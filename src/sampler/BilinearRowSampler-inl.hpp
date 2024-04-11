@@ -28,6 +28,7 @@
 #include "../yuv-inl.h"
 #include <cstdint>
 #include <algorithm>
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -160,14 +161,14 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
 
         float result = blerp(c1, c2, c3, c4, dx, dy);
         float f = result;
-        f = std::clamp(std::round(f), 0.0f, maxColors);
+        f = std::clamp(::roundf(f), 0.0f, maxColors);
         dst[x * components + c] = static_cast<uint8_t>(f);
       }
     }
   }
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
 };
 
 template<int Components>
@@ -192,9 +193,9 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
   }
 
-  ~BilinearRowSamplerF16Bit() = default;
+  ~BilinearRowSamplerF16Bit() override = default;
 
-  void sample(const int y) {
+  void sample(const int y) override {
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<int32_t, 4> dix4;
     const FixedTag<hwy::float16_t, 4> df16x4;
@@ -294,7 +295,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
   }
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
 };
 
 template<typename T, int Components>
@@ -333,8 +334,8 @@ class BilinearRowSamplerAnyBit : public ScaleRowSampler<T> {
       const float srcX = (float) x * this->xScale;
       const float srcY = (float) row * this->yScale;
 
-      const int x1 = static_cast<int>(std::floorf(srcX));
-      const int y1 = static_cast<int>(std::floorf(srcY));
+      const int x1 = static_cast<int>(::floorf(srcX));
+      const int y1 = static_cast<int>(::floorf(srcY));
 
       int x2 = std::min(x1 + 1, this->inputWidth - 1);
       int y2 = std::min(y1 + 1, this->inputHeight - 1);
@@ -356,7 +357,7 @@ class BilinearRowSamplerAnyBit : public ScaleRowSampler<T> {
 
         float result = blerp(c1, c2, c3, c4, dx, dy);
         float f = result;
-        f = std::clamp(std::roundf(f), 0.0f, maxColors);
+        f = std::clamp(::roundf(f), 0.0f, maxColors);
         dst[0] = static_cast<uint8_t>(f);
         dst += 1;
       }
@@ -364,7 +365,7 @@ class BilinearRowSamplerAnyBit : public ScaleRowSampler<T> {
   }
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 8.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
 };
 
 class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
@@ -423,10 +424,10 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
       float bInter = blerp(b1, b2, b3, b4, dx, dy);
       float aInter = blerp(a1, a2, a3, a4, dx, dy);
 
-      auto R10 = static_cast<uint32_t >(std::clamp(std::roundf(rInter * maxColors), 0.0f, (float) maxColors));
-      auto G10 = static_cast<uint32_t >(std::clamp(std::roundf(gInter * maxColors), 0.0f, (float) maxColors));
-      auto B10 = static_cast<uint32_t >(std::clamp(std::roundf(bInter * maxColors), 0.0f, (float) maxColors));
-      auto A10 = static_cast<uint32_t >(std::clamp(std::roundf(aInter * 3.f), 0.0f, 3.0f));
+      auto R10 = static_cast<uint32_t >(std::clamp(::roundf(rInter * maxColors), 0.0f, (float) maxColors));
+      auto G10 = static_cast<uint32_t >(std::clamp(::roundf(gInter * maxColors), 0.0f, (float) maxColors));
+      auto B10 = static_cast<uint32_t >(std::clamp(::roundf(bInter * maxColors), 0.0f, (float) maxColors));
+      auto A10 = static_cast<uint32_t >(std::clamp(::roundf(aInter * 3.f), 0.0f, 3.0f));
 
       dst16[0] = (A10 << 30) | (R10 << 20) | (G10 << 10) | B10;
       dst16 += 1;
@@ -434,7 +435,7 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
   }
 
  private:
-  const float maxColors = std::powf(2.0f, (float) 10.f) - 1.0f;
+  const float maxColors = ::powf(2.0f, (float) 10.f) - 1.0f;
 
   static inline void parseToFloat(const uint32_t rgba1010102, float &r, float &g, float &b, float &a) {
     const uint32_t scalarMask = (1u << 10u) - 1u;

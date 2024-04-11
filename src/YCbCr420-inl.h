@@ -24,6 +24,8 @@
 #include "hwy/highway.h"
 #include "yuv-inl.h"
 #include "sparkyuv-internal.h"
+#include <algorithm>
+#include <cmath>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -117,9 +119,9 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
       auto B = BitCast(di16, PromoteTo(du16, B8));
 
       V32 YRh = vBiasY;
-      V32 YRl = WidenMulAccumulate(di16, R, vYR, vBiasY, YRh);
-      YRl = WidenMulAccumulate(di16, G, vYG, YRl, YRh);
-      YRl = WidenMulAccumulate(di16, B, vYB, YRl, YRh);
+      V32 YRl = WidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
+      YRl = WidenMulAccumulate(d32, G, vYG, YRl, YRh);
+      YRl = WidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto Y = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
       if (!(y & 1)) {
@@ -135,16 +137,16 @@ void Pixel8ToYCbCr420HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t sr
         }
 
         V32 Cbh = vBiasUV;
-        V32 Cbl = WidenMulAccumulate(di16, R, vCbR, vBiasUV, Cbh);
-        Cbl = WidenMulAccumulate(di16, G, vCbG, Cbl, Cbh);
-        Cbl = WidenMulAccumulate(di16, B, vCbB, Cbl, Cbh);
+        V32 Cbl = WidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
+        Cbl = WidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
+        Cbl = WidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
         const auto Cbf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
         V32 Crh = vBiasUV;
-        V32 Crl = WidenMulAccumulate(di16, R, vCrR, vBiasUV, Crh);
-        Crl = WidenMulAccumulate(di16, G, vCrG, Crl, Crh);
-        Crl = WidenMulAccumulate(di16, B, vCrB, Crl, Crh);
+        V32 Crl = WidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
+        Crl = WidenMulAccumulate(d32, G, vCrG, Crl, Crh);
+        Crl = WidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
         const auto Crf = BitCast(du16, Combine(di16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
 
@@ -301,12 +303,12 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
 
   int precision = 6;
 
-  const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
-  const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
-  const int GCoeff1 = static_cast<int>(std::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
-  const int GCoeff2 = static_cast<int>(std::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
+  const int CrCoeff = static_cast<int>(::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
+  const int CbCoeff = static_cast<int>(::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
+  const int GCoeff1 = static_cast<int>(::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
+  const int GCoeff2 = static_cast<int>(::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
 
-  const int iLumaCoeff = static_cast<int>(std::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
+  const int iLumaCoeff = static_cast<int>(::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
 
   const auto ivLumaCoeff = Set(du8, iLumaCoeff);
   const auto ivLumaCoeffh = Set(du8h, iLumaCoeff);

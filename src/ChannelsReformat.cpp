@@ -264,9 +264,9 @@ HWY_EXPORT(BGRAUnpremultiplyAlphaHWY);
 HWY_EXPORT(ABGRUnpremultiplyAlphaHWY);
 
 #define UNPREMULTIPLY_ALPHA_DECLARATION_R(pixelType) \
-    void pixelType##UnpremultiplyAlphaHWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride, \
-                                        uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
-                                        const uint32_t width, const uint32_t height) {\
+    void pixelType##UnpremultiplyAlpha(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride, \
+                                       uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                       const uint32_t width, const uint32_t height) {\
         HWY_DYNAMIC_DISPATCH(pixelType##UnpremultiplyAlphaHWY)(src, srcStride, dst, dstStride, width, height); \
     }
 

@@ -24,6 +24,7 @@
 #include "hwy/highway.h"
 #include "yuv-inl.h"
 #include "sparkyuv-internal.h"
+#include <algorithm>
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -48,7 +49,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
   const int precision = 8;
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   float zYR, zYG, zYB;
   float zCbR, zCbG, zCbB;
@@ -127,9 +128,9 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       LoadRGBA<PixelType>(d16, reinterpret_cast<const int16_t *>(mSrc), R, G, B, A);
 
       V32 YRh = vBiasY;
-      V32 YRl = WidenMulAccumulate(d16, R, vYR, vBiasY, YRh);
-      YRl = WidenMulAccumulate(d16, G, vYG, YRl, YRh);
-      YRl = WidenMulAccumulate(d16, B, vYB, YRl, YRh);
+      V32 YRl = WidenMulAccumulate(d32, R, vYR, vBiasY, YRh);
+      YRl = WidenMulAccumulate(d32, G, vYG, YRl, YRh);
+      YRl = WidenMulAccumulate(d32, B, vYB, YRl, YRh);
 
       const auto
           Y = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
@@ -153,17 +154,17 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
       }
 
       V32 Cbh = vBiasUV;
-      V32 Cbl = WidenMulAccumulate(d16, R, vCbR, vBiasUV, Cbh);
-      Cbl = WidenMulAccumulate(d16, G, vCbG, Cbl, Cbh);
-      Cbl = WidenMulAccumulate(d16, B, vCbB, Cbl, Cbh);
+      V32 Cbl = WidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
+      Cbl = WidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
+      Cbl = WidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
       const auto
           Cb = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
 
       V32 Crh = vBiasUV;
-      V32 Crl = WidenMulAccumulate(d16, R, vCrR, vBiasUV, Crh);
-      Crl = WidenMulAccumulate(d16, G, vCrG, Crl, Crh);
-      Crl = WidenMulAccumulate(d16, B, vCrB, Crl, Crh);
+      V32 Crl = WidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
+      Crl = WidenMulAccumulate(d32, G, vCrG, Crl, Crh);
+      Crl = WidenMulAccumulate(d32, B, vCrB, Crl, Crh);
 
       const auto
           Cr = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
@@ -404,7 +405,7 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
   uint16_t rangeUV;
   GetYUVRange(colorRange, bitDepth, biasY, biasUV, rangeY, rangeUV);
 
-  const int maxColors = static_cast<int>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+  const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
   const auto uvCorrection = Set(di16, biasUV);
   const V16 vAlpha = Set(d16, maxColors);
@@ -422,12 +423,12 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
 
   const int precision = 6;
 
-  const int CrCoeff = static_cast<int>(std::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
-  const int CbCoeff = static_cast<int>(std::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
-  const int GCoeff1 = static_cast<int>(std::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
-  const int GCoeff2 = static_cast<int>(std::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
+  const int CrCoeff = static_cast<int>(::roundf(fCrCoeff * static_cast<float>( 1 << precision )));
+  const int CbCoeff = static_cast<int>(::roundf(fCbCoeff * static_cast<float>( 1 << precision )));
+  const int GCoeff1 = static_cast<int>(::roundf(fGCoeff1 * static_cast<float>( 1 << precision )));
+  const int GCoeff2 = static_cast<int>(::roundf(fGCoeff2 * static_cast<float>( 1 << precision )));
 
-  const int iLumaCoeff = static_cast<int>(std::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
+  const int iLumaCoeff = static_cast<int>(::roundf(flumaCoeff * static_cast<float>( 1 << precision )));
 
   const auto ivGCoeff1 = Set(di16, -GCoeff1);
   const auto ivLumaCoeff = Set(di16, iLumaCoeff);
@@ -470,19 +471,19 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
       }
 
       V32 Yh = Zero(d32);
-      const V32 Yl = WidenMulAccumulate(di16, Y, ivLumaCoeff, sum0, Yh);
+      const V32 Yl = WidenMulAccumulate(d32, Y, ivLumaCoeff, sum0, Yh);
 
       V32 Crh = Yh;
-      const V32 Crl = WidenMulAccumulate(di16, cr, ivCrCoeff, Yl, Crh);
+      const V32 Crl = WidenMulAccumulate(d32, cr, ivCrCoeff, Yl, Crh);
 
       V32 Cbh = Yh;
-      const V32 Cbl = WidenMulAccumulate(di16, cb, ivCbCoeff, Yl, Cbh);
+      const V32 Cbl = WidenMulAccumulate(d32, cb, ivCbCoeff, Yl, Cbh);
 
       V32 G1h = Yh;
-      const V32 G1l = WidenMulAccumulate(di16, cr, ivGCoeff1, Yl, G1h);
+      const V32 G1l = WidenMulAccumulate(d32, cr, ivGCoeff1, Yl, G1h);
 
       V32 G2h = G1h;
-      const V32 G2l = WidenMulAccumulate(di16, cb, ivGCoeff2, G1l, G2h);
+      const V32 G2l = WidenMulAccumulate(d32, cb, ivGCoeff2, G1l, G2h);
 
       const V32 rh = Crh;
       const V32 rl = Crl;

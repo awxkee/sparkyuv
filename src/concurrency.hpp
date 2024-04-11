@@ -17,10 +17,12 @@
 #pragma once
 
 #include <functional>
-#include <mutex>
 #include <queue>
+#include <mutex>
+#if THREADS_SUPPORTED
 #include <thread>
 #include <vector>
+#endif
 #include <type_traits>
 
 namespace concurrency {
@@ -37,7 +39,7 @@ template<typename Function, typename... Args>
 void parallel_for(const int numThreads, const size_t numIterations, Function &&func, Args &&... args) {
   static_assert(std::is_invocable_v<Function, int, Args...>, "func must take an int parameter for iteration id");
 
-#if NDEBUG
+#if NDEBUG && THREADS_SUPPORTED
   std::vector<std::thread> threads;
 
   size_t segmentHeight = numIterations / numThreads;
@@ -86,7 +88,7 @@ template<typename Function, typename... Args>
 void parallel_for_with_thread_id(const int numThreads, const int numIterations, Function &&func, Args &&... args) {
   static_assert(std::is_invocable_v<Function, int, int, Args...>,
                 "func must take an int parameter for threadId, and iteration Id");
-
+#if THREADS_SUPPORTED
   std::vector<std::thread> threads;
 
   int segmentHeight = numIterations / numThreads;
@@ -124,5 +126,10 @@ void parallel_for_with_thread_id(const int numThreads, const int numIterations, 
       thread.join();
     }
   }
+#else
+  for (int i = 0; i < numIterations; ++i) {
+    func(0, i);
+  }
+#endif
 }
 }

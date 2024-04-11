@@ -14,16 +14,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(SPARKYUV__YUV_INL_H) == defined(HWY_TARGET_TOGGLE)
-#ifdef SPARKYUV__YUV_INL_H
-#undef SPARKYUV__YUV_INL_H
+#if defined(SPARKYUV_YUV_INL_H) == defined(HWY_TARGET_TOGGLE)
+#ifdef SPARKYUV_YUV_INL_H
+#undef SPARKYUV_YUV_INL_H
 #else
-#define SPARKYUV__YUV_INL_H
+#define SPARKYUV_YUV_INL_H
 #endif
 
 #include "hwy/highway.h"
 #include "sparkyuv-def.h"
 #include "sparkyuv-internal.h"
+#include <algorithm>
+#include <cmath>
 
 /**
 * VW ReorderWidenMulAccumulate(D d, V a, V b, VW sum0, VW& sum1): widens a and b to TFromD<D>,
@@ -42,7 +44,7 @@
 #define SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE 1
 #endif
 
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 && (HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2)
 #define SPARKYUV_ALLOW_FLOAT16 1
 #endif
 
@@ -731,12 +733,12 @@ static void ComputeForwardIntegersTransform(const float kr,
                           static_cast<float>(rangeY), static_cast<float>(rangeUV),
                           fullRangeRGB, YR, YG, YB, kCb, kCr);
 
-  uYR = static_cast<uint16_t>(std::roundf(scale * YR));
-  uYG = static_cast<uint16_t>(std::roundf(scale * YG));
-  uYB = static_cast<uint16_t>(std::roundf(scale * YB));
+  uYR = static_cast<uint16_t>(::roundf(scale * YR));
+  uYG = static_cast<uint16_t>(::roundf(scale * YG));
+  uYB = static_cast<uint16_t>(::roundf(scale * YB));
 
-  kuCb = static_cast<uint16_t>(std::roundf(scaleUV * kCb));
-  kuCr = static_cast<uint16_t>(std::roundf(scaleUV * kCr));
+  kuCb = static_cast<uint16_t>(::roundf(scaleUV * kCb));
+  kuCr = static_cast<uint16_t>(::roundf(scaleUV * kCr));
 }
 
 static void ComputeTransformIntegers(const float kr,
@@ -760,17 +762,17 @@ static void ComputeTransformIntegers(const float kr,
                    static_cast<float>(rangeY), static_cast<float>(rangeUV),
                    fullRangeRGB, YR, YG, YB, CbR, CbG, CbB, CrR, CrG, CrB);
 
-  uYR = static_cast<uint16_t>(std::roundf(scale * YR));
-  uYG = static_cast<uint16_t>(std::roundf(scale * YG));
-  uYB = static_cast<uint16_t>(std::roundf(scale * YB));
+  uYR = static_cast<uint16_t>(::roundf(scale * YR));
+  uYG = static_cast<uint16_t>(::roundf(scale * YG));
+  uYB = static_cast<uint16_t>(::roundf(scale * YB));
 
-  uCbR = static_cast<uint16_t>(std::roundf(scale * CbR));
-  uCbG = static_cast<uint16_t>(std::roundf(scale * CbG));
-  uCbB = static_cast<uint16_t>(std::roundf(scale * CbB));
+  uCbR = static_cast<uint16_t>(::roundf(scale * CbR));
+  uCbG = static_cast<uint16_t>(::roundf(scale * CbG));
+  uCbB = static_cast<uint16_t>(::roundf(scale * CbB));
 
-  uCrR = static_cast<uint16_t>(std::roundf(scale * CrR));
-  uCrG = static_cast<uint16_t>(std::roundf(scale * CrG));
-  uCrB = static_cast<uint16_t>(std::roundf(scale * CrB));
+  uCrR = static_cast<uint16_t>(::roundf(scale * CrR));
+  uCrG = static_cast<uint16_t>(::roundf(scale * CrG));
+  uCrB = static_cast<uint16_t>(::roundf(scale * CrB));
 }
 
 static void ComputeInverseTransform(const float kr,

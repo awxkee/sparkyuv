@@ -91,3 +91,74 @@ void LibyuvPremultiply(benchmark::State &state) {
   }
 }
 
+void SparkyuvUnpremultiply(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint16_t> yPlane;
+  std::vector<uint16_t> uPlane;
+  std::vector<uint16_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int uvPlaneHeight;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+  uvPlaneStride = inWidth;
+  uvPlaneHeight = inHeight;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  uPlane.resize(uvPlaneStride * uvPlaneHeight);
+  vPlane.resize(uvPlaneStride * uvPlaneHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  std::vector<uint8_t > store(rgbaData.size());
+  sparkyuv::RGBAPremultiplyAlpha(rgbaData.data(), rgbaStride, store.data(), rgbaStride, inWidth, inHeight);
+  std::vector<uint8_t > dst(rgbaData.size());
+
+  for (auto _ : state) {
+    sparkyuv::RGBAUnpremultiplyAlpha(rgbaData.data(), rgbaStride, dst.data(), rgbaStride, inWidth, inHeight);
+  }
+}
+
+void LibyuvUnpremultiply(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint16_t> yPlane;
+  std::vector<uint16_t> uPlane;
+  std::vector<uint16_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int uvPlaneHeight;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+  uvPlaneStride = inWidth;
+  uvPlaneHeight = inHeight;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  uPlane.resize(uvPlaneStride * uvPlaneHeight);
+  vPlane.resize(uvPlaneStride * uvPlaneHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  std::vector<uint8_t > store(rgbaData.size());
+  sparkyuv::RGBAPremultiplyAlpha(rgbaData.data(), rgbaStride, store.data(), rgbaStride, inWidth, inHeight);
+  std::vector<uint8_t > dst(rgbaData.size());
+
+  for (auto _ : state) {
+    libyuv::ARGBUnattenuate(rgbaData.data(), rgbaStride, dst.data(), rgbaStride, inWidth, inHeight);
+  }
+}

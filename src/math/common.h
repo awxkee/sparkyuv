@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <cmath>
 
 namespace sparkyuv {
 // Some enums and typedefs used by more than one header file.

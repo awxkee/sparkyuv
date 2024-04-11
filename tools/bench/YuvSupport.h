@@ -21,5 +21,7 @@
 
 void LibyuvPremultiply(benchmark::State &state);
 void SparkyuvPremultiply(benchmark::State &state);
+void SparkyuvUnpremultiply(benchmark::State &state);
+void LibyuvUnpremultiply(benchmark::State &state);
 
 #endif //YUV_TOOLS_BENCH_YUVSUPPORT_H_

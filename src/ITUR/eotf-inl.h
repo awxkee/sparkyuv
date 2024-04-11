@@ -43,8 +43,8 @@ EOTF_INLINE float PQEotf(float v, const float sdrReferencePoint) {
   const float c1 = 3424.0f / 4096.0f;
   const float c2 = (2413.0f / 4096.0f) * 32.0f;
   const float c3 = (2392.0f / 4096.0f) * 32.0f;
-  float p = std::powf(v, 1.0f / m2);
-  v = std::powf(std::max(p - c1, 0.0f) / (c2 - c3 * p), 1.0f / m1);
+  float p = ::powf(v, 1.0f / m2);
+  v = ::powf(std::max(p - c1, 0.0f) / (c2 - c3 * p), 1.0f / m1);
   v *= 10000.0f / sdrReferencePoint;
   return std::copysignf(v, o);
 }
@@ -81,30 +81,30 @@ static float PQOetf(float linear) {
 }
 
 static float Curve470MEotf(float gamma) {
-  return std::powf(std::clamp(gamma, 0.0f, 1.0f), 2.2f);
+  return ::powf(std::clamp(gamma, 0.0f, 1.0f), 2.2f);
 }
 
 static float Curve470MOetf(float linear) {
-  return std::powf(std::clamp(linear, 0.0f, 1.0f), 1.0f / 2.2f);
+  return ::powf(std::clamp(linear, 0.0f, 1.0f), 1.0f / 2.2f);
 }
 
 static float Curve470BGEotf(float gamma) {
-  return std::powf(std::clamp(gamma, 0.0f, 1.0f), 2.8f);
+  return ::powf(std::clamp(gamma, 0.0f, 1.0f), 2.8f);
 }
 
 static float Curve470BGOetf(float linear) {
-  return std::powf(std::clamp(linear, 0.0f, 1.0f), 1.0f / 2.8f);
+  return ::powf(std::clamp(linear, 0.0f, 1.0f), 1.0f / 2.8f);
 }
 
 static float HLGOetf(float linear) {
   // Scale from extended SDR range to [0.0, 1.0].
   linear = std::clamp(linear * 203.f / 1000.f, 0.0f, 1.0f);
   // Inverse OOTF followed by OETF see Table 5 and Note 5i in ITU-R BT.2100-2 page 7-8.
-  linear = std::powf(linear, 1.0f / 1.2f);
+  linear = ::powf(linear, 1.0f / 1.2f);
   if (linear < 0.0f) {
     return 0.0f;
   } else if (linear <= (1.0f / 12.0f)) {
-    return std::sqrtf(3.0f * linear);
+    return ::sqrtf(3.0f * linear);
   } else {
     return 0.17883277f * logf(12.0f * linear - 0.28466892f) + 0.55991073f;
   }
@@ -278,7 +278,7 @@ EOTF_INLINE float SRGBEotf(float v) {
   } else if (v < 12.92f * 0.0030412825601275209f) {
     return v / 12.92f;
   } else if (v < 1.0f) {
-    return std::powf((v + 0.0550107189475866f) / 1.0550107189475866f, 2.4f);
+    return ::powf((v + 0.0550107189475866f) / 1.0550107189475866f, 2.4f);
   } else {
     return 1.0f;
   }
@@ -290,7 +290,7 @@ EOTF_INLINE float Rec709Eotf(float v) {
   } else if (v < 4.5f * 0.018053968510807f) {
     return v / 4.5f;
   } else if (v < 1.f) {
-    return std::powf((v + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
+    return ::powf((v + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
   }
   return 1.f;
 }
@@ -301,7 +301,7 @@ EOTF_INLINE float Rec709Oetf(float linear) {
   } else if (linear < 0.018053968510807f) {
     return linear * 4.5f;
   } else if (linear < 1.f) {
-    return 1.09929682680944f * std::powf(linear, 0.45f) - 0.09929682680944f;
+    return 1.09929682680944f * ::powf(linear, 0.45f) - 0.09929682680944f;
   }
   return 1.f;
 }
@@ -356,7 +356,7 @@ EOTF_INLINE float TransferFunction(float v,
   if (v < 0) {
     return 0.f;
   } else if (v >= cutoff) {
-    return c0 * std::powf(c1 * v + c2, gamma) + c3;
+    return c0 * ::powf(c1 * v + c2, gamma) + c3;
   } else if (v < 1) {
     return c4 * v + c5;
   } else {
@@ -370,7 +370,7 @@ EOTF_INLINE float SRGBOetf(const float linear) {
   } else if (linear < 0.0030412825601275209f) {
     return linear * 12.92f;
   } else if (linear < 1.0f) {
-    return 1.0550107189475866f * std::powf(linear, 1.0f / 2.4f) - 0.0550107189475866f;
+    return 1.0550107189475866f * ::powf(linear, 1.0f / 2.4f) - 0.0550107189475866f;
   } else {
     return 1.0f;
   }
@@ -429,7 +429,7 @@ EOTF_INLINE V SMPTE428Eotf(const D df, V value) {
 }
 
 EOTF_INLINE float SMPTE428Eotf(const float value) {
-  return std::powf(std::max(value, 0.f), 2.6f) / 0.91655527974030934f;
+  return ::powf(std::max(value, 0.f), 2.6f) / 0.91655527974030934f;
 }
 
 EOTF_INLINE float HLGEotf(float v) {
@@ -440,7 +440,7 @@ EOTF_INLINE float HLGEotf(float v) {
   if (v <= 0.5f)
     v = v * v / 3.0f;
   else
-    v = (std::expf((v - c) / a) + b) / 12.f;
+    v = (::expf((v - c) / a) + b) / 12.f;
   return v;
 }
 
@@ -451,11 +451,11 @@ EOTF_INLINE T gammaOtf(const D d, T color, TFromD<D> gamma) {
 }
 
 EOTF_INLINE float dciP3PQGammaCorrection(float linear) {
-  return std::powf(linear, 1.f / 2.6f);
+  return ::powf(linear, 1.f / 2.6f);
 }
 
 EOTF_INLINE float gammaOtf(float linear, const float gamma) {
-  return std::powf(linear, gamma);
+  return ::powf(linear, gamma);
 }
 
 template<class D, typename T = Vec<D>, HWY_IF_F32_D(D)>
@@ -506,7 +506,7 @@ EOTF_INLINE float Rec601Eotf(float intensity) {
   if (intensity < 4.5f * 0.018053968510807f) {
     return intensity / 4.5f;
   } else {
-    return std::powf((intensity + 0.099f) / 1.099f, 1.0f / 0.45f);
+    return ::powf((intensity + 0.099f) / 1.099f, 1.0f / 0.45f);
   }
 }
 
@@ -516,7 +516,7 @@ EOTF_INLINE float Smpte240Eotf(float gamma) {
   } else if (gamma < 4.f * 0.022821585529445f) {
     return gamma / 4.f;
   } else if (gamma < 1.f) {
-    return std::powf((gamma + 0.111572195921731f) / 1.111572195921731f, 1.f / 0.45f);
+    return ::powf((gamma + 0.111572195921731f) / 1.111572195921731f, 1.f / 0.45f);
   }
   return 1.f;
 }
@@ -559,7 +559,7 @@ EOTF_INLINE float Smpte240Oetf(float linear) {
   } else if (linear < 0.022821585529445f) {
     return linear * 4.f;
   } else if (linear < 1.f) {
-    return 1.111572195921731f * std::powf(linear, 0.45f) - 0.111572195921731f;
+    return 1.111572195921731f * ::powf(linear, 0.45f) - 0.111572195921731f;
   }
   return 1.f;
 }
@@ -620,7 +620,7 @@ EOTF_INLINE float Log100Eotf(float gamma) {
   // The function is non-bijective so choose the middle of [0, 0.01].
   const float mid_interval = 0.01f / 2.f;
   return (gamma <= 0.0f) ? mid_interval
-                         : std::powf(10.0f, 2.f * (std::min(gamma, 1.f) - 1.0f));
+                         : ::powf(10.0f, 2.f * (std::min(gamma, 1.f) - 1.0f));
 }
 
 template<class D, HWY_IF_F32_D(D), typename T = TFromD<D>, typename V = VFromD<D>>
@@ -652,7 +652,7 @@ EOTF_INLINE V Log100Eotf(D d, V v) {
 }
 
 EOTF_INLINE float Log100Oetf(float linear) {
-  return (linear < 0.01f) ? 0.0f : 1.0f + std::log10f(std::min(linear, 1.f)) * 0.5f;
+  return (linear < 0.01f) ? 0.0f : 1.0f + ::log10f(std::min(linear, 1.f)) * 0.5f;
 }
 
 template<class D, HWY_IF_F32_D(D), typename T = TFromD<D>, typename V = VFromD<D>>
@@ -679,7 +679,7 @@ EOTF_INLINE float Log100Sqrt10Eotf(float gamma) {
   // The function is non-bijective so choose the middle of [0, 0.00316227766f[.
   const float mid_interval = 0.00316227766f / 2.f;
   return (gamma <= 0.0f) ? mid_interval
-                         : std::powf(10.0f, 2.5f * (std::min(gamma, 1.f) - 1.0f));
+                         : ::powf(10.0f, 2.5f * (std::min(gamma, 1.f) - 1.0f));
 }
 
 template<class D, HWY_IF_F32_D(D), typename T = TFromD<D>, typename V = VFromD<D>>
@@ -712,7 +712,7 @@ EOTF_INLINE V Log100Sqrt10Eotf(D d, V v) {
 
 EOTF_INLINE float Log100Sqrt10Oetf(float linear) {
   return (linear < 0.00316227766f) ? 0.0f
-                                   : 1.0f + std::log10f(std::min(linear, 1.f)) / 2.5f;
+                                   : 1.0f + ::log10f(std::min(linear, 1.f)) / 2.5f;
 }
 
 template<class D, HWY_IF_F32_D(D), typename T = TFromD<D>, typename V = VFromD<D>>
@@ -737,11 +737,11 @@ EOTF_INLINE V Log100Sqrt10Oetf(D d, V v) {
 
 EOTF_INLINE float Iec61966Eotf(float gamma) {
   if (gamma <= -4.5f * 0.018053968510807f) {
-    return std::powf((-gamma + 0.09929682680944f) / -1.09929682680944f, 1.f / 0.45f);
+    return ::powf((-gamma + 0.09929682680944f) / -1.09929682680944f, 1.f / 0.45f);
   } else if (gamma < 4.5f * 0.018053968510807f) {
     return gamma / 4.5f;
   }
-  return std::powf((gamma + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
+  return ::powf((gamma + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
 }
 
 template<class D, HWY_IF_F32_D(D), typename T = TFromD<D>, typename V = VFromD<D>>
@@ -796,11 +796,11 @@ EOTF_INLINE V Iec61966Eotf(D d, V v) {
 
 EOTF_INLINE float Iec61966Oetf(float linear) {
   if (linear <= -0.018053968510807f) {
-    return -1.09929682680944f * std::powf(-linear, 0.45f) + 0.09929682680944f;
+    return -1.09929682680944f * ::powf(-linear, 0.45f) + 0.09929682680944f;
   } else if (linear < 0.018053968510807f) {
     return linear * 4.5f;
   }
-  return 1.09929682680944f * std::powf(linear, 0.45f) - 0.09929682680944f;
+  return 1.09929682680944f * ::powf(linear, 0.45f) - 0.09929682680944f;
 }
 
 template<class D, typename V = Vec<D>, HWY_IF_FLOAT(TFromD<D>)>
@@ -820,12 +820,12 @@ EOTF_INLINE float Bt1361Eotf(float gamma) {
   if (gamma < -0.25f) {
     return -0.25f;
   } else if (gamma < 0.f) {
-    return std::powf((gamma - 0.02482420670236f) / -0.27482420670236f, 1.f / 0.45f) /
+    return ::powf((gamma - 0.02482420670236f) / -0.27482420670236f, 1.f / 0.45f) /
         -4.f;
   } else if (gamma < 4.5f * 0.018053968510807f) {
     return gamma / 4.5f;
   } else if (gamma < 1.f) {
-    return std::powf((gamma + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
+    return ::powf((gamma + 0.09929682680944f) / 1.09929682680944f, 1.f / 0.45f);
   }
   return 1.f;
 }
@@ -896,11 +896,11 @@ EOTF_INLINE float Bt1361Oetf(float linear) {
   if (linear < -0.25f) {
     return -0.25f;
   } else if (linear < 0.f) {
-    return -0.27482420670236f * std::powf(-4.f * linear, 0.45f) + 0.02482420670236f;
+    return -0.27482420670236f * ::powf(-4.f * linear, 0.45f) + 0.02482420670236f;
   } else if (linear < 0.018053968510807f) {
     return linear * 4.5f;
   } else if (linear < 1.f) {
-    return 1.09929682680944f * std::powf(linear, 0.45f) - 0.09929682680944f;
+    return 1.09929682680944f * ::powf(linear, 0.45f) - 0.09929682680944f;
   }
   return 1.f;
 }

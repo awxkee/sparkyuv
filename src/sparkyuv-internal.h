@@ -18,6 +18,8 @@
 
 #include <exception>
 #include <string>
+#include <algorithm>
+#include <cmath>
 
 #define SPARKYUV_RESTRICT __restrict__
 
@@ -106,7 +108,7 @@ static void GetYUVRange(const SparkYuvColorRange yuvColorRange, const int bitDep
   } else if (yuvColorRange == YUV_RANGE_PC) {
     biasY = 0;
     biasUV = static_cast<uint16_t>(1 << (static_cast<uint16_t>(bitDepth) - 1));
-    const auto maxColors = static_cast<uint16_t>(std::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
+    const auto maxColors = static_cast<uint16_t>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
     rangeY = maxColors;
     rangeUV = maxColors;
   } else {
