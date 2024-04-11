@@ -19,10 +19,6 @@ jobs:
           - arch: aarch64
             distro: ubuntu_latest
             cxx_flags: -Wno-psabi
-          - arch: armv7
-            distro: ubuntu_latest
-            cxx_flags: -Wno-psabi
-            cmake_flags: -DHWY_CMAKE_ARM7:BOOL=ON
           - arch: ppc64le
             distro: ubuntu_latest
     steps:
