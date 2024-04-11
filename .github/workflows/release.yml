@@ -32,20 +32,6 @@ jobs:
             cxx_compiler: clang++-15
             cxx_standard: 20
 
-          - name: GCC-11 (C++20)
-            extra_deps: g++-11
-            c_compiler: gcc-11
-            cxx_compiler: g++-11
-            cxx_flags: -ftrapv
-            cxx_standard: 20
-
-          - name: GCC-12 (C++20)
-            extra_deps: g++-12
-            c_compiler: gcc-12
-            cxx_compiler: g++-12
-            cxx_flags: -ftrapv
-            cxx_standard: 20
-
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -57,13 +43,26 @@ jobs:
       - name: Install deps
         run: sudo apt-get install ${{ matrix.extra_deps }} git
 
-      - name: Build and test
+      - name: Build Clang x86_64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -B out .
+          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -DBUILD_SHARED=ON -B out .
           cmake --build out
-          ctest --test-dir out
+      - name: Compress Clang x86_64 build
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          files: |
+            ./out/libsparkyuv.so
+            include
+          outPath: libsparkyuv.linux-x86_64.tar.gz
+      - name: Upload built library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libsparkyuv.linux-x86_64.tar.gz
+          path: libsparkyuv.linux-x86_64.tar.gz
