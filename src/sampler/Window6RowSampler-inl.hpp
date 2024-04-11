@@ -210,7 +210,6 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
       const int appendixLow[4] = {-2, -1, 0, 1};
       const int appendixHigh[4] = {2, 3, 0, 0};
 
-      const VF4 aVector = Set(dfx4, a);
       VF4 srcXV = Set(dfx4, srcX);
       VI4 kx1V = Set(dix4, kx1);
       const VI4 appendixLowV = LoadU(dix4, appendixLow);

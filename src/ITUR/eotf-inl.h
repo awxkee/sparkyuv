@@ -314,8 +314,8 @@ EOTF_INLINE V SRGBEotf(D d, V v) {
   const auto lowValueDivider = Set(d, static_cast<T>(1.0f) / static_cast<T>(12.92f));
   const auto lowMask = v <= lowerValueThreshold;
   const auto lowValue = Mul(v, lowValueDivider);
-  const auto powerStatic = Set(d, T(2.4f));
-  const auto addStatic = Set(d, T(0.0550107189475866f));
+  const auto powerStatic = Set(d, static_cast<T>(2.4f));
+  const auto addStatic = Set(d, static_cast<T>(0.0550107189475866f));
   const auto scaleStatic = Set(d, static_cast<T>(1.f / 1.0550107189475866f));
   const auto highValue = Pow(d, Mul(Add(v, addStatic), scaleStatic), powerStatic);
   auto result = IfThenElse(And(lowMask, v >= zeros), lowValue, v);

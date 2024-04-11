@@ -27,23 +27,6 @@
 #include <algorithm>
 #include <cmath>
 
-/**
-* VW ReorderWidenMulAccumulate(D d, V a, V b, VW sum0, VW& sum1): widens a and b to TFromD<D>,
-* then adds a[i] * b[i] to either sum1[j] or lane j of the return value, where j = P(i) and P is a permutation.
-* The only guarantee is that SumOfLanes(d, Add(return_value, sum1)) is the sum of all a[i] * b[i].
-* This is useful for computing dot products and the L2 norm.
-* The initial value of sum1 before any call to ReorderWidenMulAccumulate must be zero (because it is unused on some platforms).
-* It is safe to set the initial value of sum0 to any vector v;
-* this has the effect of increasing the total sum by GetLane(SumOfLanes(d, v)) and may be slightly more efficient than later adding v to sum0.
-*
-*
-* However on neon target there is vmlal which works pretty good so for neon it's preferable to accumulate results with
-* ReorderWidenMulAccumulate instead of passing zeros
-*/
-#if (HWY_ARCH_ARM_A64 && (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES))
-#define SPARKYUV_ALLOW_WIDE_MULL_ACCUMULATE 1
-#endif
-
 #if HWY_HAVE_FLOAT16 && (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES)
 #define SPARKYUV_ALLOW_FLOAT16 1
 #endif
@@ -154,9 +137,10 @@ HWY_API VN ShiftRightNarrow(D /* tag */, Vec<D> v) {
   return Vec64<uint16_t>(vshrn_n_u32(v.raw, n));
 }
 
-template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
-HWY_API VW AddWide(D /* tag */, Vec<D> v, Vec<D> x) {
-  return Vec128<uint16_t>(vaddl_u8(v.raw, x.raw));
+template<class D, HWY_IF_U16_D(D), HWY_IF_LANES_D(D, 8),
+         typename DN = Rebind<MakeNarrow<TFromD<D>>, D>>
+HWY_API VFromD<D> AddWide(D /* tag */, VFromD<DN> v, VFromD<DN> x) {
+  return VFromD<D>(vaddl_u8(v.raw, x.raw));
 }
 
 template<class D, HWY_IF_U8_D(D), typename DW = RepartitionToWide<D>, typename VW = Vec<DW>>
@@ -175,7 +159,7 @@ HWY_API VW WidenMul(D /* tag */, Vec<D> v, Vec<D> x) {
 }
 
 template<class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
-HWY_API VW WidenMulW(D d, Vec<D> v, VW x) {
+HWY_API VW WidenMulW(D /* tag */d, Vec<D> v, VW x) {
   const DW dw;
   return Mul(PromoteTo(dw, v), x);
 }
@@ -186,8 +170,13 @@ HWY_API VW ShiftLeftWide(D d, Vec<D> v) {
 }
 
 template<class D, HWY_IF_U16_D(D)>
-HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
+HWY_API VFromD<D> AddAndHalf(D d, VFromD<D> v1, VFromD<D> v2) {
   return Vec128<uint16_t>(vhaddq_u16(v1.raw, v2.raw));
+}
+
+template<class D, HWY_IF_U8_D(D), HWY_IF_LANES_D(D, 8)>
+HWY_API VFromD<D> AddAndHalf(D /* tag */, VFromD<D> v1, VFromD<D> v2) {
+  return Vec64<uint8_t>(vhadd_u8(v1.raw, v2.raw));
 }
 
 template<class D, HWY_IF_I16_D(D)>
@@ -271,6 +260,12 @@ HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
 template<class D, HWY_IF_I32_D(D)>
 HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
   return ShiftRight<1>(Add(v1, v2));
+}
+
+template<class D, HWY_IF_U16_D(D), HWY_IF_LANES_D(D, 8),
+    typename DN = Rebind<MakeNarrow<TFromD<D>>, D>>
+HWY_API VFromD<D> AddWide(D d, VFromD<DN> v, VFromD<DN> x) {
+  return Add(PromoteTo(d, v), PromoteTo(d, x));
 }
 
 #endif

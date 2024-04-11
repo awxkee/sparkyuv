@@ -110,14 +110,12 @@ class BoxSampler : public ScaleRowSampler<T> {
 
         const FixedTag<uint8_t, 8> d;
         const Half<decltype(d)> dh;
-        const RepartitionToWide<decltype(d)> d32;
+        const Rebind<uint16_t, decltype(d)> d16;
+        const RepartitionToWide<decltype(d16)> d32;
         const auto row1 = LoadU(d, &reinterpret_cast<const uint8_t *>(src8 + y1 * this->srcStride)[x1*4]);
         const auto row2 = LoadU(d, &reinterpret_cast<const uint8_t *>(src8 + y2 * this->srcStride)[x1*4]);
-        const auto row1Upper = PromoteUpperTo(d32, row1);
-        const auto row2Upper = PromoteUpperTo(d32, row2);
-        const auto row1Lower = PromoteLowerTo(d32, row1);
-        const auto row2Lower = PromoteLowerTo(d32, row2);
-        const auto newWidePX = ShiftRight<2>(Add(Add(Add(row1Lower, row1Upper), row2Lower), row2Upper));
+        const auto sums = AddWide(d16, row1, row2);
+        const auto newWidePX = ShiftRightNarrow<2>(d32, SumsOf2(sums));
         const auto newPX = DemoteTo(dh, newWidePX);
         StoreU(newPX, dh, reinterpret_cast<uint8_t *>(dst));
         dst += 4;
@@ -135,11 +133,7 @@ class BoxSampler : public ScaleRowSampler<T> {
 #if SPARKYUV_ALLOW_FLOAT16
         const auto row1 = LoadU(df16, &reinterpret_cast<const hwy::float16_t *>(src8 + y1 * this->srcStride)[x1*4]);
         const auto row2 = LoadU(df16, &reinterpret_cast<const hwy::float16_t *>(src8 + y2 * this->srcStride)[x1*4]);
-        const auto row1Upper = UpperHalf(df16, row1);
-        const auto row2Upper = UpperHalf(df16, row2);
-        const auto row1Lower = LowerHalf(row1);
-        const auto row2Lower = LowerHalf(row2);
-        const auto newWidePX = Mul(Add(Add(Add(row1Lower, row1Upper), row2Lower), row2Upper), v16Scale);
+        const auto newWidePX = Mul(DemoteTo(df16, SumsOf2(Add(row1, row2))), v16Scale);
         const auto newPX = newWidePX;
         StoreU(newPX, dhf16, reinterpret_cast<hwy::float16_t *>(dst));
 #else
