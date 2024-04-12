@@ -33,13 +33,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=out" >> "$GITHUB_OUTPUT"
       - name: Build and test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=ON -B out .
-          cmake --build out --config Release
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_SHARED=ON -B ${{ steps.strings.outputs.build-output-dir }} -S .
+          cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
           ctest --test-dir out
           cp out/Release/sparkyuv.dll sparkyuv.dll
       - name: Compress MSVC x86_64 build
