@@ -66,7 +66,7 @@ jobs:
             export CTEST_PARALLEL_LEVEL=2
             cmake -G "Ninja" \
               -DCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
-              -DBUILD_SHARED=OFF \
+              -DBUILD_SHARED=ON \
               -B out .
             ninja -j 8 -C out
             ctest --test-dir out

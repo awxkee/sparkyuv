@@ -1,0 +1,51 @@
+permissions: read-all
+
+name: Build x86_64 Windows
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!ci_test_*'
+  pull_request:
+    branches:
+      - '*'
+      - '!ci_test_*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cmake_ubuntu_2204:
+    name: Build and test ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [windows-latest]
+        build_type: [Release]
+        c_compiler: [cl]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit  # cannot be block - runner does git checkout
+
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+
+      - name: Build and test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export CMAKE_BUILD_PARALLEL_LEVEL=2
+          export CTEST_PARALLEL_LEVEL=2
+          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -B out .
+          cmake --build out
+          ctest --test-dir out
