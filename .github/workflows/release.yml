@@ -234,7 +234,6 @@ jobs:
           cp out/libsparkyuv.so libsparkyuv.so
           
           tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
-          cp libsparkyuv.linux-graviton-v2.tar.gz "/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
       - name: Upload built graviton library
         uses: actions/upload-artifact@v4
         id: artifact-linux-graviton-v2
