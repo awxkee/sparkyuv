@@ -69,21 +69,21 @@ jobs:
 
       - name: Upload built library Armeabi-v7a
         uses: actions/upload-artifact@v4
-        id: artifact-linux-arm64-v8a
+        id: artifact-linux-armeabi-v7a
         with:
           name: libsparkyuv.android-armeabi-v7a.tar.gz
           path: libsparkyuv.android-armeabi-v7a.tar.gz
 
       - name: Upload built library x86
         uses: actions/upload-artifact@v4
-        id: artifact-linux-arm64-v8a
+        id: artifact-linux-x86
         with:
           name: libsparkyuv.android-x86.tar.gz
           path: libsparkyuv.android-x86.tar.gz
 
       - name: Upload built library x86_64
         uses: actions/upload-artifact@v4
-        id: artifact-linux-arm64-v8a
+        id: artifact-linux-x86_64
         with:
           name: libsparkyuv.android-x86_64.tar.gz
           path: libsparkyuv.android-x86_64.tar.gz
