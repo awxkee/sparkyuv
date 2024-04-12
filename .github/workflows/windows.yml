@@ -39,17 +39,17 @@ jobs:
         run: |
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
           cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=ON -B out .
-          cmake --build out
+          cmake --config Release --build out
           ctest --test-dir out
           dir ./out /s /b /o:gn
-          cp out/sparkyuv.dll libsparkyuv.dll
+          cp out/Release/sparkyuv.dll sparkyuv.dll
       - name: Compress MSVC x86_64 build
         uses: a7ul/tar-action@v1.1.0
         id: compress
         with:
           command: c
           files: |
-            libsparkyuv.dll
+            sparkyuv.dll
             include
           outPath: libsparkyuv.windows-x86_64.tar.gz
       - name: Upload built graviton library
