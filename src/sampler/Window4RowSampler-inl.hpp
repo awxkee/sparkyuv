@@ -179,7 +179,7 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
         auto row = reinterpret_cast<const uint8_t *>(this->mSource
             + std::clamp(yj, 0, this->inputHeight - 1) * this->srcStride);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int i = -a + 1; i <= a; i++) {
@@ -189,7 +189,7 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
 
           const int px = std::clamp(xi, 0, this->inputWidth - 1) * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
           for (int c = 0; c < components; ++c) {
@@ -202,7 +202,7 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
 
       const int px = x * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {
@@ -284,7 +284,7 @@ class WeightedWindow4RowSampler16Bit : public ScaleRowSampler<uint16_t> {
       float rgb[components];
       std::fill(rgb, rgb + components, 0.0f);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int j = -a + 1; j <= a; j++) {
@@ -295,7 +295,7 @@ class WeightedWindow4RowSampler16Bit : public ScaleRowSampler<uint16_t> {
         auto row = reinterpret_cast<const uint16_t *>(reinterpret_cast<const uint8_t *>(this->mSource)
             + std::clamp(yj, 0, this->inputHeight - 1) * this->srcStride);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int i = -a + 1; i <= a; i++) {
@@ -305,7 +305,7 @@ class WeightedWindow4RowSampler16Bit : public ScaleRowSampler<uint16_t> {
 
           const int px = std::clamp(xi, 0, this->inputWidth - 1) * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
           for (int c = 0; c < components; ++c) {
@@ -318,7 +318,7 @@ class WeightedWindow4RowSampler16Bit : public ScaleRowSampler<uint16_t> {
 
       const int px = x * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {
@@ -387,7 +387,7 @@ class WeightedWindow4RowSampler10Bit : public ScaleRowSampler<uint32_t> {
 
       float rgb[4] = {0, 0, 0, 0};
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int j = -a + 1; j <= a; j++) {
@@ -398,7 +398,7 @@ class WeightedWindow4RowSampler10Bit : public ScaleRowSampler<uint32_t> {
         auto row = reinterpret_cast<const uint32_t *>(reinterpret_cast<const uint8_t *>(this->mSource) +
             std::clamp(yj, 0, this->inputHeight - 1) * this->srcStride);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int i = -a + 1; i <= a; i++) {
@@ -541,7 +541,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       VI4 kx1V = Set(dix4, kx1);
       const VI4 appendixLowV = LoadU(dix4, appendixLow);
 
-      #if HWY_CXX_LANG
+      #if defined(__clang__)
       #pragma clang loop unroll(full)
       #endif
       for (int j = -a + 1; j <= a; j++) {
@@ -555,7 +555,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
         VF4 dx = Sub(srcXV, ConvertTo(dfx4, xi));
         VF4 weights = Mul(samplerHWY(dfx4, dx), yWeightV);
 
-        #if HWY_CXX_LANG
+        #if defined(__clang__)
         #pragma clang loop unroll(full)
         #endif
         for (int i = 0; i < 4; ++i) {
@@ -583,7 +583,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       float kx1 = ::floorf(srcX);
       float ky1 = ::floorf(srcY);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int j = -a + 1; j <= a; j++) {
@@ -591,7 +591,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
         float dy = float(srcY) - (float(ky1) + (float) j);
         float yWeight = sampler(dy);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int i = -a + 1; i <= a; i++) {
@@ -604,7 +604,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
           const int px = std::clamp(xi, 0, this->inputWidth - 1) * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
           for (int c = 0; c < components; ++c) {
@@ -617,7 +617,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
       int px = x * components;
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {

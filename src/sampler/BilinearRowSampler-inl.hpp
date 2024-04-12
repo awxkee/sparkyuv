@@ -110,7 +110,7 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
       VI4 row1Add = Mul(yi1, srcStrideV);
       VI4 row2Add = Mul(yi2, srcStrideV);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int i = 0; i < 4; i++) {
@@ -240,7 +240,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       VF4 dx = Max(Sub(currentXVF, ConvertTo(dfx4, xi1)), vfZeros);
       VF4 dy = Max(Sub(currentYVF, ConvertTo(dfx4, yi1)), vfZeros);
 
-      #if HWY_CXX_LANG
+      #if defined(__clang__)
       #pragma clang loop unroll(full)
       #endif
       for (int i = 0; i < 4; i++) {
@@ -346,7 +346,7 @@ class BilinearRowSamplerAnyBit : public ScaleRowSampler<T> {
       auto row1 = reinterpret_cast<const T *>(src8 + y1 * this->srcStride);
       auto row2 = reinterpret_cast<const T *>(src8 + y2 * this->srcStride);
 
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
       for (int c = 0; c < components; ++c) {

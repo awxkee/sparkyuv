@@ -70,8 +70,10 @@ RgbaToRGB(const T *__restrict__ src, const uint32_t srcStride,
   }
 }
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cert-err52-cpp"
+#endif
 std::vector<uint8_t> JPEGEncoder::encodeRGB() {
   int newStride = sizeof(uint8_t) * width * 3;
 
@@ -127,7 +129,9 @@ std::vector<uint8_t> JPEGEncoder::encodeRGB() {
 
   return output;
 }
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
 std::vector<uint8_t> JPEGEncoder::encode() {
   int newStride = sizeof(uint8_t) * width * 3;

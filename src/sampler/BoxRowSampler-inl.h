@@ -172,7 +172,7 @@ class BoxSampler : public ScaleRowSampler<T> {
       auto row2 = reinterpret_cast<const T *>(src8 + y2 * this->srcStride);
 
       if (PixelType != sparkyuv::BOX_RGBA1010102 && PixelType != sparkyuv::BOX_FLOAT16) {
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int c = 0; c < components; ++c) {
@@ -186,7 +186,7 @@ class BoxSampler : public ScaleRowSampler<T> {
           dst += 1;
         }
       } else if (PixelType == sparkyuv::BOX_FLOAT16) {
-#if HWY_CXX_LANG
+#if defined(__clang__)
 #pragma clang loop unroll(full)
 #endif
         for (int c = 0; c < components; ++c) {

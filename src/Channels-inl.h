@@ -88,8 +88,10 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
 
     uint32_t x = 0;
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "Simplify"
+#endif
     if (useHWY) {
       for (; x + lanes < width; x += lanes) {
         VF in1, in2, in3, in4;
@@ -300,7 +302,9 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
         dstPixels += components * lanes;
       }
     }
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
     for (; x < width; ++x) {
       float r;
@@ -449,8 +453,10 @@ ReformatSurfaceToF16(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
     uint32_t x = 0;
 
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "Simplify"
+#endif
     if (useHWY) {
       for (; x + lanes < width; x += lanes) {
         VF in1, in2, in3, in4;
@@ -682,6 +688,9 @@ ReformatSurfaceToF16(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         dstPixels += components * lanes;
       }
     }
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
     for (; x < width; ++x) {
       float r;
