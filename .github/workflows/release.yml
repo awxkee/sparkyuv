@@ -143,4 +143,4 @@ jobs:
       - run: ls -la
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "sparkyuv.tar.gz,libsparkyuv.ZZlinux-*.tar.gz"
+          artifacts: "sparkyuv.tar.gz,libsparkyuv.linux-*.tar.gz"
