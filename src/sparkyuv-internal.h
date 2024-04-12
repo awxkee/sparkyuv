@@ -22,7 +22,11 @@
 #include <cmath>
 #include <stdexcept>
 
+#if defined(__GNUC__) || defined(__clang__)
 #define SPARKYUV_RESTRICT __restrict__
+#else
+#define SPARKYUV_RESTRICT
+#endif
 
 namespace sparkyuv {
 
