@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   cmake_ubuntu_x86_64:
-    name: Build ${{ matrix.name }}
+    name: Build x86_64
     runs-on: ubuntu-22.04
     strategy:
       matrix:
