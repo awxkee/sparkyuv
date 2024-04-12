@@ -93,6 +93,8 @@ jobs:
                   ninja-build \
                   git curl \
                   ;
+            apt-get reinstall -y ca-certificates
+            update-ca-certificates
           run: |
             export GIT_SSL_NO_VERIFY=1
             git config --global http.sslverify false
@@ -131,15 +133,11 @@ jobs:
           files: |
             ../sparkyuv
           outPath: sparkyuv.tar.gz
-      - name: Download Binaries
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_RUNID: ${{ github.run_id }}
-        run: |
-          apt-get update -q -y
-          apt-get install -y curl
-          curl --output libsparkyuv.linux-x86_64.tar.gz https://token:${GITHUB_TOKEN}@github.com/awxkee/sparkyuv/actions/runs/${GITHUB_RUNID}/artifacts/artifact-linux-x86_64
-          curl --output libsparkyuv.linux-aarch64.tar.gz https://token:${GITHUB_TOKEN}@github.com/awxkee/sparkyuv/actions/runs/${GITHUB_RUNID}/artifacts/artifact-linux-aarch64
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - run: ls -la
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "sparkyuv.tar.gz,libsparkyuv.linux-x86_64.tar.gz,libsparkyuv.linux-aarch64.tar.gz"
