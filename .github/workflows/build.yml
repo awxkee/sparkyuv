@@ -5,12 +5,12 @@ name: Build / test
 on:
   push:
     branches:
-      - none
+      - '*'
+      - '!ci_test_*'
   pull_request:
     branches:
-      - none
-
-# [push, pull_request]
+      - '*'
+      - '!ci_test_*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

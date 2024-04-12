@@ -7,10 +7,12 @@ name: Build android static
 on:
   push:
     branches:
-      - none
+      - '*'
+      - '!ci_test_*'
   pull_request:
     branches:
-      - none
+      - '*'
+      - '!ci_test_*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

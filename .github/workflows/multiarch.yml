@@ -4,10 +4,12 @@ name: Foreign architectures
 on:
   push:
     branches:
-      - none
+      - '*'
+      - '!ci_test_*'
   pull_request:
     branches:
-      - none
+      - '*'
+      - '!ci_test_*'
 
 # [push, pull_request]
 

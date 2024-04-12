@@ -2,9 +2,15 @@ permissions: read-all
 
 name: Build Graviton
 
-on: [push]
-
-# [push, pull_request]
+on:
+  push:
+    branches:
+      - '*'
+      - '!ci_test_*'
+  pull_request:
+    branches:
+      - '*'
+      - '!ci_test_*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
