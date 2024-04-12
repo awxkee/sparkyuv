@@ -12,14 +12,12 @@ for abi in ${ABI_LIST}; do
     -G "Ninja" \
     -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=${abi} -DCMAKE_ANDROID_ARCH_ABI=${abi} \
     -DANDROID_NDK=${ANDROID_NDK_HOME} \
-    -DSJPEG_ANDROID_NDK_PATH=${ANDROID_NDK_HOME} \
     -DANDROID_PLATFORM=android-21 \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED=OFF \
     -DCMAKE_SYSTEM_NAME=Generic \
     -DCMAKE_ANDROID_STL_TYPE=c++_shared \
     -DCMAKE_SYSTEM_NAME=Android \
-    -DCMAKE_THREAD_PREFER_PTHREAD=TRUE \
     -DANDROID=TRUE
   ninja
   cd ..
