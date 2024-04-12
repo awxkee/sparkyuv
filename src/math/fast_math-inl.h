@@ -27,7 +27,11 @@
 #include "common.h"
 #include "rational_polynomial-inl.h"
 
+#if defined(__GNUC__) || defined(__clang__)
 #define HWY_FAST_MATH_INLINE inline __attribute__((flatten))
+#else
+#define HWY_FAST_MATH_INLINE inline
+#endif
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {

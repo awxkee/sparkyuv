@@ -25,7 +25,11 @@
 #include "hwy/highway.h"
 #include "fast_math-inl.h"
 
+#if defined(__GNUC__) || defined(__clang__)
 #define HWY_MATH_INLINE static inline __attribute__((flatten))
+#else
+#define HWY_MATH_INLINE static
+#endif
 
 HWY_BEFORE_NAMESPACE();
 

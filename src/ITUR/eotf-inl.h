@@ -24,7 +24,11 @@
 #include "hwy/highway.h"
 #include "../math/math-inl.h"
 
+#if defined(__GNUC__) || defined(__clang__)
 #define EOTF_INLINE inline __attribute__((flatten))
+#else
+#define EOTF_INLINE inline
+#endif
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
