@@ -31,7 +31,11 @@
 #define SPARKYUV_ALLOW_FLOAT16 1
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
 #define SPARKYUV_INLINE __attribute__((flatten)) inline
+#else
+#define SPARKYUV_INLINE inline
+#endif
 
 HWY_BEFORE_NAMESPACE();
 
