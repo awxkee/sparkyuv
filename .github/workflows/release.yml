@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
 
       - name: Install deps
-        run: sudo apt-get install ${{ matrix.extra_deps }} git
+        run: sudo apt-get install ${{ matrix.extra_deps }} git curl
 
       - name: Build Clang x86_64
         env:
@@ -89,7 +89,7 @@ jobs:
                   build-essential \
                   cmake \
                   ninja-build \
-                  git \
+                  git curl \
                   ;
           run: |
             export GIT_SSL_NO_VERIFY=1
