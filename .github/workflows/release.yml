@@ -245,6 +245,7 @@ jobs:
             export CTEST_PARALLEL_LEVEL=2
             cmake -G "Ninja" \
               -DCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
+              -DCMAKE_BUILD_TYPE=Release \
               -DBUILD_SHARED=ON \
               -B out .
             ninja -j 8 -C out
@@ -269,6 +270,7 @@ jobs:
       - gcc_ubuntu_arm64
       - cmake_ubuntu_x86_64
       - android_build
+      - build_release_graviton
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
