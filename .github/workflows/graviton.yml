@@ -73,4 +73,4 @@ jobs:
         id: artifact-linux-graviton-v2
         with:
           name: libsparkyuv.linux-graviton-v2.tar.gz
-          path: "${PWD}/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
+          path: libsparkyuv.linux-graviton-v2.tar.gz
