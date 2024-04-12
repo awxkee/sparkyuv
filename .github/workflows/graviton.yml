@@ -46,4 +46,4 @@ jobs:
             -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
             -DBUILD_SHARED=ON \
             -B out .
-          ninja out
+          ninja -C out
