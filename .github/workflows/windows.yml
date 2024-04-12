@@ -6,18 +6,18 @@ on:
   push:
     branches:
       - '*'
-#      - '!ci_test_*'
+      - '!ci_test_*'
   pull_request:
     branches:
       - '*'
-#      - '!ci_test_*'
+      - '!ci_test_*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  cmake_windows:
+  make_windows_x86_64:
     name: Build x86_64 Windows
     runs-on: ${{ matrix.os }}
     strategy:
