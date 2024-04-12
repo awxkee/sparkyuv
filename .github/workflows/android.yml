@@ -28,16 +28,12 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r21e
-          add-to-path: false
-      - run: ./build.sh
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
-      - name: Build and test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
+          add-to-path: true
+      - run: |
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
           bash ci_android_runnner.sh
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
