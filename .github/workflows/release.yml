@@ -1,12 +1,10 @@
 permissions: read-all
 name: Create release artifacts
 
-on: [push, pull_request]
-
-#on:
-#  push:
-#    tags:
-#      - '*'
+on:
+  push:
+    tags:
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -130,7 +128,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Compress GCC x86_64 build
+      - name: Compress Sources
         uses: a7ul/tar-action@v1.1.0
         id: compress
         with:
@@ -145,4 +143,4 @@ jobs:
       - run: ls -la
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "sparkyuv.tar.gz,libsparkyuv.linux-x86_64.tar.gz,libsparkyuv.linux-aarch64.tar.gz"
+          artifacts: "sparkyuv.tar.gz,libsparkyuv.linux-*.tar.gz"
