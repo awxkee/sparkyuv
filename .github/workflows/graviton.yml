@@ -17,12 +17,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Clang-15 (C++20)
-            extra_deps: clang-15
-            c_compiler: clang-15
-            cxx_compiler: clang++-15
-            cxx_standard: 20
-
+          - arch: aarch64
+            distro: ubuntu_latest
+            cxx_flags: -Wno-psabi
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -31,26 +28,49 @@ jobs:
 
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
 
-      - name: Install deps
-        run: sudo apt-get install ${{ matrix.extra_deps }} git ninja-build
-
       - name: Build and test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -G "Ninja" \
-            -DCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
-            -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
-            -DBUILD_SHARED=ON \
-            -B out .
-          ninja -j 8 -C out
-          cp out/libsparkyuv.so libsparkyuv.so
-        
-          tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
+        uses: uraimo/run-on-arch-action@v2.7.1
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+          env: |
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y --no-install-recommends \
+                  build-essential \
+                  cmake \
+                  ninja-build clang-15 \
+                  git \
+                  ;
+            apt-get reinstall -y ca-certificates
+            update-ca-certificates
+          run: |
+            export GIT_SSL_NO_VERIFY=1
+            git config --global http.sslverify false
+            git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+            export CMAKE_BUILD_PARALLEL_LEVEL=2
+            export CTEST_PARALLEL_LEVEL=2
+            cmake -G "Ninja" \
+              -DCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
+              -DBUILD_SHARED=ON \
+              -B out .
+            ninja -j 8 -C out
+            ctest --test-dir out
+            
+            cp out/libsparkyuv.so libsparkyuv.so
+            tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
+            cp libsparkyuv.linux-graviton-v2.tar.gz "/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
       - name: Upload built graviton library
         uses: actions/upload-artifact@v4
         id: artifact-linux-graviton-v2
         with:
           name: libsparkyuv.linux-graviton-v2.tar.gz
-          path: libsparkyuv.linux-graviton-v2.tar.gz
+          path: "${PWD}/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"

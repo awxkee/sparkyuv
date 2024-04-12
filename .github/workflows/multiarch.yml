@@ -51,6 +51,8 @@ jobs:
                   ninja-build \
                   git \
                   ;
+            apt-get reinstall -y ca-certificates
+            update-ca-certificates
           run: |
             export GIT_SSL_NO_VERIFY=1
             git config --global http.sslverify false

@@ -115,7 +115,7 @@ jobs:
         id: artifact-linux-aarch64
         with:
           name: libsparkyuv.linux-aarch64.tar.gz
-          path: libsparkyuv.linux-aarch64.tar.gz
+          path: "${PWD}/artifacts/libsparkyuv.linux-aarch64.tar.gz"
 
   android_build:
     name: Build
