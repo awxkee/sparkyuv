@@ -117,6 +117,85 @@ jobs:
           name: libsparkyuv.linux-aarch64.tar.gz
           path: libsparkyuv.linux-aarch64.tar.gz
 
+  android_build:
+    name: Build
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit  # cannot be block - runner does git checkout
+
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+
+      - name: Install deps
+        run: sudo apt-get install git ninja-build
+
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+          add-to-path: true
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          export CMAKE_BUILD_PARALLEL_LEVEL=2
+          export CTEST_PARALLEL_LEVEL=2
+          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+          bash toolchain/ci_android_runner.sh
+
+          echo "Creating arm64-v8a Package"
+          cp build-arm64-v8a/libsparkyuv.a libsparkyuv.a
+          tar -cf libsparkyuv.android-arm64-v8a.tar.gz libsparkyuv.a include
+
+          rm -rf libsparkyuv.a
+
+          echo "Creating armeabi-v7a Package"
+          cp build-armeabi-v7a/libsparkyuv.a libsparkyuv.a
+          tar -cf libsparkyuv.android-armeabi-v7a.tar.gz libsparkyuv.a include
+
+          rm -rf libsparkyuv.a
+
+          echo "Creating x86 Package"
+          cp build-x86/libsparkyuv.a libsparkyuv.a
+          tar -cf libsparkyuv.android-x86.tar.gz libsparkyuv.a include
+
+          rm -rf libsparkyuv.a
+
+          echo "Creating x86_64 Package"
+          cp build-x86_64/libsparkyuv.a libsparkyuv.a
+          tar -cf libsparkyuv.android-x86_64.tar.gz libsparkyuv.a include
+
+      - name: Upload built library ARM64-v8a
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-arm64-v8a
+        with:
+          name: libsparkyuv.android-arm64-v8a.tar.gz
+          path: libsparkyuv.android-arm64-v8a.tar.gz
+
+      - name: Upload built library Armeabi-v7a
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-armeabi-v7a
+        with:
+          name: libsparkyuv.android-armeabi-v7a.tar.gz
+          path: libsparkyuv.android-armeabi-v7a.tar.gz
+
+      - name: Upload built library x86
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-x86
+        with:
+          name: libsparkyuv.android-x86.tar.gz
+          path: libsparkyuv.android-x86.tar.gz
+
+      - name: Upload built library x86_64
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-x86_64
+        with:
+          name: libsparkyuv.android-x86_64.tar.gz
+          path: libsparkyuv.android-x86_64.tar.gz
+
   create_release:
     name: Create and upload release
     runs-on: ubuntu-22.04
@@ -125,6 +204,7 @@ jobs:
     needs:
       - gcc_ubuntu_arm64
       - cmake_ubuntu_x86_64
+      - android_build
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

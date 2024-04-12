@@ -1,0 +1,49 @@
+permissions: read-all
+
+name: Build Graviton
+
+on: [push]
+
+# [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clang_graviton:
+    name: Build Graviton
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - name: Clang-15 (C++20)
+            extra_deps: clang-15
+            c_compiler: clang-15
+            cxx_compiler: clang++-15
+            cxx_standard: 20
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit  # cannot be block - runner does git checkout
+
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+
+      - name: Install deps
+        run: sudo apt-get install ${{ matrix.extra_deps }} git ninja-build
+
+      - name: Build and test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export CMAKE_BUILD_PARALLEL_LEVEL=2
+          export CTEST_PARALLEL_LEVEL=2
+          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -G "Ninja" \
+            -DDCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
+            -DBUILD_SHARED=ON \
+            -B out .
+          ninja out

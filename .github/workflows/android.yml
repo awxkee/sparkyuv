@@ -2,7 +2,15 @@ permissions: read-all
 
 name: Build android static
 
-on: [push, pull_request]
+#on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - none
+  pull_request:
+    branches:
+      - none
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,7 +44,7 @@ jobs:
           export CMAKE_BUILD_PARALLEL_LEVEL=2
           export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          bash ci_android_runner.sh
+          bash toolchain/ci_android_runner.sh
           
           echo "Creating arm64-v8a Package"
           cp build-arm64-v8a/libsparkyuv.a libsparkyuv.a
