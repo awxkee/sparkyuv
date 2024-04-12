@@ -101,21 +101,14 @@ jobs:
             cmake --build out
             rm -rf libsparkyuv.so
             cp ./out/libsparkyuv.so libsparkyuv.so
-      - name: Compress build
-        uses: a7ul/tar-action@v1.1.0
-        id: compress
-        with:
-          command: c
-          files: |
-            libsparkyuv.so
-            include
-          outPath: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
-      - name: Upload built library
-        uses: actions/upload-artifact@v4
-        id: artifact-linux-${{ matrix.arch }}
-        with:
-          name: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
-          path: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
+            
+            tar -cf libsparkyuv.linux-${{ matrix.arch }}.tar.gz libsparkyuv.so include
+            
+            curl -X POST \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @"libsparkyuv.linux-${{ matrix.arch }}.tar.gz" \
+              "https://api.github.com/repos/awxkee/highway/actions/artifacts/artifact-linux-${{ matrix.arch }}/upload"
 
   create_release:
     name: Create and upload release
