@@ -27,7 +27,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r25c
+          ndk-version: r26d
           add-to-path: true
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -39,25 +39,25 @@ jobs:
           bash ci_android_runner.sh
           
           echo "Creating arm64-v8a Package"
-          cp libsparkyuv.a build-arm64-v8a/libsparkyuv.a
+          cp build-arm64-v8a/libsparkyuv.a libsparkyuv.a
           tar -cf libsparkyuv.android-arm64-v8a.tar.gz libsparkyuv.a include
           
           rm -rf libsparkyuv.a
           
           echo "Creating armeabi-v7a Package"
-          cp libsparkyuv.a build-armeabi-v7a/libsparkyuv.a
+          cp build-armeabi-v7a/libsparkyuv.a libsparkyuv.a
           tar -cf libsparkyuv.android-armeabi-v7a.tar.gz libsparkyuv.a include
           
           rm -rf libsparkyuv.a
           
           echo "Creating x86 Package"
-          cp libsparkyuv.a build-x86/libsparkyuv.a
+          cp build-x86/libsparkyuv.a libsparkyuv.a
           tar -cf libsparkyuv.android-x86.tar.gz libsparkyuv.a include
           
           rm -rf libsparkyuv.a
           
           echo "Creating x86_64 Package"
-          cp libsparkyuv.a build-x86_64/libsparkyuv.a
+          cp build-x86_64/libsparkyuv.a libsparkyuv.a
           tar -cf libsparkyuv.android-x86_64.tar.gz libsparkyuv.a include
 
       - name: Upload built library ARM64-v8a
