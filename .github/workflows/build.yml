@@ -1,6 +1,17 @@
 permissions: read-all
+
 name: Build / test
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - none
+  pull_request:
+    branches:
+      - none
+
+# [push, pull_request]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
