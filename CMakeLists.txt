@@ -38,6 +38,7 @@ set(SPARKYUV_SOURCES
 set(HWY_SOURCES
         highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc
         highway/hwy/nanobenchmark.cc highway/hwy/per_target.cc highway/hwy/timer.cc
+        highway/hwy/abort.cc
         src/Eotf.cpp
         src/Eotf-inl.h)
 
