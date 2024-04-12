@@ -114,12 +114,31 @@ static float HLGOetf(float linear) {
   }
 }
 
-template<class D, typename V>
+template<class D, typename V, HWY_IF_F32_D(D)>
+HWY_API VFromD<D> HLGOetf(D df, V v) {
+  const auto zeros = Zero(df);
+  const auto ones = Set(df, 1.0f);
+  auto linear = Clamp(Mul(v, Set(df, 203.f / 1000.f)), zeros, ones);
+  linear = sparkyuv::HWY_NAMESPACE::Pow(df, linear, Set(df, 1.0f / 1.2f));
+  const auto inter = hwy::HWY_NAMESPACE::Sqrt(Mul(linear, Set(df, 3.0f)));
+  const auto other = MulAdd(
+      sparkyuv::HWY_NAMESPACE::Lognf(df, MulAdd(Set(df, 12.0f), linear, Set(df, -0.28466892f))),
+      Set(df, 0.17883277f), Set(df, 0.55991073f)
+  );
+  const auto cutoff = Set(df, 1.0f / 12.0f);
+  auto x = IfThenElse(linear < zeros, zeros, linear);
+  x = IfThenElse(And(linear >= zeros, linear <= cutoff), inter, x);
+  x = IfThenElse(linear  > cutoff, other, x);
+  return x;
+}
+
+template<class D, class V, HWY_IF_F16_D(D)>
 HWY_API VFromD<D> HLGOetf(D d, V v) {
-  for (size_t i = 0; i < MaxLanes(d); ++i) {
-    v.raw[i] = HLGOetf(v.raw[i]);
-  }
-  return v;
+  const Half<decltype(d)> dh;
+  const Rebind<float32_t, decltype(dh)> df;
+  const auto lo = HLGOetf(df, PromoteLowerTo(df, v));
+  const auto hi = HLGOetf(df, PromoteLowerTo(df, v));
+  return Combine(d, DemoteTo(dh, hi), DemoteTo(dh, lo));
 }
 
 using hwy::HWY_NAMESPACE::Zero;
