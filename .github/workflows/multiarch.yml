@@ -58,5 +58,5 @@ jobs:
             export CMAKE_BUILD_PARALLEL_LEVEL=2
             export CTEST_PARALLEL_LEVEL=2
             CXXFLAGS=${{ matrix.cxx_flags }} cmake -GNinja ${{ matrix.cmake_flags }} -B out .
-            cmake --build out
+            ninja -j 8 -C out
             ctest --test-dir out

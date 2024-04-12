@@ -40,7 +40,7 @@ jobs:
         run: |
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
           CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -G "Ninja" \
-            -DDCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
             -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
             -DBUILD_SHARED=ON \
             -B out .
