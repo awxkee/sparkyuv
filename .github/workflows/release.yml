@@ -196,6 +196,52 @@ jobs:
           name: libsparkyuv.android-x86_64.tar.gz
           path: libsparkyuv.android-x86_64.tar.gz
 
+  build_release_graviton:
+    name: Build Graviton
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - name: Clang-15 (C++20)
+            extra_deps: clang-15
+            c_compiler: clang-15
+            cxx_compiler: clang++-15
+            cxx_standard: 20
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit  # cannot be block - runner does git checkout
+
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+
+      - name: Install deps
+        run: sudo apt-get install ${{ matrix.extra_deps }} git ninja-build
+
+      - name: Build and test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -G "Ninja" \
+            -DDCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
+            -DBUILD_SHARED=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -B out .
+          ninja -j 8 -C out
+          cp out/libsparkyuv.so libsparkyuv.so
+          
+          tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
+          cp libsparkyuv.linux-graviton-v2.tar.gz "/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
+      - name: Upload built graviton library
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-graviton-v2
+        with:
+          name: libsparkyuv.linux-graviton-v2.tar.gz
+          path: libsparkyuv.linux-graviton-v2.tar.gz
+
   create_release:
     name: Create and upload release
     runs-on: ubuntu-22.04

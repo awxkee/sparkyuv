@@ -38,12 +38,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export CMAKE_BUILD_PARALLEL_LEVEL=2
-          export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
           CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -G "Ninja" \
             -DDCMAKE_TOOLCHAIN_FILE=toolchain/graviton.cmake \
             -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} \
             -DBUILD_SHARED=ON \
             -B out .
-          ninja -C out
+          ninja -j 8 -C out
+          cp out/libsparkyuv.so libsparkyuv.so
+        
+          tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
+          cp libsparkyuv.linux-graviton-v2.tar.gz "/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
+
+      - name: Upload built graviton library
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-graviton-v2
+        with:
+          name: libsparkyuv.linux-graviton-v2.tar.gz
+          path: libsparkyuv.linux-graviton-v2.tar.gz
