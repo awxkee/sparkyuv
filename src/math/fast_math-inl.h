@@ -27,6 +27,12 @@
 #include "common.h"
 #include "rational_polynomial-inl.h"
 
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+#include <cmath>
+
 #if defined(__GNUC__) || defined(__clang__)
 #define HWY_FAST_MATH_INLINE inline __attribute__((flatten))
 #else
