@@ -20,49 +20,108 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cmake_ubuntu_2204:
-    name: Build and test ${{ matrix.name }}
+#  cmake_ubuntu_x86_64:
+#    name: Build and test ${{ matrix.name }}
+#    runs-on: ubuntu-22.04
+#    strategy:
+#      matrix:
+#        include:
+#          - name: Clang-15 (C++20)
+#            extra_deps: clang-15
+#            c_compiler: clang-15
+#            cxx_compiler: clang++-15
+#            cxx_standard: 20
+#
+#    steps:
+#      - name: Harden Runner
+#        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+#        with:
+#          egress-policy: audit  # cannot be block - runner does git checkout
+#
+#      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
+#
+#      - name: Install deps
+#        run: sudo apt-get install ${{ matrix.extra_deps }} git
+#
+#      - name: Build Clang x86_64
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          export CMAKE_BUILD_PARALLEL_LEVEL=2
+#          export CTEST_PARALLEL_LEVEL=2
+#          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+#          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -DBUILD_SHARED=ON -B out .
+#          cmake --build out
+#          cp ./out/libsparkyuv.so libsparkyuv.so
+#      - name: Compress Clang x86_64 build
+#        uses: a7ul/tar-action@v1.1.0
+#        id: compress
+#        with:
+#          command: c
+#          files: |
+#            libsparkyuv.so
+#            include
+#          outPath: libsparkyuv.linux-x86_64.tar.gz
+#      - name: Upload built library
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: libsparkyuv.linux-x86_64.tar.gz
+#          path: libsparkyuv.linux-x86_64.tar.gz
+
+  gcc_ubuntu_arm64_ppc64le:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: true
       matrix:
         include:
-          - name: Clang-15 (C++20)
-            extra_deps: clang-15
-            c_compiler: clang-15
-            cxx_compiler: clang++-15
-            cxx_standard: 20
-
+          - arch: aarch64
+            distro: ubuntu_latest
+            cxx_flags: -Wno-psabi
+          - arch: ppc64le
+            distro: ubuntu_latest
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build and test
+        uses: uraimo/run-on-arch-action@v2.7.1
+        id: build
         with:
-          egress-policy: audit  # cannot be block - runner does git checkout
-
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.0.0
-
-      - name: Install deps
-        run: sudo apt-get install ${{ matrix.extra_deps }} git
-
-      - name: Build Clang x86_64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          export CMAKE_BUILD_PARALLEL_LEVEL=2
-          export CTEST_PARALLEL_LEVEL=2
-          git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
-          CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -DBUILD_SHARED=ON -B out .
-          cmake --build out
-      - name: Compress Clang x86_64 build
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+          env: |
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y --no-install-recommends \
+                  build-essential \
+                  cmake \
+                  ninja-build \
+                  git \
+                  ;
+          run: |
+            export GIT_SSL_NO_VERIFY=1
+            git config --global http.sslverify false
+            git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
+            export CMAKE_BUILD_PARALLEL_LEVEL=2
+            export CTEST_PARALLEL_LEVEL=2
+            CXXFLAGS=${{ matrix.cxx_flags }} cmake -GNinja ${{ matrix.cmake_flags }} -B -DBUILD_SHARED=ON out .
+            cmake --build out
+            rm -rf libsparkyuv.so
+            cp ./out/libsparkyuv.so libsparkyuv.so
+      - name: Compress build
         uses: a7ul/tar-action@v1.1.0
         id: compress
         with:
           command: c
           files: |
-            ./out/libsparkyuv.so
+            libsparkyuv.so
             include
-          outPath: libsparkyuv.linux-x86_64.tar.gz
+          outPath: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
       - name: Upload built library
         uses: actions/upload-artifact@v4
         with:
-          name: libsparkyuv.linux-x86_64.tar.gz
-          path: libsparkyuv.linux-x86_64.tar.gz
+          name: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
+          path: libsparkyuv.linux-${{ matrix.arch }}.tar.gz
+
