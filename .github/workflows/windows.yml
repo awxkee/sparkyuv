@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cmake_ubuntu_2204:
-    name: Build and test ${{ matrix.name }}
+  cmake_windows:
+    name: Build x86_64 Windows
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -43,8 +43,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export CMAKE_BUILD_PARALLEL_LEVEL=2
-          export CTEST_PARALLEL_LEVEL=2
           git clone --branch widen_mul https://token:${GITHUB_TOKEN}@github.com/awxkee/highway
           CXXFLAGS=${{ matrix.cxx_flags }} CC=${{ matrix.c_compiler }} CXX=${{ matrix.cxx_compiler }} cmake -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }} -B out .
           cmake --build out
