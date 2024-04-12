@@ -85,6 +85,10 @@ jobs:
           githubToken: ${{ github.token }}
           env: |
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
           install: |
             apt-get update -q -y
             apt-get install -q -y --no-install-recommends \
@@ -107,12 +111,13 @@ jobs:
             cp ./out/libsparkyuv.so libsparkyuv.so
             
             tar -cf libsparkyuv.linux-${{ matrix.arch }}.tar.gz libsparkyuv.so include
-            
-            curl -X POST \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
-              -H "Content-Type: application/zip" \
-              --data-binary @"libsparkyuv.linux-${{ matrix.arch }}.tar.gz" \
-              "https://api.github.com/repos/awxkee/highway/actions/artifacts/artifact-linux-${{ matrix.arch }}/upload"
+            cp libsparkyuv.linux-${{ matrix.arch }}.tar.gz "/artifacts/libsparkyuv.linux-${{ matrix.arch }}.tar.gz"
+      - name: Upload built library
+        uses: actions/upload-artifact@v4
+        id: artifact-linux-aarch64
+        with:
+          name: libsparkyuv.linux-aarch64.tar.gz
+          path: libsparkyuv.linux-aarch64.tar.gz
 
   create_release:
     name: Create and upload release
