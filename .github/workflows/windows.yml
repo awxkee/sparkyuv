@@ -6,11 +6,11 @@ on:
   push:
     branches:
       - '*'
-      - '!ci_test_*'
+#      - '!ci_test_*'
   pull_request:
     branches:
       - '*'
-      - '!ci_test_*'
+#      - '!ci_test_*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
