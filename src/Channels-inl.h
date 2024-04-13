@@ -1011,6 +1011,175 @@ ChannelsReformat(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   }
 }
 
+template<SparkYuvReformatPixelType InputPixelType = sparkyuv::REFORMAT_RGB,
+    SparkYuvReformatPixelType DestinationPixelType = sparkyuv::REFORMAT_RGBA>
+void
+ChannelsReformatF16(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                    uint16_t *SPARKYUV_RESTRICT dst, const uint32_t newStride,
+                 const uint32_t width, const uint32_t height) {
+  static_assert(InputPixelType != REFORMAT_RGBA1010102 && DestinationPixelType != REFORMAT_RGBA1010102, "RGBA1010102 Cannot belong to F16");
+  const ScalableTag<uint16_t> d;
+  using V = Vec<decltype(d)>;
+
+  const hwy::float16_t maxColors = hwy::F16FromF32(1.0f);
+
+  const int srcPixelsComponents = (InputPixelType == REFORMAT_BGR || InputPixelType == REFORMAT_RGB) ? 3 : 4;
+  const int
+      destinationComponents = (DestinationPixelType == REFORMAT_BGR || DestinationPixelType == REFORMAT_RGB) ? 3 : 4;
+
+  const uint16_t fillingAlpha = maxColors.bits;
+  const auto vFillingAlpha = Set(d, fillingAlpha);
+
+  auto mSrcPixels = reinterpret_cast<const uint8_t *>(src);
+  auto mDestination = reinterpret_cast<uint8_t *>(dst);
+
+  const int lanes = Lanes(d);
+
+  for (uint32_t y = 0; y < height; ++y) {
+
+    auto srcPixels = reinterpret_cast<const uint16_t *>(mSrcPixels);
+    auto dstPixels = reinterpret_cast<uint16_t *>(mDestination);
+
+    uint32_t x = 0;
+
+    for (; x + lanes < width; x += lanes) {
+      V R;
+      V G;
+      V B;
+      V A;
+      switch (InputPixelType) {
+        case REFORMAT_RGB: {
+          LoadInterleaved3(d, srcPixels, R, G, B);
+          A = vFillingAlpha;
+        }
+          break;
+        case REFORMAT_BGR: {
+          LoadInterleaved3(d, srcPixels, B, G, R);
+          A = vFillingAlpha;
+        }
+          break;
+        case REFORMAT_RGBA:LoadInterleaved4(d, srcPixels, R, G, B, A);
+          break;
+        case REFORMAT_BGRA:LoadInterleaved4(d, srcPixels, B, G, R, A);
+          break;
+        case REFORMAT_ARGB:LoadInterleaved4(d, srcPixels, A, R, G, B);
+          break;
+        case REFORMAT_ABGR:LoadInterleaved4(d, srcPixels, A, B, G, R);
+          break;
+        default:break;
+      }
+
+      switch (DestinationPixelType) {
+        case REFORMAT_RGBA:StoreInterleaved4(R, G, B, A, d, dstPixels);
+          break;
+        case REFORMAT_ABGR:StoreInterleaved4(A, B, G, R, d, dstPixels);
+          break;
+        case REFORMAT_BGR:StoreInterleaved3(B, G, R, d, dstPixels);
+          break;
+        case REFORMAT_RGB:StoreInterleaved3(R, G, B, d, dstPixels);
+          break;
+        case REFORMAT_BGRA:StoreInterleaved4(B, G, R, A, d, dstPixels);
+          break;
+        case REFORMAT_ARGB:StoreInterleaved4(A, R, G, B, d, dstPixels);
+          break;
+        default:break;
+      }
+
+      srcPixels += srcPixelsComponents * lanes;
+      dstPixels += destinationComponents * lanes;
+    }
+
+    for (; x < width; ++x) {
+      uint16_t r;
+      uint16_t g;
+      uint16_t b;
+      uint16_t a;
+
+      switch (InputPixelType) {
+        case REFORMAT_RGB: {
+          r = static_cast<uint16_t>(srcPixels[0]);
+          g = static_cast<uint16_t>(srcPixels[1]);
+          b = static_cast<uint16_t>(srcPixels[2]);
+          a = fillingAlpha;
+        }
+          break;
+        case REFORMAT_RGBA: {
+          r = static_cast<uint16_t>(srcPixels[0]);
+          g = static_cast<uint16_t>(srcPixels[1]);
+          b = static_cast<uint16_t>(srcPixels[2]);
+          a = static_cast<uint16_t>(srcPixels[3]);
+        }
+          break;
+        case REFORMAT_BGRA: {
+          b = static_cast<uint16_t>(srcPixels[0]);
+          g = static_cast<uint16_t>(srcPixels[1]);
+          r = static_cast<uint16_t>(srcPixels[2]);
+          a = static_cast<uint16_t>(srcPixels[3]);
+        }
+          break;
+        case REFORMAT_BGR: {
+          b = static_cast<uint16_t>(srcPixels[0]);
+          g = static_cast<uint16_t>(srcPixels[1]);
+          r = static_cast<uint16_t>(srcPixels[2]);
+          a = fillingAlpha;
+        }
+          break;
+        case REFORMAT_ARGB: {
+          a = static_cast<uint16_t>(srcPixels[0]);
+          r = static_cast<uint16_t>(srcPixels[1]);
+          g = static_cast<uint16_t>(srcPixels[2]);
+          b = static_cast<uint16_t>(srcPixels[3]);
+        }
+          break;
+        case REFORMAT_ABGR: {
+          a = static_cast<uint16_t>(srcPixels[0]);
+          b = static_cast<uint16_t>(srcPixels[1]);
+          g = static_cast<uint16_t>(srcPixels[2]);
+          r = static_cast<uint16_t>(srcPixels[3]);
+        }
+          break;
+      }
+
+      switch (DestinationPixelType) {
+        case REFORMAT_RGBA:dstPixels[3] = a;
+        case REFORMAT_RGB: {
+          dstPixels[0] = r;
+          dstPixels[1] = g;
+          dstPixels[2] = b;
+        }
+          break;
+        case REFORMAT_BGRA:dstPixels[3] = a;
+        case REFORMAT_BGR: {
+          dstPixels[2] = r;
+          dstPixels[1] = g;
+          dstPixels[0] = b;
+        }
+          break;
+        case REFORMAT_ABGR: {
+          dstPixels[0] = a;
+          dstPixels[3] = r;
+          dstPixels[2] = g;
+          dstPixels[1] = b;
+        }
+          break;
+        case REFORMAT_ARGB: {
+          dstPixels[0] = a;
+          dstPixels[1] = r;
+          dstPixels[2] = g;
+          dstPixels[3] = b;
+        }
+          break;
+      }
+
+      srcPixels += srcPixelsComponents;
+      dstPixels += destinationComponents;
+    }
+
+    mSrcPixels += srcStride;
+    mDestination += newStride;
+  }
+}
+
 #define CHANNEL_XXX_REFORMAT_DECLARATION_8(srcPixelType, dstPixelType) \
     void srcPixelType##To##dstPixelType##HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                                uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
@@ -1087,6 +1256,37 @@ CHANNEL_XXX_REFORMAT_DECLARATION_16(ABGR, RGBA)
 CHANNEL_XXX_REFORMAT_DECLARATION_16(ARGB, BGRA)
 
 #undef CHANNEL_XXX_REFORMAT_DECLARATION_16
+
+#define CHANNEL_XXX_REFORMAT_DECLARATION_F16(srcPixelType, dstPixelType) \
+    void srcPixelType##F16To##dstPixelType##F16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                                 uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                                 const uint32_t width, const uint32_t height) {\
+        ChannelsReformatF16<sparkyuv::REFORMAT_##srcPixelType, sparkyuv::REFORMAT_##dstPixelType>(src, srcStride, dst, dstStride,\
+                                                                                                   width, height); \
+    }
+
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(RGB, RGBA)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGR, BGRA)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGR, ABGR)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(RGB, ARGB)
+
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(RGBA, RGB)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGRA, BGR)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ABGR, BGR)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ARGB, RGB)
+
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGRA, RGB)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(RGBA, BGR)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ABGR, RGB)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ARGB, BGR)
+
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGRA, RGBA)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(BGRA, ARGB)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(RGBA, ABGR)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ABGR, RGBA)
+CHANNEL_XXX_REFORMAT_DECLARATION_F16(ARGB, BGRA)
+
+#undef CHANNEL_XXX_REFORMAT_DECLARATION_F16
 
 #define CHANNEL_XXX_REFORMAT_TO_F16_DECLARATION(srcPixel, dstPixel, storageType, surfaceType) \
     void srcPixel##To##dstPixel##F16HWY(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
