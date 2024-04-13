@@ -75,6 +75,9 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
   const bool useHWY = Surface != SURFACE_RGBA1010102;
 #endif
 
+  const auto keepAlpha = Set(d32, 0b111);
+  const auto keepValue1010102 = Set(d32, 0b1111111111);
+
   const int components =
       (Surface == SURFACE_CHANNELS_4 || Surface == SURFACE_RGBA1010102) ? 4 : (Surface == SURFACE_CHANNELS_3 ? 3 : 1);
 
@@ -273,27 +276,27 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
             const auto uout3h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out3)));
             const auto uout4h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out4)));
 
-            const auto al = ConvertTo(d32, uout4l);
-            const auto rl = ConvertTo(d32, uout1l);
-            const auto gl = ConvertTo(d32, uout2l);
-            const auto bl = ConvertTo(d32, uout3l);
-            const VU32 Lowh = Or(ShiftLeft<30>(al), ShiftLeft<20>(rl));
-            const VU32 Lowl = Or(ShiftLeft<10>(gl), bl);
+            const auto al = And(ConvertTo(d32, uout4l), keepAlpha);
+            const auto rl = And(ConvertTo(d32, uout1l), keepValue1010102);
+            const auto gl = And(ConvertTo(d32, uout2l), keepValue1010102);
+            const auto bl = And(ConvertTo(d32, uout3l), keepValue1010102);
+            const VU32 Lowh = Or(ShiftLeft<30>(al), ShiftLeft<20>(bl));
+            const VU32 Lowl = Or(ShiftLeft<10>(gl), rl);
             const VU32 Low = Or(Lowh, Lowl);
 
-            const auto ah = ConvertTo(d32, uout4h);
-            const auto rh = ConvertTo(d32, uout1h);
-            const auto gh = ConvertTo(d32, uout2h);
-            const auto bh = ConvertTo(d32, uout3h);
-            const VU32 Highh = Or(ShiftLeft<30>(ah), ShiftLeft<20>(rh));
-            const VU32 Highl = Or(ShiftLeft<10>(gh), bh);
+            const auto ah = And(ConvertTo(d32, uout4h), keepAlpha);
+            const auto rh = And(ConvertTo(d32, uout1h), keepValue1010102);
+            const auto gh = And(ConvertTo(d32, uout2h), keepValue1010102);
+            const auto bh = And(ConvertTo(d32, uout3h), keepValue1010102);
+            const VU32 Highh = Or(ShiftLeft<30>(ah), ShiftLeft<20>(bh));
+            const VU32 Highl = Or(ShiftLeft<10>(gh), rh);
             const VU32 High = Or(Highh, Highl);
 #if HWY_IS_LITTLE_ENDIAN
             StoreU(Low, d32, reinterpret_cast<uint32_t *>(dstPixels));
             StoreU(High, d32, reinterpret_cast<uint32_t *>(dstPixels) + halfLanes);
 #else
-            StoreU(High, d32, reinterpret_cast<uint32_t*>(dstPixels) + halfLanes);
-            StoreU(Low, d32, reinterpret_cast<uint32_t*>(dstPixels));
+            StoreU(High, d32, reinterpret_cast<uint32_t*>(dstPixels));
+            StoreU(Low, d32, reinterpret_cast<uint32_t*>(dstPixels) + halfLanes);
 #endif
           }
         }
@@ -380,12 +383,12 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
         }
           break;
         case SURFACE_RGBA1010102: {
-          auto R10 = (uint32_t) out0;
-          auto G10 = (uint32_t) out1;
-          auto B10 = (uint32_t) out2;
-          auto A10 = (uint32_t) out3;
+          auto R10 = std::clamp(static_cast<uint32_t>(out0), static_cast<uint32_t>(0), static_cast<uint32_t>(1023));
+          auto G10 = std::clamp(static_cast<uint32_t>(out1), static_cast<uint32_t>(0), static_cast<uint32_t>(1023));
+          auto B10 = std::clamp(static_cast<uint32_t>(out2), static_cast<uint32_t>(0), static_cast<uint32_t>(1023));
+          auto A10 = std::clamp(static_cast<uint32_t>(out3), static_cast<uint32_t>(0), static_cast<uint32_t>(1023));
 
-          reinterpret_cast<uint32_t *>(dstPixels)[0] = (A10 << 30) | (R10 << 20) | (G10 << 10) | B10;
+          reinterpret_cast<uint32_t *>(dstPixels)[0] = (A10 << 30) | (B10 << 20) | (G10 << 10) | R10;
         }
           break;
       }
@@ -551,23 +554,23 @@ ReformatSurfaceToF16(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                                          DemoteTo(dh16, ShiftRight<30>(color1010102l))));
 #else
 #if HWY_TARGET == HWY_EMU128
-            const auto in1h = DemoteTo(fh16, ConvertTo(f32, And(ShiftRight<20>(color1010102h), mask1010102)));
-            const auto in1l = DemoteTo(fh16, ConvertTo(f32, And(ShiftRight<20>(color1010102l), mask1010102)));
+            const auto in1h = DemoteTo(fh16, ConvertTo(f32, And(color1010102h, mask1010102)));
+            const auto in1l = DemoteTo(fh16, ConvertTo(f32, And(color1010102l, mask1010102)));
             in1 = Combine(f16, in1h, in1l);
             in2 = Int16ToFloat(f16, Combine(d16, DemoteTo(dh16, And(ShiftRight<10>(color1010102h), mask1010102)),
                                          DemoteTo(dh16, And(ShiftRight<10>(color1010102l), mask1010102))));
-            in3 = Int16ToFloat(f16, Combine(d16, DemoteTo(dh16, And(color1010102h, mask1010102)),
-                                         DemoteTo(dh16, And(color1010102l, mask1010102))));
+            in3 = Int16ToFloat(f16, Combine(d16, DemoteTo(dh16, And(ShiftRight<20>(color1010102h), mask1010102)),
+                                         DemoteTo(dh16, And(ShiftRight<20>(color1010102l), mask1010102))));
             in4 = Int16ToFloat(f16, Combine(d16, DemoteTo(dh16, ShiftRight<30>(color1010102h)),
                                          DemoteTo(dh16, ShiftRight<30>(color1010102l))));
 #else
-            const auto in1h = DemoteTo(fh16, ConvertTo(f32, And(ShiftRight<20>(color1010102h), mask1010102)));
-            const auto in1l = DemoteTo(fh16, ConvertTo(f32, And(ShiftRight<20>(color1010102l), mask1010102)));
+            const auto in1h = DemoteTo(fh16, ConvertTo(f32, And(color1010102h, mask1010102)));
+            const auto in1l = DemoteTo(fh16, ConvertTo(f32, And(color1010102l, mask1010102)));
             in1 = Combine(f16, in1h, in1l);
             in2 = ConvertTo(f16, Combine(d16, DemoteTo(dh16, And(ShiftRight<10>(color1010102h), mask1010102)),
                                          DemoteTo(dh16, And(ShiftRight<10>(color1010102l), mask1010102))));
-            in3 = ConvertTo(f16, Combine(d16, DemoteTo(dh16, And(color1010102h, mask1010102)),
-                                         DemoteTo(dh16, And(color1010102l, mask1010102))));
+            in3 = ConvertTo(f16, Combine(d16, DemoteTo(dh16, And(ShiftRight<20>(color1010102h), mask1010102)),
+                                         DemoteTo(dh16, And(ShiftRight<20>(color1010102l), mask1010102))));
             in4 = ConvertTo(f16, Combine(d16, DemoteTo(dh16, ShiftRight<30>(color1010102h)),
                                          DemoteTo(dh16, ShiftRight<30>(color1010102l))));
 #endif
@@ -724,9 +727,9 @@ ReformatSurfaceToF16(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
           constexpr uint32_t scalarMask = (1u << 10u) - 1u;
           constexpr float alphaScale = 1.f / 3.f;
-          uint32_t bu = (rgba1010102) & scalarMask;
+          uint32_t ru = (rgba1010102) & scalarMask;
           uint32_t gu = (rgba1010102 >> 10) & scalarMask;
-          uint32_t ru = (rgba1010102 >> 20) & scalarMask;
+          uint32_t bu = (rgba1010102 >> 20) & scalarMask;
           uint32_t au = (rgba1010102 >> 30);
 
           r = static_cast<float>(ru) * scale;
@@ -968,7 +971,7 @@ ChannelsReformat(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
               b32 = b32 << r1010102Diff;
             }
           }
-          uint32_t px = (a32 << 30) | (r32 << 20) | (g32 << 10) | b32;
+          uint32_t px = (a32 << 30) | (b32 << 20) | (g32 << 10) | r32;
           reinterpret_cast<uint32_t *>(dstPixels)[0] = px;
         }
           break;
@@ -1016,8 +1019,9 @@ template<SparkYuvReformatPixelType InputPixelType = sparkyuv::REFORMAT_RGB,
 void
 ChannelsReformatF16(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                     uint16_t *SPARKYUV_RESTRICT dst, const uint32_t newStride,
-                 const uint32_t width, const uint32_t height) {
-  static_assert(InputPixelType != REFORMAT_RGBA1010102 && DestinationPixelType != REFORMAT_RGBA1010102, "RGBA1010102 Cannot belong to F16");
+                    const uint32_t width, const uint32_t height) {
+  static_assert(InputPixelType != REFORMAT_RGBA1010102 && DestinationPixelType != REFORMAT_RGBA1010102,
+                "RGBA1010102 Cannot belong to F16");
   const ScalableTag<uint16_t> d;
   using V = Vec<decltype(d)>;
 

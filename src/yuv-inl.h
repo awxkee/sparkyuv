@@ -28,7 +28,7 @@
 #include <cmath>
 
 #if HWY_HAVE_FLOAT16 && (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES)
-#define SPARKYUV_ALLOW_FLOAT16 1
+#define SPARKYUV_ALLOW_FLOAT16 0
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
