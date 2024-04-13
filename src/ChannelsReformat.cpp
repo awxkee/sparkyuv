@@ -176,7 +176,7 @@ CHANNEL_XXX_REFORMAT_DECLARATION_F16(ARGB, BGRA)
 #undef CHANNEL_XXX_REFORMAT_DECLARATION_F16
 
 #define CHANNEL_REFORMAT_DECLARATION_F16_E(srcPixelType, dstPixelType) \
-    void srcPixelType##F16To##dstPixelType##F16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+    void srcPixelType##F16To##dstPixelType##F16(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                                  uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                                  const uint32_t width, const uint32_t height) {\
         HWY_DYNAMIC_DISPATCH(srcPixelType##F16To##dstPixelType##F16HWY)(src, srcStride, dst, dstStride,\

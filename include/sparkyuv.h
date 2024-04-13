@@ -768,9 +768,9 @@ CHANNEL_XXX_REFORMAT_F16_TO_U16_DECLARATION_H(Channel16, Channel, uint16_t)
 #undef CHANNEL_XXX_REFORMAT_F16_TO_U16_DECLARATION_H
 
 #define CHANNEL_REFORMAT_DECLARATION_F16_H(srcPixelType, dstPixelType) \
-    void srcPixelType##F16To##dstPixelType##F16HWY(const uint16_t * src, const uint32_t srcStride,\
-                                                 uint16_t * dst, const uint32_t dstStride,\
-                                                 const uint32_t width, const uint32_t height);
+    void srcPixelType##F16To##dstPixelType##F16(const uint16_t * src, const uint32_t srcStride,\
+                                                uint16_t * dst, const uint32_t dstStride,\
+                                                const uint32_t width, const uint32_t height);
 
 CHANNEL_REFORMAT_DECLARATION_F16_H(RGB, RGBA)
 CHANNEL_REFORMAT_DECLARATION_F16_H(BGR, BGRA)
