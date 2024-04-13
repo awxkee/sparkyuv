@@ -266,12 +266,12 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
             const auto uout1l = ConvertTo(f32, PromoteLowerTo(di32, BitCast(di16, out1)));
             const auto uout2l = ConvertTo(f32, PromoteLowerTo(di32, BitCast(di16, out2)));
             const auto uout3l = ConvertTo(f32, PromoteLowerTo(di32, BitCast(di16, out3)));
-            const auto uout4l = ConvertTo(f32, PromoteLowerTo(di32, BitCast(di16, out3)));
+            const auto uout4l = ConvertTo(f32, PromoteLowerTo(di32, BitCast(di16, out4)));
 
             const auto uout1h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out1)));
             const auto uout2h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out2)));
             const auto uout3h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out3)));
-            const auto uout4h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out3)));
+            const auto uout4h = ConvertTo(f32, PromoteUpperTo(di32, BitCast(di16, out4)));
 
             const auto al = ConvertTo(d32, uout4l);
             const auto rl = ConvertTo(d32, uout1l);

@@ -107,13 +107,13 @@ int main() {
 //    sparkyuv::RGBToNV24BT601(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, inWidth, inHeight, yNVPlane.data(),
 //                             nvWidth, uvPlane.data(), uvPlaneStride);
     sparkyuv::NV16ToRGBA(rgbaNVData.data(),
-                              rgbaNVStride,
-                              nvWidth,
-                              nvHeight,
-                              yNVPlane.data(),
-                              nvWidth,
-                              uvPlane.data(),
-                              uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
+                         rgbaNVStride,
+                         nvWidth,
+                         nvHeight,
+                         yNVPlane.data(),
+                         nvWidth,
+                         uvPlane.data(),
+                         uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
   });
 
 //
@@ -147,13 +147,13 @@ int main() {
   const size_t rgbaStride = sizeof(uint8_t) * width * 4;
   std::vector<uint8_t> rgbaData(rgbaStride * height);
 
-  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof (uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
     sparkyuv::RGBA8ToYIQ422P8(rgbaData.data(), rgbaStride, width, height,
-                                yPlane.data(), yPlaneStride,
-                                uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
+                              yPlane.data(), yPlaneStride,
+                              uPlane.data(), uvPlaneStride,
+                              vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
 //    libyuv::ABGRToI420(rgbaData.data(), rgbaStride, yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride, width, height );
@@ -166,9 +166,9 @@ int main() {
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
     sparkyuv::YIQ422P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
-                                yPlane.data(), yPlaneStride,
-                                uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
+                              yPlane.data(), yPlaneStride,
+                              uPlane.data(), uvPlaneStride,
+                              vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);
@@ -283,6 +283,21 @@ int main() {
 //
 //  sparkyuv::SaturateRGBA10To8(reinterpret_cast<uint16_t *>(rgba16Data.data()), inWidth * 4 * sizeof(uint16_t),
 //                              rgbaData.data(), inWidth * 4 * sizeof(uint8_t), inWidth, inHeight);
+
+  sparkyuv::RGBAToRGBAF16(rgbaData.data(),
+                          rgbaStride,
+                          reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                          sizeof(uint16_t) * inWidth * 4,
+                          inWidth,
+                          inHeight);
+  std::vector<uint8_t> rgba1010102(sizeof(uint32_t) * inWidth * inHeight);
+  sparkyuv::RGBAF16ToRGBA1010102(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                 sizeof(uint16_t) * inWidth * 4, rgba1010102.data(), sizeof(uint32_t) * inWidth,
+                                 inWidth,
+                                 inHeight);
+  sparkyuv::RGBA1010102ToRGBA(rgba1010102.data(), sizeof(uint32_t) * inWidth, rgbaData.data(),
+                              rgbaStride, inWidth,
+                              inHeight);
 
   aire::JPEGEncoder encoder(rgbaData.data(), rgbaStride, width, height);
   auto encoded = encoder.encode();
