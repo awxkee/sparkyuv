@@ -441,9 +441,9 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
     const uint32_t scalarMask = (1u << 10u) - 1u;
     constexpr float colorsScale = 1.f / 1023.f;
     constexpr float alphaScale = 1.f / 3.f;
-    uint32_t b1 = (rgba1010102) & scalarMask;
+    uint32_t r1 = (rgba1010102) & scalarMask;
     uint32_t g1 = (rgba1010102 >> 10) & scalarMask;
-    uint32_t r1 = (rgba1010102 >> 20) & scalarMask;
+    uint32_t b1 = (rgba1010102 >> 20) & scalarMask;
     uint32_t a1 = (rgba1010102 >> 30) * 3;
     float rFloat = static_cast<float>(r1) * colorsScale;
     float gFloat = static_cast<float>(g1) * colorsScale;
