@@ -221,7 +221,7 @@ class BoxSampler : public ScaleRowSampler<T> {
         uint32_t b = (b1 + b2 + b3 + b4) >> 2;
         uint32_t a = (a1 + a2 + a3 + a4) >> 2;
 
-        reinterpret_cast<uint32_t *>(dst)[0] = (a << 30) | (r << 20) | (g << 10) | b;
+        reinterpret_cast<uint32_t *>(dst)[0] = (a << 30) | (b << 20) | (g << 10) | r;
 
         if (std::is_same<T, uint8_t>::value) {
           dst += 4;
@@ -234,9 +234,9 @@ class BoxSampler : public ScaleRowSampler<T> {
 
   inline void sparse1010102(const uint32_t rgba1010102, uint32_t &r, uint32_t &g, uint32_t &b, uint32_t &a) {
     constexpr uint32_t scalarMask = (1u << 10u) - 1u;
-    uint32_t b1 = (rgba1010102) & scalarMask;
+    uint32_t r1 = (rgba1010102) & scalarMask;
     uint32_t g1 = (rgba1010102 >> 10) & scalarMask;
-    uint32_t r1 = (rgba1010102 >> 20) & scalarMask;
+    uint32_t b1 = (rgba1010102 >> 20) & scalarMask;
     uint32_t a1 = (rgba1010102 >> 30) * 3;
 
     r = r1;

@@ -120,7 +120,7 @@ class WeightedWindow6RowSampler10Bit : public ScaleRowSampler<uint32_t> {
         auto B10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[2] * revertScale), 0.0f, (float) maxColors));
         auto A10 = static_cast<uint32_t >(std::clamp(::roundf(rgb[3] / weightSum * 3.f), 0.0f, 3.0f));
 
-        dst[x] = (A10 << 30) | (R10 << 20) | (G10 << 10) | B10;
+        dst[x] = (A10 << 30) | (B10 << 20) | (G10 << 10) | R10;
       }
     }
   }

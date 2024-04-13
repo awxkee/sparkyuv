@@ -429,7 +429,7 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
       auto B10 = static_cast<uint32_t >(std::clamp(::roundf(bInter * maxColors), 0.0f, (float) maxColors));
       auto A10 = static_cast<uint32_t >(std::clamp(::roundf(aInter * 3.f), 0.0f, 3.0f));
 
-      dst16[0] = (A10 << 30) | (R10 << 20) | (G10 << 10) | B10;
+      dst16[0] = (A10 << 30) | (B10 << 20) | (G10 << 10) | R10;
       dst16 += 1;
     }
   }
@@ -457,7 +457,7 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
   }
 };
 
-} // aire
+} // sparkyuv
 HWY_AFTER_NAMESPACE();
 
-#endif //AIRE_BILINEARROWSAMPLER_HPP
+#endif //SPARKYUV_BILINEAR_ROW_SAMPLER
