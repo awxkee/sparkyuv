@@ -63,14 +63,14 @@ static void SparkyuvYCbCr444ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr444BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
-  for (auto _ : state) {
-    sparkyuv::YCbCr444BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
                                 vPlane.data(), uvPlaneStride);
+  for (auto _ : state) {
+    sparkyuv::YCbCr444BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
   }
 }
 
@@ -102,9 +102,9 @@ static void LibYuvYCbCr444ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr444BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
+                                yPlane.data(), yPlaneStride,
+                                uPlane.data(), uvPlaneStride,
+                                vPlane.data(), uvPlaneStride);
   for (auto _ : state) {
     libyuv::I444ToABGR(yPlane.data(), yPlaneStride,
                        uPlane.data(), uvPlaneStride,
@@ -141,14 +141,14 @@ static void SparkyuvYCbCr422ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr422BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
-  for (auto _ : state) {
-    sparkyuv::YCbCr422BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
                                 vPlane.data(), uvPlaneStride);
+  for (auto _ : state) {
+    sparkyuv::YCbCr422BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
   }
 }
 
@@ -180,9 +180,9 @@ static void LibYuvYCbCr422ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr420BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
+                                yPlane.data(), yPlaneStride,
+                                uPlane.data(), uvPlaneStride,
+                                vPlane.data(), uvPlaneStride);
   for (auto _ : state) {
     libyuv::I422ToABGR(yPlane.data(), yPlaneStride,
                        uPlane.data(), uvPlaneStride,
@@ -219,14 +219,14 @@ static void SparkyuvYCbCr420ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr420BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
-  for (auto _ : state) {
-    sparkyuv::YCbCr420BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
                                 yPlane.data(), yPlaneStride,
                                 uPlane.data(), uvPlaneStride,
                                 vPlane.data(), uvPlaneStride);
+  for (auto _ : state) {
+    sparkyuv::YCbCr420BT601ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
   }
 }
 
@@ -258,9 +258,9 @@ static void LibYuvYCbCr420ToRGBA8(benchmark::State &state) {
   rgbaData.resize(rgbaStride * inHeight);
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   sparkyuv::RGBAToYCbCr420BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                              yPlane.data(), yPlaneStride,
-                              uPlane.data(), uvPlaneStride,
-                              vPlane.data(), uvPlaneStride);
+                                yPlane.data(), yPlaneStride,
+                                uPlane.data(), uvPlaneStride,
+                                vPlane.data(), uvPlaneStride);
   for (auto _ : state) {
     libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
                        uPlane.data(), uvPlaneStride,
@@ -298,9 +298,9 @@ static void SparkyuvRGBA8ToYCbCr420(benchmark::State &state) {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   for (auto _ : state) {
     sparkyuv::RGBAToYCbCr420BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                                yPlane.data(), yPlaneStride,
-                                uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
   }
 }
 
@@ -367,9 +367,9 @@ void SparkyuvRGBA8ToYCbCr422(benchmark::State &state) {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   for (auto _ : state) {
     sparkyuv::RGBAToYCbCr422BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                                yPlane.data(), yPlaneStride,
-                                uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
   }
 }
 
@@ -436,9 +436,67 @@ void SparkyuvRGBA8ToYCbCr444(benchmark::State &state) {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
   for (auto _ : state) {
     sparkyuv::RGBAToYCbCr444BT601(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                                yPlane.data(), yPlaneStride,
-                                uPlane.data(), uvPlaneStride,
-                                vPlane.data(), uvPlaneStride);
+                                  yPlane.data(), yPlaneStride,
+                                  uPlane.data(), uvPlaneStride,
+                                  vPlane.data(), uvPlaneStride);
+  }
+}
+
+void SparkyuvRGBA8ToYCbCr400(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> yPlane;
+  std::vector<uint8_t> uPlane;
+  std::vector<uint8_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  for (auto _ : state) {
+    sparkyuv::RGBAToYCbCr400(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
+  }
+}
+
+static void SparkyuvYCbCr400ToRGBA8(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> yPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  sparkyuv::RGBAToYCbCr400(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                           yPlane.data(), yPlaneStride,
+                           0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
+  for (auto _ : state) {
+    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
   }
 }
 
@@ -461,6 +519,10 @@ BENCHMARK(SparkyuvRGBA8ToYCbCr420);
 BENCHMARK(LibyuvRGBA8ToYCbCr420);
 BENCHMARK(LibYuvRGBA8ToYCbCr422);
 BENCHMARK(SparkyuvRGBA8ToYCbCr444);
+BENCHMARK(SparkyuvRGBA8ToYCbCr422);
+
+BENCHMARK(SparkyuvRGBA8ToYCbCr400);
+BENCHMARK(SparkyuvYCbCr400ToRGBA8);
 
 BENCHMARK(SparkyuvRGBA8ToNV21);
 BENCHMARK(SparkyuvNV21ToRGBA8);

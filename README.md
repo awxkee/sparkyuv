@@ -6,7 +6,7 @@ Library allows to convert RGB to Y'UV formats at high speed using platform SIMD 
 
 | YUV      | 444 | 422 | 420 | 400 | NV12/NV21 | NV16/NV61 | NV24/NV42 |
 |----------|-----|-----|-----|-----|-----------|-----------|-----------|
-| YCbCr    | ✅   | ✅   | ✅   | ❌   | ✅         | ✅         | ✅         |
+| YCbCr    | ✅   | ✅   | ✅   | ✅   | ✅         | ✅         | ✅         |
 | YcCbcCrc | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YCgCo    | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
 | YCgCo-Ro | ✅   | ✅   | ✅   | ❌   | N/A       | N/A       | N/A       |
