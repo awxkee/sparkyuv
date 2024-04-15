@@ -30,14 +30,15 @@ HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample>
-void Pixel8ToYCbCr411(const uint8_t *SPARKYUV_RESTRICT src,
-                      const uint32_t srcStride,
-                      const uint32_t width, const uint32_t height,
-                      uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                      uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
-                      uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
-                      const float kr, const float kb, const SparkYuvColorRange colorRange) {
-  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410, "Not supported chroma subsample");
+static void Pixel8ToYCbCr411(const uint8_t *SPARKYUV_RESTRICT src,
+                             const uint32_t srcStride,
+                             const uint32_t width, const uint32_t height,
+                             uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                             uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
+                             uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
+                             const float kr, const float kb, const SparkYuvColorRange colorRange) {
+  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410,
+                "Not supported chroma subsample");
   uint16_t biasY;
   uint16_t biasUV;
   uint16_t rangeY;
@@ -277,15 +278,15 @@ void Pixel8ToYCbCr411(const uint8_t *SPARKYUV_RESTRICT src,
 }
 
 #define XXXXToYCbCr411HWY_DECLARATION_R(pixelType, chroma) \
-        void pixelType##ToYCbCr411HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
-                                   const uint32_t width, const uint32_t height,\
-                                   uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
-                                   uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
-                                   uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
-                                   const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-          Pixel8ToYCbCr411<sparkyuv::PIXEL_##pixelType, chroma>(src, srcStride, width, height,\
-                                                      yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
-        }
+  static void pixelType##ToYCbCr411HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                             const uint32_t width, const uint32_t height,\
+                             uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
+                             uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
+                             uint8_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
+                             const float kr, const float kb, const SparkYuvColorRange colorRange) {\
+    Pixel8ToYCbCr411<sparkyuv::PIXEL_##pixelType, chroma>(src, srcStride, width, height,\
+                                                yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
+  }
 
 XXXXToYCbCr411HWY_DECLARATION_R(RGBA, sparkyuv::YUV_SAMPLE_411)
 XXXXToYCbCr411HWY_DECLARATION_R(RGB, sparkyuv::YUV_SAMPLE_411)
@@ -299,7 +300,7 @@ XXXXToYCbCr411HWY_DECLARATION_R(BGR, sparkyuv::YUV_SAMPLE_411)
 #undef XXXXToYCbCr411HWY_DECLARATION_R
 
 #define XXXXToYCbCr410HWY_DECLARATION_R(pixelType, chroma) \
-        void pixelType##ToYCbCr410HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+        static void pixelType##ToYCbCr410HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                    const uint32_t width, const uint32_t height,\
                                    uint8_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                    uint8_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
@@ -321,20 +322,21 @@ XXXXToYCbCr410HWY_DECLARATION_R(BGR, sparkyuv::YUV_SAMPLE_410)
 #undef XXXXToYCbCr411HWY_DECLARATION_R
 
 template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, SparkYuvChromaSubsample chromaSubsample>
-void YCbCr411ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
-                      const uint32_t dstStride,
-                      const uint32_t width,
-                      const uint32_t height,
-                      const uint8_t *SPARKYUV_RESTRICT yPlane,
-                      const uint32_t yStride,
-                      const uint8_t *SPARKYUV_RESTRICT uPlane,
-                      const uint32_t uStride,
-                      const uint8_t *SPARKYUV_RESTRICT vPlane,
-                      const uint32_t vStride,
-                      const float kr,
-                      const float kb,
-                      const SparkYuvColorRange colorRange) {
-  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410, "Not supported chroma subsample");
+static void YCbCr411ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
+                             const uint32_t dstStride,
+                             const uint32_t width,
+                             const uint32_t height,
+                             const uint8_t *SPARKYUV_RESTRICT yPlane,
+                             const uint32_t yStride,
+                             const uint8_t *SPARKYUV_RESTRICT uPlane,
+                             const uint32_t uStride,
+                             const uint8_t *SPARKYUV_RESTRICT vPlane,
+                             const uint32_t vStride,
+                             const float kr,
+                             const float kb,
+                             const SparkYuvColorRange colorRange) {
+  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410,
+                "Not supported chroma subsample");
   const ScalableTag<uint8_t> du8;
   const Half<decltype(du8)> du8h;
   const Half<decltype(du8h)> du8hh;
@@ -527,7 +529,7 @@ void YCbCr411ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
 }
 
 #define YCbCr411ToXXXXHWY_DECLARATION_R(pixelType, chroma) \
-        void YCbCr411To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+        static void YCbCr411To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                       const uint32_t width,const uint32_t height,\
                                       const uint8_t *SPARKYUV_RESTRICT yPlane,const uint32_t yStride,\
                                       const uint8_t *SPARKYUV_RESTRICT uPlane,const uint32_t uStride,\
@@ -550,7 +552,7 @@ YCbCr411ToXXXXHWY_DECLARATION_R(BGR, sparkyuv::YUV_SAMPLE_411)
 #undef YCbCr411ToXXXXHWY_DECLARATION_R
 
 #define YCbCr410ToXXXXHWY_DECLARATION_R(pixelType, chroma) \
-        void YCbCr410To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+        static void YCbCr410To##pixelType##HWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                       const uint32_t width,const uint32_t height,\
                                       const uint8_t *SPARKYUV_RESTRICT yPlane,const uint32_t yStride,\
                                       const uint8_t *SPARKYUV_RESTRICT uPlane,const uint32_t uStride,\
