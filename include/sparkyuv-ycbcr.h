@@ -195,6 +195,105 @@ YCbCr411PXToXXXX_DECLARATION_H(BGR, 12, YCbCr411)
 #endif
 
 #undef YCbCr411PXToXXXX_DECLARATION_H
+
+// MARK: YCbCr410
+
+#define XXXX_TO_YCbCr410_DECLARATION_E(pixelType) \
+ void pixelType##ToYCbCr410(const uint8_t * src, const uint32_t srcStride,\
+                            const uint32_t width, const uint32_t height,\
+                            uint8_t * yPlane, const uint32_t yStride,\
+                            uint8_t * uPlane, const uint32_t uStride,\
+                            uint8_t * vPlane, const uint32_t vStride,\
+                            const float kr, const float kb, const SparkYuvColorRange colorRange);
+
+XXXX_TO_YCbCr410_DECLARATION_E(RGBA)
+XXXX_TO_YCbCr410_DECLARATION_E(RGB)
+#if SPARKYUV_FULL_CHANNELS
+XXXX_TO_YCbCr410_DECLARATION_E(ARGB)
+XXXX_TO_YCbCr410_DECLARATION_E(ABGR)
+XXXX_TO_YCbCr410_DECLARATION_E(BGRA)
+XXXX_TO_YCbCr410_DECLARATION_E(BGR)
+#endif
+
+#undef XXXX_TO_YCbCr410_DECLARATION_E
+
+#define YCbCr410_TO_RGBX_DECLARATION_E(pixelType) \
+ void YCbCr410To##pixelType(uint8_t * dst,const uint32_t dstStride,\
+                            const uint32_t width,const uint32_t height,\
+                            const uint8_t * yPlane,const uint32_t yStride,\
+                            const uint8_t * uPlane,const uint32_t uStride,\
+                            const uint8_t * vPlane,const uint32_t vStride,\
+                            const float kr, const float kb, const SparkYuvColorRange colorRange);
+
+YCbCr410_TO_RGBX_DECLARATION_E(RGBA)
+YCbCr410_TO_RGBX_DECLARATION_E(RGB)
+#if SPARKYUV_FULL_CHANNELS
+YCbCr410_TO_RGBX_DECLARATION_E(ARGB)
+YCbCr410_TO_RGBX_DECLARATION_E(ABGR)
+YCbCr410_TO_RGBX_DECLARATION_E(BGRA)
+YCbCr410_TO_RGBX_DECLARATION_E(BGR)
+#endif
+
+#undef YCbCr410_TO_RGBX_DECLARATION_E
+
+// MAKR: YCbCr410 P16
+
+#define XXXToYCbCr410PHWY_DECLARATION_H(pixelType, bit, yuvname) \
+ void pixelType##bit##To##yuvname##P##bit(const uint16_t * src, const uint32_t srcStride,\
+                                          const uint32_t width, const uint32_t height,\
+                                          uint16_t * yPlane, const uint32_t yStride,\
+                                          uint16_t * uPlane, const uint32_t uStride,\
+                                          uint16_t * vPlane, const uint32_t vStride,\
+                                          const float kr, const float kb, const SparkYuvColorRange colorRange);
+
+XXXToYCbCr410PHWY_DECLARATION_H(RGBA, 10, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(RGB, 10, YCbCr410)
+#if SPARKYUV_FULL_CHANNELS
+XXXToYCbCr410PHWY_DECLARATION_H(ARGB, 10, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(ABGR, 10, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(BGRA, 10, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(BGR, 10, YCbCr410)
+#endif
+
+XXXToYCbCr410PHWY_DECLARATION_H(RGBA, 12, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(RGB, 12, YCbCr410)
+#if SPARKYUV_FULL_CHANNELS
+XXXToYCbCr410PHWY_DECLARATION_H(ARGB, 12, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(ABGR, 12, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(BGRA, 12, YCbCr410)
+XXXToYCbCr410PHWY_DECLARATION_H(BGR, 12, YCbCr410)
+#endif
+
+#undef XXXToYCbCr410PHWY_DECLARATION_H
+
+#define YCbCr410PXToXXXX_DECLARATION_H(pixelType, bit, yuvname) \
+ void yuvname##P##bit##To##pixelType##bit(uint16_t * src, const uint32_t srcStride,\
+                                          const uint32_t width, const uint32_t height,\
+                                          const uint16_t * yPlane, const uint32_t yStride,\
+                                          const uint16_t * uPlane, const uint32_t uStride,\
+                                          const uint16_t * vPlane, const uint32_t vStride,\
+                                          const float kr, const float kb, const SparkYuvColorRange colorRange);
+
+YCbCr410PXToXXXX_DECLARATION_H(RGBA, 10, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(RGB, 10, YCbCr410)
+#if SPARKYUV_FULL_CHANNELS
+YCbCr410PXToXXXX_DECLARATION_H(ARGB, 10, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(ABGR, 10, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(BGRA, 10, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(BGR, 10, YCbCr410)
+#endif
+
+YCbCr410PXToXXXX_DECLARATION_H(RGBA, 12, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(RGB, 12, YCbCr410)
+#if SPARKYUV_FULL_CHANNELS
+YCbCr410PXToXXXX_DECLARATION_H(ARGB, 12, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(ABGR, 12, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(BGRA, 12, YCbCr410)
+YCbCr410PXToXXXX_DECLARATION_H(BGR, 12, YCbCr410)
+#endif
+
+#undef YCbCr410PXToXXXX_DECLARATION_H
+
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_YCBCR_H_

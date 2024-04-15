@@ -84,13 +84,13 @@ int main() {
 
   int yPlaneStride = width;
   int uvPlaneStride = (width + 5) / 4;
-  int uvPlaneHeight = height;
+  int uvPlaneHeight = (height + 5 ) / 4;
   yPlane.resize(yPlaneStride * height);
   uPlane.resize(uvPlaneStride * uvPlaneHeight);
   vPlane.resize(uvPlaneStride * uvPlaneHeight);
 
   int uvPlaneStride16 = (width + 5) / 4;
-  int uvPlaneHeight16 = height;
+  int uvPlaneHeight16 = (height + 5) / 4;
 
   std::vector<uint8_t> yPlane16;
   std::vector<uint8_t> uPlane16;
@@ -150,7 +150,7 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
-    sparkyuv::RGBAToYCbCr411(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::RGBAToYCbCr410(rgbaData.data(), rgbaStride, width, height,
                               yPlane.data(), yPlaneStride,
                               uPlane.data(), uvPlaneStride,
                               vPlane.data(), uvPlaneStride, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
@@ -165,7 +165,7 @@ int main() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
-    sparkyuv::YCbCr411ToRGBA(rgbaData.data(), rgbaStride, width, height,
+    sparkyuv::YCbCr410ToRGBA(rgbaData.data(), rgbaStride, width, height,
                               yPlane.data(), yPlaneStride,
                               uPlane.data(), uvPlaneStride,
                               vPlane.data(), uvPlaneStride, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
@@ -205,7 +205,7 @@ int main() {
                           inWidth,
                           inHeight);
   bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
-    sparkyuv::RGBA10ToYCbCr411P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+    sparkyuv::RGBA10ToYCbCr410P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
                                 inWidth * 4 * sizeof(uint16_t),
                                 inWidth,
                                 inHeight,
@@ -228,7 +228,7 @@ int main() {
 //                                     reinterpret_cast<uint16_t *>(vPlane16.data()),
 //                                     uvPlaneStride16 * sizeof(uint16_t), sparkyuv::YUV_RANGE_TV);
 
-    sparkyuv::YCbCr411P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+    sparkyuv::YCbCr410P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
                                 inWidth * 4 * sizeof(uint16_t),
                                 inWidth,
                                 inHeight,

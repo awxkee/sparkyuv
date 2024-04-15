@@ -75,7 +75,9 @@ enum SparkYuvDefaultPixelType {
 enum SparkYuvChromaSubsample {
   YUV_SAMPLE_444,
   YUV_SAMPLE_422,
-  YUV_SAMPLE_420
+  YUV_SAMPLE_420,
+  YUV_SAMPLE_411,
+  YUV_SAMPLE_410
 };
 
 enum SparkYuvReformatPixelType {

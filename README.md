@@ -6,16 +6,16 @@ Library allows to convert RGB to Y'UV formats at high speed using platform SIMD 
 
 Almost all YUV formats supported, everything you might need :)
 
-| YUV      | 444 | 422 | 420 | 411 | 400 | NV12/NV21 | NV16/NV61 | NV24/NV42 |
-|----------|-----|-----|-----|-----|-----|-----------|-----------|-----------|
-| YCbCr    | ✅   | ✅   | ✅   | ✅   | ✅   | ✅         | ✅         | ✅         |
-| YcCbcCrc | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YCgCo    | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YCgCo-Ro | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YCgCo-Re | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YDzDx    | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YIQ      | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
-| YDbDr    | ✅   | ✅   | ✅   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YUV      | 444 | 422 | 420 | 411 | 410 | 400 | NV12/NV21 | NV16/NV61 | NV24/NV42 |
+|----------|-----|-----|-----|-----|-----|-----|-----------|-----------|-----------|
+| YCbCr    | ✅   | ✅   | ✅   | ✅   | ✅   | ✅   | ✅         | ✅         | ✅         |
+| YcCbcCrc | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YCgCo    | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YCgCo-Ro | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YCgCo-Re | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YDzDx    | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YIQ      | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
+| YDbDr    | ✅   | ✅   | ✅   | ❌   | ❌   | ❌   | N/A       | N/A       | N/A       |
 
 When encoding to NV12/NV21, NV12/N61, 420, 422 for chroma subsampling bi-linear scaling is automatically applied. There
 is no option to turn this off. Bi-linear scaling probably may be not so good as libsharpyuv, however also good.

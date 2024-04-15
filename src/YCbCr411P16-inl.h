@@ -29,13 +29,15 @@
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 
-template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, int bitDepth>
+template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, int bitDepth, SparkYuvChromaSubsample chromaSubsample>
 void Pixel16ToYCbCr411HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                           const uint32_t width, const uint32_t height,
                           uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
                           uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
                           uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                           const float kr, const float kb, const SparkYuvColorRange colorRange) {
+  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410,
+                "Not supported chroma subsample");
   static_assert(bitDepth >= 8, "Invalid bit depth");
   uint16_t biasY;
   uint16_t biasUV;
@@ -74,7 +76,6 @@ void Pixel16ToYCbCr411HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
   const Half<decltype(d16)> dh16;
   const Rebind<int32_t, decltype(dh16)> d32;
   const RebindToUnsigned<decltype(d32)> du32;
-  const Half<decltype(du16)> dhu16;
   using V16 = Vec<decltype(d16)>;
   using V32 = Vec<decltype(d32)>;
   using VU16 = Vec<decltype(du16)>;
@@ -104,9 +105,9 @@ void Pixel16ToYCbCr411HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
   const auto vBiasUV = Set(d32, iBiasUV);
 
   const int cutOffY = rangeY + biasY;
-  const int cutOffUV = rangeUV + biasUV;
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const uint32_t lastY = height - 1 - 4;
 
   const int lanesForward = 4;
 
@@ -134,32 +135,33 @@ void Pixel16ToYCbCr411HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
       const auto
           Y = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, YRh), ShiftRightNarrow<8>(d32, YRl)));
-
-      V32 Cbh = vBiasUV;
-      V32 Cbl = WidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
-      Cbl = WidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
-      Cbl = WidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
-
-      const auto
-          Cb = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
-
-      V32 Crh = vBiasUV;
-      V32 Crl = WidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
-      Crl = WidenMulAccumulate(d32, G, vCrG, Crl, Crh);
-      Crl = WidenMulAccumulate(d32, B, vCrB, Crl, Crh);
-
-      const auto
-          Cr = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
-
       StoreU(Y, du16, yDst);
 
-      const RepartitionToWide<decltype(du32)> du64;
-      const Rebind<uint16_t, decltype(du64)> du16cb;
+      if (chromaSubsample == YUV_SAMPLE_411 || ((y % 4 == 0 || y > lastY) && chromaSubsample == YUV_SAMPLE_410)) {
+        V32 Cbh = vBiasUV;
+        V32 Cbl = WidenMulAccumulate(d32, R, vCbR, vBiasUV, Cbh);
+        Cbl = WidenMulAccumulate(d32, G, vCbG, Cbl, Cbh);
+        Cbl = WidenMulAccumulate(d32, B, vCbB, Cbl, Cbh);
 
-      const auto cbh = ShiftRightNarrow<2>(du64, SumsOf2(SumsOf2(Cb)));
-      const auto crh = ShiftRightNarrow<2>(du64, SumsOf2(SumsOf2(Cr)));
-      StoreU(DemoteTo(du16cb, cbh), du16cb, uDst);
-      StoreU(DemoteTo(du16cb, crh), du16cb, vDst);
+        const auto
+            Cb = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Cbh), ShiftRightNarrow<8>(d32, Cbl)));
+
+        V32 Crh = vBiasUV;
+        V32 Crl = WidenMulAccumulate(d32, R, vCrR, vBiasUV, Crh);
+        Crl = WidenMulAccumulate(d32, G, vCrG, Crl, Crh);
+        Crl = WidenMulAccumulate(d32, B, vCrB, Crl, Crh);
+
+        const auto
+            Cr = BitCast(du16, Combine(d16, ShiftRightNarrow<8>(d32, Crh), ShiftRightNarrow<8>(d32, Crl)));
+
+        const RepartitionToWide<decltype(du32)> du64;
+        const Rebind<uint16_t, decltype(du64)> du16cb;
+
+        const auto cbh = ShiftRightNarrow<2>(du64, SumsOf2(SumsOf2(Cb)));
+        const auto crh = ShiftRightNarrow<2>(du64, SumsOf2(SumsOf2(Cr)));
+        StoreU(DemoteTo(du16cb, cbh), du16cb, uDst);
+        StoreU(DemoteTo(du16cb, crh), du16cb, vDst);
+      }
 
       yDst += lanes;
       uDst += uvLanes;
@@ -216,66 +218,105 @@ void Pixel16ToYCbCr411HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
         mSrc += components;
       }
 
-      r = (r + r1 + r2 + r3) >> 2;
-      g = (g + g1 + g2 + g3) >> 2;
-      b = (b + b1 + b2 + b3) >> 2;
+      if (chromaSubsample == YUV_SAMPLE_411 || ((y % 4 == 0 || y > lastY) && chromaSubsample == YUV_SAMPLE_410)) {
+        r = (r + r1 + r2 + r3) >> 2;
+        g = (g + g1 + g2 + g3) >> 2;
+        b = (b + b1 + b2 + b3) >> 2;
 
-      int Cb = ((-r * CbR - g * CbG + b * CbB + iBiasUV) >> precision);
-      int Cr = ((r * CrR - g * CrG - b * CrB + iBiasUV) >> precision);
+        int Cb = ((-r * CbR - g * CbG + b * CbB + iBiasUV) >> precision);
+        int Cr = ((r * CrR - g * CrG - b * CrB + iBiasUV) >> precision);
 
-      uDst[0] = Cb;
-      vDst[0] = Cr;
+        uDst[0] = Cb;
+        vDst[0] = Cr;
+      }
 
       uDst += 1;
       vDst += 1;
     }
 
+    if (chromaSubsample == YUV_SAMPLE_411 || (y % 4 == 0 && chromaSubsample == YUV_SAMPLE_410)) {
+      vStore += vStride;
+      uStore += uStride;
+    }
     yStore += yStride;
-    uStore += uStride;
-    vStore += vStride;
 
     mSource += srcStride;
   }
 }
 
-#define XXXXToYCbCr411PHWY_DECLARATION_R(pixelType, bit, yuvname) \
+#define XXXXToYCbCr411PHWY_DECLARATION_R(pixelType, bit, yuvname, chroma) \
         void pixelType##To##yuvname##P##bit##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                             const uint32_t width, const uint32_t height,\
                                             uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                             uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                             uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                             const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-          Pixel16ToYCbCr411HWY<sparkyuv::PIXEL_##pixelType, bit>(src, srcStride, width, height,\
-                                                          yPlane, yStride, uPlane, uStride, vPlane, vStride, kr, kb, colorRange);\
+          Pixel16ToYCbCr411HWY<sparkyuv::PIXEL_##pixelType, bit, chroma>(src, srcStride, width, height,\
+                                                          yPlane, yStride, uPlane, uStride, vPlane, vStride,     \
+                                                          kr, kb, colorRange);\
         }
 
-XXXXToYCbCr411PHWY_DECLARATION_R(RGBA, 10, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(RGB, 10, YCbCr411)
+XXXXToYCbCr411PHWY_DECLARATION_R(RGBA, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(RGB, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYCbCr411PHWY_DECLARATION_R(ARGB, 10, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(ABGR, 10, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(BGRA, 10, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(BGR, 10, YCbCr411)
+XXXXToYCbCr411PHWY_DECLARATION_R(ARGB, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(ABGR, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(BGRA, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(BGR, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #endif
 
-XXXXToYCbCr411PHWY_DECLARATION_R(RGBA, 12, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(RGB, 12, YCbCr411)
+XXXXToYCbCr411PHWY_DECLARATION_R(RGBA, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(RGB, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #if SPARKYUV_FULL_CHANNELS
-XXXXToYCbCr411PHWY_DECLARATION_R(ARGB, 12, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(ABGR, 12, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(BGRA, 12, YCbCr411)
-XXXXToYCbCr411PHWY_DECLARATION_R(BGR, 12, YCbCr411)
+XXXXToYCbCr411PHWY_DECLARATION_R(ARGB, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(ABGR, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(BGRA, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+XXXXToYCbCr411PHWY_DECLARATION_R(BGR, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #endif
 
 #undef XXXXToYCbCr411PHWY_DECLARATION_R
 
-template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, int bitDepth>
+#define XXXXToYCbCr410PHWY_DECLARATION_R(pixelType, bit, yuvname, chroma) \
+        void pixelType##To##yuvname##P##bit##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                            const uint32_t width, const uint32_t height,\
+                                            uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
+                                            uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
+                                            uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
+                                            const float kr, const float kb, const SparkYuvColorRange colorRange) {\
+          Pixel16ToYCbCr411HWY<sparkyuv::PIXEL_##pixelType, bit, chroma>(src, srcStride, width, height,\
+                                                          yPlane, yStride, uPlane, uStride, vPlane, vStride,     \
+                                                          kr, kb, colorRange);\
+        }
+
+XXXXToYCbCr410PHWY_DECLARATION_R(RGBA, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(RGB, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#if SPARKYUV_FULL_CHANNELS
+XXXXToYCbCr410PHWY_DECLARATION_R(ARGB, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(ABGR, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(BGRA, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(BGR, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#endif
+
+XXXXToYCbCr410PHWY_DECLARATION_R(RGBA, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(RGB, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#if SPARKYUV_FULL_CHANNELS
+XXXXToYCbCr410PHWY_DECLARATION_R(ARGB, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(ABGR, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(BGRA, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+XXXXToYCbCr410PHWY_DECLARATION_R(BGR, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#endif
+
+#undef XXXXToYCbCr410PHWY_DECLARATION_R
+
+template<SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA, int bitDepth, SparkYuvChromaSubsample chromaSubsample>
 void YCbCr411P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                        const uint32_t width, const uint32_t height,
                        const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
                        const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
                        const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                        const float kr, const float kb, const SparkYuvColorRange colorRange) {
+  static_assert(chromaSubsample == YUV_SAMPLE_411 || chromaSubsample == YUV_SAMPLE_410,
+                "Not supported chroma subsample");
   static_assert(bitDepth >= 8, "Invalid bit depth");
   const ScalableTag<uint16_t> d16;
   const RebindToSigned<decltype(d16)> di16;
@@ -463,41 +504,75 @@ void YCbCr411P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
       CrSource += 1;
     }
 
-    mUSrc += uStride;
-    mVSrc += vStride;
+    if (chromaSubsample == YUV_SAMPLE_411 || (chromaSubsample == YUV_SAMPLE_410 && y % 4 == 0)) {
+      mUSrc += uStride;
+      mVSrc += vStride;
+    }
     mYSrc += yStride;
     dst += dstStride;
   }
 }
 
-#define YCbCr411PXToXXXX_DECLARATION_R(pixelType, bit, yuvname) \
+#define YCbCr411PXToXXXX_DECLARATION_R(pixelType, bit, yuvname, chroma) \
     void yuvname##P##bit##To##pixelType##HWY(uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                              const uint32_t width, const uint32_t height,\
                                              const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                              const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
                                              const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
                                              const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-      YCbCr411P16ToXRGB<sparkyuv::PIXEL_##pixelType, bit>(src, srcStride, width, height,\
+      YCbCr411P16ToXRGB<sparkyuv::PIXEL_##pixelType, bit, chroma>(src, srcStride, width, height,\
                                                  yPlane, yStride, uPlane, uStride, vPlane, vStride, \
                                                  kr, kb, colorRange);\
     }
 
-YCbCr411PXToXXXX_DECLARATION_R(RGBA, 10, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(RGB, 10, YCbCr411)
+YCbCr411PXToXXXX_DECLARATION_R(RGBA, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(RGB, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #if SPARKYUV_FULL_CHANNELS
-YCbCr411PXToXXXX_DECLARATION_R(ARGB, 10, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(ABGR, 10, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(BGRA, 10, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(BGR, 10, YCbCr411)
+YCbCr411PXToXXXX_DECLARATION_R(ARGB, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(ABGR, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(BGRA, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(BGR, 10, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #endif
 
-YCbCr411PXToXXXX_DECLARATION_R(RGBA, 12, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(RGB, 12, YCbCr411)
+YCbCr411PXToXXXX_DECLARATION_R(RGBA, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(RGB, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
 #if SPARKYUV_FULL_CHANNELS
-YCbCr411PXToXXXX_DECLARATION_R(ARGB, 12, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(ABGR, 12, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(BGRA, 12, YCbCr411)
-YCbCr411PXToXXXX_DECLARATION_R(BGR, 12, YCbCr411)
+YCbCr411PXToXXXX_DECLARATION_R(ARGB, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(ABGR, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(BGRA, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+YCbCr411PXToXXXX_DECLARATION_R(BGR, 12, YCbCr411, sparkyuv::YUV_SAMPLE_411)
+#endif
+
+#undef YCbCr411PXToXXXX_DECLARATION_R
+
+#define YCbCr410PXToXXXX_DECLARATION_R(pixelType, bit, yuvname, chroma) \
+    void yuvname##P##bit##To##pixelType##HWY(uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                             const uint32_t width, const uint32_t height,\
+                                             const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
+                                             const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,\
+                                             const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,\
+                                             const float kr, const float kb, const SparkYuvColorRange colorRange) {\
+      YCbCr411P16ToXRGB<sparkyuv::PIXEL_##pixelType, bit, chroma>(src, srcStride, width, height,\
+                                                 yPlane, yStride, uPlane, uStride, vPlane, vStride, \
+                                                 kr, kb, colorRange);\
+    }
+
+YCbCr410PXToXXXX_DECLARATION_R(RGBA, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(RGB, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#if SPARKYUV_FULL_CHANNELS
+YCbCr410PXToXXXX_DECLARATION_R(ARGB, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(ABGR, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(BGRA, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(BGR, 10, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#endif
+
+YCbCr410PXToXXXX_DECLARATION_R(RGBA, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(RGB, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+#if SPARKYUV_FULL_CHANNELS
+YCbCr410PXToXXXX_DECLARATION_R(ARGB, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(ABGR, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(BGRA, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
+YCbCr410PXToXXXX_DECLARATION_R(BGR, 12, YCbCr410, sparkyuv::YUV_SAMPLE_410)
 #endif
 
 #undef YCbCr411PXToXXXX_DECLARATION_R
