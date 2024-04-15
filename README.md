@@ -2,7 +2,7 @@
 
 Library allows to convert RGB to Y'UV formats at high speed using platform SIMD acceleration and appropriate approximation level
 
-## Supported YUV formats and layouts
+## Supported YUV matrix
 
 Almost all YUV formats supported, everything you might need :)
 
@@ -21,6 +21,8 @@ When encoding to NV12/NV21, NV12/N61, 420, 422 for chroma subsampling bi-linear 
 is no option to turn this off. Bi-linear scaling probably may be not so good as libsharpyuv, however also good.
 Due to nature of this transformation in those cases it is exceptionally fast.
 
+All NV, YUV444 (4:4:4), YUV422(4:2:2), YUV420(4:2:2), YUV411 (4:1:1), YUV410 (4:1:0) do not accept nullable U and V planes, if you need to use 4:0:0 chroma subsample, please, do use 4:0:0 when it's available
+
 ### Things to note
 
 - YCgCo-Ro/YCgCo-Re 8-bit cannot be represented in 8-bit uint storage, so YCgCo-Ro/YCgCo-Re 8-bit requires a storage buffer to be at least twice widen ( 16-bit storage type )
@@ -30,6 +32,7 @@ Due to nature of this transformation in those cases it is exceptionally fast.
 - YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower than other approximations. Against naive implementation current transformation about 400-600% faster.
 - YDbDr should be computed from linearized components, however library expect that content already linearized and won't do that
 - YDbDr requires very high precision matrix for decoding, however low precision approximation is used, some color info loss is highly possible especially in TV range
+- YUV (4:1:1), YUV (4:1:0) does only box scaling, it's not very good, however it's only one available at the moment to keep performance in line
 
 ## Performance
 
