@@ -477,7 +477,6 @@ static void SparkyuvYCbCr400ToRGBA8(benchmark::State &state) {
   std::vector<uint8_t> yPlane;
   std::vector<uint8_t> rgbaData;
   int yPlaneStride;
-  int uvPlaneStride;
   int rgbaStride;
   if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
     std::cout << "Cannot read file (((" << std::endl;
@@ -497,6 +496,80 @@ static void SparkyuvYCbCr400ToRGBA8(benchmark::State &state) {
     sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
                              yPlane.data(), yPlaneStride,
                              0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
+  }
+}
+
+void SparkyuvRGBA8ToYCbCr411(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> yPlane;
+  std::vector<uint8_t> uPlane;
+  std::vector<uint8_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int uvPlaneHeight;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+  uvPlaneStride = (inWidth + 5) / 4;
+  uvPlaneHeight = inHeight;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  uPlane.resize(uvPlaneStride * uvPlaneHeight);
+  vPlane.resize(uvPlaneStride * uvPlaneHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  for (auto _ : state) {
+    sparkyuv::RGBAToYCbCr411(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             uPlane.data(), uvPlaneStride,
+                             vPlane.data(), uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
+  }
+}
+
+static void SparkyuvYCbCr411ToRGBA8(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> yPlane;
+  std::vector<uint8_t> uPlane;
+  std::vector<uint8_t> vPlane;
+  std::vector<uint8_t> rgbaData;
+  int yPlaneStride;
+  int uvPlaneStride;
+  int uvPlaneHeight;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  yPlaneStride = inWidth;
+  uvPlaneStride = (inWidth + 5) / 2;
+  uvPlaneHeight = inHeight;
+
+  yPlane.resize(yPlaneStride * inHeight);
+  uPlane.resize(uvPlaneStride * uvPlaneHeight);
+  vPlane.resize(uvPlaneStride * uvPlaneHeight);
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  sparkyuv::RGBAToYCbCr411(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                           yPlane.data(), yPlaneStride,
+                           uPlane.data(), uvPlaneStride,
+                           vPlane.data(), uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
+  for (auto _ : state) {
+    sparkyuv::YCbCr411ToRGBA(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             uPlane.data(), uvPlaneStride,
+                             vPlane.data(), uvPlaneStride, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV);
   }
 }
 
@@ -520,6 +593,9 @@ BENCHMARK(LibyuvRGBA8ToYCbCr420);
 BENCHMARK(LibYuvRGBA8ToYCbCr422);
 BENCHMARK(SparkyuvRGBA8ToYCbCr444);
 BENCHMARK(SparkyuvRGBA8ToYCbCr422);
+
+BENCHMARK(SparkyuvRGBA8ToYCbCr411);
+BENCHMARK(SparkyuvYCbCr411ToRGBA8);
 
 BENCHMARK(SparkyuvRGBA8ToYCbCr400);
 BENCHMARK(SparkyuvYCbCr400ToRGBA8);

@@ -137,13 +137,13 @@ YCbCr400_TO_RGBX_DECLARATION_E(BGR, 12, YCbCr400)
 #undef YCbCr400_TO_RGBX_DECLARATION_E
 
 #define RGBX_TO_YCbCr400_DECLARATION_E(pixelType, bit, yuvname) \
-        void pixelType##To##yuvname##P##bit##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
-                                            const uint32_t width, const uint32_t height,\
-                                            uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
-                                            const float kr, const float kb, const SparkYuvColorRange colorRange) {\
-          HWY_DYNAMIC_DISPATCH(pixelType##To##yuvname##P##bit##HWY)(src, srcStride, width, height,\
-                                                                    yPlane, yStride, kr, kb, colorRange);\
-        }
+ void pixelType##bit##To##yuvname##P##bit(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                          const uint32_t width, const uint32_t height,\
+                                          uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
+                                          const float kr, const float kb, const SparkYuvColorRange colorRange) {\
+   HWY_DYNAMIC_DISPATCH(pixelType##To##yuvname##P##bit##HWY)(src, srcStride, width, height,\
+                                                             yPlane, yStride, kr, kb, colorRange);\
+ }
 
 RGBX_TO_YCbCr400_DECLARATION_E(RGBA, 10, YCbCr400)
 RGBX_TO_YCbCr400_DECLARATION_E(RGB, 10, YCbCr400)
@@ -164,7 +164,7 @@ RGBX_TO_YCbCr400_DECLARATION_E(BGR, 12, YCbCr400)
 #endif
 
 #define YCbCr400_TO_RGBX_DECLARATION_E(pixelType, bit, yuvname) \
-    void yuvname##P##bit##To##pixelType##HWY(uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+    void yuvname##P##bit##To##pixelType##bit(uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                              const uint32_t width, const uint32_t height,\
                                              const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,\
                                              const float kr, const float kb, const SparkYuvColorRange colorRange) {\

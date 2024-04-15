@@ -126,6 +126,11 @@ HWY_API VFromD<D> PromoteTo(D df, Vec<Rebind<uint8_t, D>> v) {
 
 #if (HWY_TARGET == HWY_NEON || HWY_TARGET == HWY_NEON_WITHOUT_AES) && HWY_ARCH_ARM_A64
 
+template<int n, class D, HWY_IF_U64_D(D), typename DN = Rebind<MakeNarrow<TFromD<D>>, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightNarrow(D /* tag */, Vec<D> v) {
+  return Vec64<uint32_t>(vshrn_n_u64(v.raw, n));
+}
+
 template<int n, class D, HWY_IF_U16_D(D), typename DN = Rebind<MakeNarrow<TFromD<D>>, D>, typename VN = Vec<DN>>
 HWY_API VN ShiftRightNarrow(D /* tag */, Vec<D> v) {
   return Vec64<uint8_t>(vshrn_n_u16(v.raw, n));
@@ -194,6 +199,12 @@ HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
 }
 
 #else
+
+template<int n, class D, HWY_IF_U64_D(D), typename DN = Rebind<MakeNarrow<TFromD<D>>, D>, typename VN = Vec<DN>>
+HWY_API VN ShiftRightNarrow(D /* tag */, Vec<D> v) {
+  const DN dn;
+  return DemoteTo(dn, v);
+}
 
 template<int n, class D, HWY_IF_U16_D(D), typename D8 = Rebind<uint8_t, D>, typename VN = Vec<D8>>
 HWY_API VN ShiftRightNarrow(D d, Vec<D> v) {

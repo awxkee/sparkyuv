@@ -83,13 +83,13 @@ int main() {
 //  vPlane.resize(uvPlaneStride * (height + 1) / 2);
 
   int yPlaneStride = width;
-  int uvPlaneStride = (width + 1) / 2;
+  int uvPlaneStride = (width + 5) / 4;
   int uvPlaneHeight = height;
   yPlane.resize(yPlaneStride * height);
   uPlane.resize(uvPlaneStride * uvPlaneHeight);
   vPlane.resize(uvPlaneStride * uvPlaneHeight);
 
-  int uvPlaneStride16 = width;
+  int uvPlaneStride16 = (width + 5) / 4;
   int uvPlaneHeight16 = height;
 
   std::vector<uint8_t> yPlane16;
@@ -150,12 +150,10 @@ int main() {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   bench(1, ANSI_COLOR_GREEN, "RGBA -> YCbCr420", [&]() {
-    sparkyuv::RGBAToYCbCr400(rgbaData.data(), rgbaStride, width, height,
-                              yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
-//    sparkyuv::RGBA8ToYIQ422P8(rgbaData.data(), rgbaStride, width, height,
-//                              yPlane.data(), yPlaneStride,
-//                              uPlane.data(), uvPlaneStride,
-//                              vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
+    sparkyuv::RGBAToYCbCr411(rgbaData.data(), rgbaStride, width, height,
+                              yPlane.data(), yPlaneStride,
+                              uPlane.data(), uvPlaneStride,
+                              vPlane.data(), uvPlaneStride, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
 //    libyuv::ABGRToI420(rgbaData.data(), rgbaStride, yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride, width, height );
@@ -167,12 +165,12 @@ int main() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
-//    sparkyuv::YIQ422P8ToRGBA8(rgbaData.data(), rgbaStride, width, height,
-//                              yPlane.data(), yPlaneStride,
-//                              uPlane.data(), uvPlaneStride,
-//                              vPlane.data(), uvPlaneStride, sparkyuv::YUV_RANGE_PC);
-    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
-                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
+    sparkyuv::YCbCr411ToRGBA(rgbaData.data(), rgbaStride, width, height,
+                              yPlane.data(), yPlaneStride,
+                              uPlane.data(), uvPlaneStride,
+                              vPlane.data(), uvPlaneStride, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
+//    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
+//                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
   });
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);
@@ -200,47 +198,47 @@ int main() {
 
   std::vector<uint8_t> rgba16Data(sizeof(uint16_t) * inWidth * 4 * inHeight);
 
+  sparkyuv::WideRGBA8To10(rgbaData.data(),
+                          inWidth * 4 * sizeof(uint8_t),
+                          reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                          inWidth * 4 * sizeof(uint16_t),
+                          inWidth,
+                          inHeight);
+  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
+    sparkyuv::RGBA10ToYCbCr411P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                inWidth * 4 * sizeof(uint16_t),
+                                inWidth,
+                                inHeight,
+                                reinterpret_cast<uint16_t *>(yPlane16.data()),
+                                yPlaneStride * sizeof(uint16_t),
+                                reinterpret_cast<uint16_t *>(uPlane16.data()),
+                                uvPlaneStride16 * sizeof(uint16_t),
+                                reinterpret_cast<uint16_t *>(vPlane16.data()),
+                                uvPlaneStride16 * sizeof(uint16_t), 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
+  });
+  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
+//    sparkyuv::YCbCr420P12ToRGBA12(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+//                                     inWidth * 4 * sizeof(uint16_t),
+//                                     inWidth,
+//                                     inHeight,
+//                                     reinterpret_cast<uint16_t *>(yPlane16.data()),
+//                                     yPlaneStride * sizeof(uint16_t),
+//                                     reinterpret_cast<uint16_t *>(uPlane16.data()),
+//                                     uvPlaneStride16 * sizeof(uint16_t),
+//                                     reinterpret_cast<uint16_t *>(vPlane16.data()),
+//                                     uvPlaneStride16 * sizeof(uint16_t), sparkyuv::YUV_RANGE_TV);
 
-//  sparkyuv::WideRGBA8To10(rgbaData.data(),
-//                          inWidth * 4 * sizeof(uint8_t),
-//                          reinterpret_cast<uint16_t *>(rgba16Data.data()),
-//                          inWidth * 4 * sizeof(uint16_t),
-//                          inWidth,
-//                          inHeight);
-//  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
-//    sparkyuv::RGBA10ToYCbCr444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-//                                inWidth * 4 * sizeof(uint16_t),
-//                                inWidth,
-//                                inHeight,
-//                                reinterpret_cast<uint16_t *>(yPlane16.data()),
-//                                yPlaneStride * sizeof(uint16_t),
-//                                reinterpret_cast<uint16_t *>(uPlane16.data()),
-//                                uvPlaneStride16 * sizeof(uint16_t),
-//                                reinterpret_cast<uint16_t *>(vPlane16.data()),
-//                                uvPlaneStride16 * sizeof(uint16_t), 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
-//  });
-//  bench(1, ANSI_COLOR_BLUE, "RGBA10 -> YUV444 P10", [&] () {
-////    sparkyuv::YCbCr420P12ToRGBA12(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-////                                     inWidth * 4 * sizeof(uint16_t),
-////                                     inWidth,
-////                                     inHeight,
-////                                     reinterpret_cast<uint16_t *>(yPlane16.data()),
-////                                     yPlaneStride * sizeof(uint16_t),
-////                                     reinterpret_cast<uint16_t *>(uPlane16.data()),
-////                                     uvPlaneStride16 * sizeof(uint16_t),
-////                                     reinterpret_cast<uint16_t *>(vPlane16.data()),
-////                                     uvPlaneStride16 * sizeof(uint16_t), sparkyuv::YUV_RANGE_TV);
-//    sparkyuv::RGBA10ToYCbCr444P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-//                                inWidth * 4 * sizeof(uint16_t),
-//                                inWidth,
-//                                inHeight,
-//                                reinterpret_cast<uint16_t *>(yPlane16.data()),
-//                                yPlaneStride * sizeof(uint16_t),
-//                                reinterpret_cast<uint16_t *>(uPlane16.data()),
-//                                uvPlaneStride16 * sizeof(uint16_t),
-//                                reinterpret_cast<uint16_t *>(vPlane16.data()),
-//                                uvPlaneStride16 * sizeof(uint16_t), 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
-//  });
+    sparkyuv::YCbCr411P10ToRGBA10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                                inWidth * 4 * sizeof(uint16_t),
+                                inWidth,
+                                inHeight,
+                                reinterpret_cast<uint16_t *>(yPlane16.data()),
+                                yPlaneStride * sizeof(uint16_t),
+                                reinterpret_cast<uint16_t *>(uPlane16.data()),
+                                uvPlaneStride16 * sizeof(uint16_t),
+                                reinterpret_cast<uint16_t *>(vPlane16.data()),
+                                uvPlaneStride16 * sizeof(uint16_t), 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV);
+  });
 //
 //  SaveYUV444ToFile(yPlane16.data(), uPlane16.data(), vPlane16.data(), inWidth, inHeight, "filirovska_s_444_p10.yuv",
 //                   sizeof(uint16_t));
@@ -283,10 +281,10 @@ int main() {
 //  });
 //
 
-//  std::fill(rgbaData.begin(), rgbaData.end(), 0);
+  std::fill(rgbaData.begin(), rgbaData.end(), 0);
 //
-//  sparkyuv::SaturateRGBA10To8(reinterpret_cast<uint16_t *>(rgba16Data.data()), inWidth * 4 * sizeof(uint16_t),
-//                              rgbaData.data(), inWidth * 4 * sizeof(uint8_t), inWidth, inHeight);
+  sparkyuv::SaturateRGBA10To8(reinterpret_cast<uint16_t *>(rgba16Data.data()), inWidth * 4 * sizeof(uint16_t),
+                              rgbaData.data(), inWidth * 4 * sizeof(uint8_t), inWidth, inHeight);
 
 //  sparkyuv::RGBAToRGBAF16(rgbaData.data(),
 //                          rgbaStride,

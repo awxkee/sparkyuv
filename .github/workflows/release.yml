@@ -338,4 +338,5 @@ jobs:
       - run: ls -la
       - uses: ncipollo/release-action@v1
         with:
+          bodyFile: 'CHANGELOG.md'
           artifacts: "sparkyuv.tar.gz,libsparkyuv.linux-*.tar.gz,libsparkyuv.android-*.tar.gz,libsparkyuv.windows-*.tar.gz"
