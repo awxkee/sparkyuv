@@ -40,6 +40,9 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
                             const SparkYuvColorRange colorRange,
                             const SparkYuvTransformMatrix matrix) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(
+      chromaSubsample == YUV_SAMPLE_444 || chromaSubsample == YUV_SAMPLE_420 || chromaSubsample == YUV_SAMPLE_422,
+      "Unsupported chroma type");
   uint16_t biasY;
   uint16_t biasUV;
   uint16_t rangeY;
@@ -51,13 +54,13 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   const float rangeReformatY = static_cast<float>(rangeY) / static_cast<float>(maxColors);
   const float rangeReformatUV = static_cast<float>(rangeUV) / static_cast<float>(maxColors);
 
-  auto YR = static_cast<int16_t>(::roundf(matrix.Y1 * scale * rangeReformatY)),
+  const auto YR = static_cast<int16_t>(::roundf(matrix.Y1 * scale * rangeReformatY)),
       YG = static_cast<int16_t>(::roundf(matrix.Y2 * scale * rangeReformatY)),
       YB = static_cast<int16_t>(::roundf(matrix.Y3 * scale * rangeReformatY));
-  auto CbR = static_cast<int16_t>(::roundf(matrix.U1 * scale * rangeReformatUV)),
+  const auto CbR = static_cast<int16_t>(::roundf(matrix.U1 * scale * rangeReformatUV)),
       CbG = static_cast<int16_t>(::roundf(matrix.U2 * scale * rangeReformatUV)),
       CbB = static_cast<int16_t>(::roundf(matrix.U3 * scale * rangeReformatUV));
-  auto CrR = static_cast<int16_t>(::roundf(matrix.V1 * scale * rangeReformatUV)),
+  const auto CrR = static_cast<int16_t>(::roundf(matrix.V1 * scale * rangeReformatUV)),
       CrG = static_cast<int16_t>(::roundf(matrix.V2 * scale * rangeReformatUV)),
       CrB = static_cast<int16_t>(::roundf(matrix.V3 * scale * rangeReformatUV));
 
@@ -71,7 +74,6 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   const Half<decltype(d16)> dh16;
   const Rebind<int32_t, decltype(dh16)> d32;
   const RebindToSigned<decltype(d16)> di16;
-  const Half<decltype(di16)> dhi16;
   const Half<decltype(d16)> dhu16;
   using V16 = Vec<decltype(d16)>;
   using V32 = Vec<decltype(d32)>;
@@ -108,7 +110,7 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -364,6 +366,9 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
                              const SparkYuvColorRange colorRange,
                              const SparkYuvTransformMatrix matrix) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(
+      chromaSubsample == YUV_SAMPLE_444 || chromaSubsample == YUV_SAMPLE_420 || chromaSubsample == YUV_SAMPLE_422,
+      "Unsupported chroma type");
   const ScalableTag<uint16_t> d16;
   const RebindToSigned<decltype(d16)> di16;
   const Half<decltype(d16)> dh16;
@@ -396,13 +401,13 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   const float rangeReformatY = static_cast<float>(maxColors) / static_cast<float>(rangeY);
   const float rangeReformatUV = static_cast<float>(maxColors) / static_cast<float>(rangeUV);
 
-  int YR = static_cast<int>(::roundf(matrix.Y1 * scale * rangeReformatY)),
+  const int YR = static_cast<int>(::roundf(matrix.Y1 * scale * rangeReformatY)),
       YG = static_cast<int>(::roundf(matrix.Y2 * scale * rangeReformatY)),
       YB = static_cast<int>(::roundf(matrix.Y3 * scale * rangeReformatY));
-  int CbR = static_cast<int>(::roundf(matrix.U1 * scale * rangeReformatUV)),
+  const int CbR = static_cast<int>(::roundf(matrix.U1 * scale * rangeReformatUV)),
       CbG = static_cast<int>(::roundf(matrix.U2 * scale * rangeReformatUV)),
       CbB = static_cast<int>(::roundf(matrix.U3 * scale * rangeReformatUV));
-  int CrR = static_cast<int>(::roundf(matrix.V1 * scale * rangeReformatUV)),
+  const int CrR = static_cast<int>(::roundf(matrix.V1 * scale * rangeReformatUV)),
       CrG = static_cast<int>(::roundf(matrix.V2 * scale * rangeReformatUV)),
       CrB = static_cast<int>(::roundf(matrix.V3 * scale * rangeReformatUV));
 
@@ -417,7 +422,7 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   const auto vCrB = Set(di16, CrB);
 
   const int lanes = Lanes(d16);
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh16);
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
@@ -476,9 +481,9 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
       }
 
       /*
-       *       int R = (Y * YR + U * YG + V * YB) >> precision;
-      int G = (Y * CbR + U * CbG + V * CbB) >> precision;
-      int B = (Y * CrR + U * CrG + V * CrB) >> precision;
+       * int R = (Y * YR + U * YG + V * YB) >> precision;
+         int G = (Y * CbR + U * CbG + V * CbB) >> precision;
+         int B = (Y * CrR + U * CrG + V * CrB) >> precision;
        */
 
       V32 rl = v32Zeros;
@@ -503,21 +508,12 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
 
       // In 12 bit overflow is highly likely so there is a need to handle it slightly in another way
       V16 r, g, b;
-      if (bitDepth > 12 || precision > 6) {
-        r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
-                                       ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
-        g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),
-                                       ShiftRightNarrow<precision>(d32, gl)), zeros, vMaxColors));
-        b = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, bh),
-                                       ShiftRightNarrow<precision>(d32, bl)), zeros, vMaxColors));
-      } else {
-        r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
-                                       ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
-        g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),
-                                       ShiftRightNarrow<precision>(d32, gl)), zeros, vMaxColors));
-        b = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, bh),
-                                       ShiftRightNarrow<precision>(d32, bl)), zeros, vMaxColors));
-      }
+      r = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, rh),
+                                     ShiftRightNarrow<precision>(d32, rl)), zeros, vMaxColors));
+      g = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, gh),
+                                     ShiftRightNarrow<precision>(d32, gl)), zeros, vMaxColors));
+      b = BitCast(d16, Clamp(Combine(di16, ShiftRightNarrow<precision>(d32, bh),
+                                     ShiftRightNarrow<precision>(d32, bl)), zeros, vMaxColors));
 
       if (std::is_same<T, uint16_t>::value) {
         StoreRGBA<PixelType>(d16, reinterpret_cast<uint16_t *>(store), r, g, b, vAlpha);

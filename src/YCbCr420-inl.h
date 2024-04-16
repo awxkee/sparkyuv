@@ -277,7 +277,6 @@ YCbCr420ToXXXXHWY(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t rgbaStride,
   const Rebind<int16_t, decltype(du8h)> di16;
   const RebindToUnsigned<decltype(di16)> du16;
   using VU16 = Vec<decltype(di16)>;
-  const Half<decltype(di16)> du16h;
 
   uint16_t biasY;
   uint16_t biasUV;

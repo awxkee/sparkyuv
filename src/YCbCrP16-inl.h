@@ -108,7 +108,7 @@ void Pixel16ToYCbCr444HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -438,7 +438,7 @@ void YCbCr444P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
   const auto sum0 = Zero(d32);
 
   const int lanes = Lanes(d16);
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh16);
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;

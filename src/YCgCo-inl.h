@@ -39,6 +39,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                    T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                    const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");
   uint16_t bY;
   uint16_t bUV;
   uint16_t rangeY;
@@ -79,7 +81,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const int lanes = Lanes(d);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh);
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -465,7 +467,8 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                     const T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                     const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
-
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");
   auto mYSrc = reinterpret_cast<const uint8_t *>(yPlane);
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
   auto mVSrc = reinterpret_cast<const uint8_t *>(vPlane);
@@ -482,7 +485,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const int rangeReduction = static_cast<int>(::roundf((static_cast<float>(maxColors) / static_cast<float>(rangeY)
       * static_cast<float>(1 << precision))));
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 

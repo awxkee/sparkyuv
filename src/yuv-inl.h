@@ -168,18 +168,18 @@ HWY_API VW WidenMul(D /* tag */, Vec<D> v, Vec<D> x) {
 }
 
 template<class D, HWY_IF_U8_D(D), typename DW = Rebind<uint16_t, D>, typename VW = Vec<DW>>
-HWY_API VW WidenMulW(D /* tag */d, Vec<D> v, VW x) {
+HWY_API VW WidenMulW(D /* tag */, Vec<D> v, VW x) {
   const DW dw;
   return Mul(PromoteTo(dw, v), x);
 }
 
 template<int n, class D, HWY_IF_U8_D(D), typename DW = Rebind<MakeWide<TFromD<D>>, D>, typename VW = Vec<DW>>
-HWY_API VW ShiftLeftWide(D d, Vec<D> v) {
+HWY_API VW ShiftLeftWide(D /* tag */, Vec<D> v) {
   return Vec128<uint16_t>(vshll_n_u8(v.raw, n));
 }
 
 template<class D, HWY_IF_U16_D(D)>
-HWY_API VFromD<D> AddAndHalf(D d, VFromD<D> v1, VFromD<D> v2) {
+HWY_API VFromD<D> AddAndHalf(D /* tag */, VFromD<D> v1, VFromD<D> v2) {
   return Vec128<uint16_t>(vhaddq_u16(v1.raw, v2.raw));
 }
 
@@ -189,12 +189,12 @@ HWY_API VFromD<D> AddAndHalf(D /* tag */, VFromD<D> v1, VFromD<D> v2) {
 }
 
 template<class D, HWY_IF_I16_D(D)>
-HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
+HWY_API Vec<D> AddAndHalf(D /* tag */, Vec<D> v1, Vec<D> v2) {
   return Vec128<int16_t>(vhaddq_s16(v1.raw, v2.raw));
 }
 
 template<class D, HWY_IF_I32_D(D)>
-HWY_API Vec<D> AddAndHalf(D d, Vec<D> v1, Vec<D> v2) {
+HWY_API Vec<D> AddAndHalf(D /* tag */, Vec<D> v1, Vec<D> v2) {
   return Vec128<int32_t>(vhaddq_s32(v1.raw, v2.raw));
 }
 

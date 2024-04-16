@@ -39,6 +39,8 @@ PixelToYCgCoRHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                    uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                    const SparkYuvYCgCoRType rType) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");
   uint16_t biasY;
   uint16_t biasUV;
   uint16_t rangeY;
@@ -57,7 +59,6 @@ PixelToYCgCoRHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const RebindToSigned<decltype(du16)> di16;
   using VU16 = Vec<decltype(du16)>;
   const Rebind<T, decltype(du16)> d;
-  const Half<decltype(di16)> dhi16;
   const Half<decltype(d)> dh;
   const Half<decltype(du16)> dhu16;
   const Rebind<uint32_t, decltype(dhu16)> du32;
@@ -66,7 +67,7 @@ PixelToYCgCoRHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   const int lanes = Lanes(d);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh);
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -370,7 +371,8 @@ void YCgCoRToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                     const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                     const SparkYuvYCgCoRType rType) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
-
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");
   auto mYSrc = reinterpret_cast<const uint8_t *>(yPlane);
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
   auto mVSrc = reinterpret_cast<const uint8_t *>(vPlane);
@@ -386,7 +388,7 @@ void YCgCoRToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 
   const int maxColors = static_cast<int>(::powf(2.f, static_cast<float>(bitDepth)) - 1.f);
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
@@ -401,7 +403,6 @@ void YCgCoRToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const auto vMaxColors = Set(di16, maxColors);
   const auto viZeros = Zero(di16);
   const auto A16 = Set(du16, maxColors);
-  const Rebind<uint8_t, decltype(du16)> d8;
 
   const int lanes = Lanes(d);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh);
@@ -538,7 +539,7 @@ void YCgCoRToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 /**
 * @brief It will be good to declare a type of transfer function
  * and compile each variant separately however increase of binary size about 400%
- * and compile time abound 1000% sacrifices this benefit
+ * and compile time abound 1000% eliminates this benefit
 */
 #define YcCbcCrcToXXXX_DECLARATION_R(T, PixelType, bit, yuvname, chroma) \
 void yuvname##P##bit##To##PixelType##bit##HWY(T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\

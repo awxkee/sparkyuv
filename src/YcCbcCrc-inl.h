@@ -78,6 +78,8 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                    const float kr, const float kb, const SparkYuvColorRange colorRange,
                    const SparkYuvTransferFunction TransferFunction) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected type");
   uint16_t biasY;
   uint16_t biasUV;
   uint16_t rangeY;
@@ -150,7 +152,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
     auto mSrc = reinterpret_cast<const T *>(mSource);
 
     for (; x + lanes < width; x += lanes) {
-      VF Rh, Rl, Gh, Gl, Bh, Bl, Ah, Al;
+      VF Rh, Rl, Gh, Gl, Bh, Bl;
       if (std::is_same<T, uint16_t>::value) {
         VU R16, G16, B16, A16;
         LoadRGBA<PixelType>(du16, reinterpret_cast<const uint16_t *>(mSrc), R16, G16, B16, A16);
@@ -162,7 +164,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         Bh = ConvertTo(df, PromoteUpperTo(du32, B16));
         Bl = ConvertTo(df, PromoteLowerTo(du32, B16));
       } else if (std::is_same<T, uint8_t>::value) {
-        VU R16, G16, B16, A16;
+        VU R16, G16, B16;
         LoadRGB<PixelType>(du16, reinterpret_cast<const uint8_t *>(mSrc), R16, G16, B16);
 
         Rh = ConvertTo(df, PromoteTo(du32, UpperHalf(dhu16, R16)));
@@ -208,7 +210,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       if (chromaSubsample == YUV_SAMPLE_420 || chromaSubsample == YUV_SAMPLE_422) {
         if (chromaSubsample == YUV_SAMPLE_420) {
           if (!(y & 1) && y + 1 < height) {
-            VF vRh, vRl, vGh, vGl, vBh, vBl, vAh, vAl;
+            VF vRh, vRl, vBh, vBl;
             if (std::is_same<T, uint16_t>::value) {
               auto nextRow = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
               VU R16, G16, B16, A16;
@@ -219,8 +221,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
               vBh = ConvertTo(df, PromoteUpperTo(du32, B16));
               vBl = ConvertTo(df, PromoteLowerTo(du32, B16));
             } else if (std::is_same<T, uint8_t>::value) {
-              const Rebind<uint8_t, decltype(du16)> du8;
-              VU R16, G16, B16, A16;
+              VU R16, G16, B16;
               auto nextRow = reinterpret_cast<const uint8_t*>(reinterpret_cast<const uint8_t *>(mSrc) + srcStride);
               LoadRGB<PixelType>(du16, reinterpret_cast<const uint8_t *>(nextRow), R16, G16, B16);
 
@@ -596,7 +597,8 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                     const float kr, const float kb, const SparkYuvColorRange colorRange,
                     const SparkYuvTransferFunction transferFunction) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
-
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected type");
   auto mYSrc = reinterpret_cast<const uint8_t *>(yPlane);
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
   auto mVSrc = reinterpret_cast<const uint8_t *>(vPlane);

@@ -68,7 +68,6 @@ void Pixel8ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src,
   const ScalableTag<uint8_t> du8;
   const Half<decltype(di16)> dhi16;
   const Rebind<int32_t, decltype(dhi16)> d32;
-  const RebindToUnsigned<decltype(d32)> du32;
   using VU8 = Vec<decltype(du8)>;
   using VU16 = Vec<decltype(di16)>;
   using V32 = Vec<decltype(d32)>;

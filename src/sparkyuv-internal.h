@@ -80,6 +80,16 @@ enum SparkYuvChromaSubsample {
   YUV_SAMPLE_410
 };
 
+static inline int getYuvChromaPixels(SparkYuvChromaSubsample chroma) {
+  switch (chroma) {
+    case YUV_SAMPLE_444:return 1;
+    case YUV_SAMPLE_422:
+    case YUV_SAMPLE_420:return 2;
+    case YUV_SAMPLE_411:
+    case YUV_SAMPLE_410:return 4;
+  }
+}
+
 enum SparkYuvReformatPixelType {
   REFORMAT_RGBA,
   REFORMAT_RGB,

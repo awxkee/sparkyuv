@@ -39,6 +39,8 @@ PixelToYDzDxHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                 T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                 const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected type");
   uint16_t bY;
   uint16_t bUV;
   uint16_t rangeY;
@@ -80,7 +82,7 @@ PixelToYDzDxHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -293,6 +295,8 @@ void YDzDxToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
                  const T *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
                  const SparkYuvColorRange colorRange) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
+  static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
+                    || chromaSubsample == YUV_SAMPLE_444, "Unexpected type");
 
   auto mYSrc = reinterpret_cast<const uint8_t *>(yPlane);
   auto mUSrc = reinterpret_cast<const uint8_t *>(uPlane);
@@ -330,7 +334,7 @@ void YDzDxToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const int coeffPr1 = static_cast<int>(static_cast<float>(2.f / 0.991902f) * frangeReductionUV);
   const int coeffPr2 = static_cast<int>(static_cast<float>(1.f / 0.991902f) * frangeReductionUV);
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
   const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
 
