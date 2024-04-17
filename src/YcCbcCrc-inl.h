@@ -106,7 +106,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 
   const float kg = 1.f - kr - kb;
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
 
@@ -625,9 +625,9 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
   const float scaleRangeY = 1.f / static_cast<float>(rangeY);
   const float scaleRangeUV = 1.f / static_cast<float>(rangeUV);
 
-  const int lanesForward = (chromaSubsample == YUV_SAMPLE_444) ? 1 : 2;
+  const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
   const auto fMaxColors = static_cast<float>(maxColors);
 
   const float ekg = 1.f / kg;

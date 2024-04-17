@@ -47,7 +47,7 @@ PremultiplyAlphaPixel8(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);
@@ -133,7 +133,7 @@ UnpremultiplyAlpha8HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       PixelType == PIXEL_RGBA || PixelType == PIXEL_ARGB || PixelType == PIXEL_ABGR || PixelType == PIXEL_BGRA,
       "Cannot be used on image without alpha");
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);

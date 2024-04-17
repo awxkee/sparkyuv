@@ -539,19 +539,6 @@ namespace sparkyuv::HWY_NAMESPACE {
 using namespace hwy;
 using namespace hwy::HWY_NAMESPACE;
 
-template<typename D>
-SPARKYUV_INLINE static void YUVToRGBLimited(D d,
-                                            const Vec<D> Y, const Vec<D> U, const Vec<D> V,
-                                            Vec<D> &R, Vec<D> &G, Vec<D> &B,
-                                            const Vec<D> lumaCoeff,
-                                            const Vec<D> crCoeff, const Vec<D> cbCoeff,
-                                            const Vec<D> gCoeff1, const Vec<D> gCoeff2) {
-  const auto luma = Mul(Y, lumaCoeff);
-  R = MulAdd(crCoeff, V, luma);
-  B = MulAdd(cbCoeff, U, luma);
-  G = NegMulAdd(gCoeff2, U, NegMulAdd(gCoeff1, V, luma));
-}
-
 static void ComputeTransform(const float kr,
                              const float kb,
                              const float biasY,

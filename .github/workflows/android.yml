@@ -50,25 +50,25 @@ jobs:
 
           echo "Creating arm64-v8a Package"
           cp build-arm64-v8a/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-arm64-v8a-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-arm64-v8a-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating armeabi-v7a Package"
           cp build-armeabi-v7a/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-armeabi-v7a-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-armeabi-v7a-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating x86 Package"
           cp build-x86/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-x86-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-x86-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating x86_64 Package"
           cp build-x86_64/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-x86_64-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-x86_64-static.tar.gz libsparkyuv.a include
 
       - name: Upload built library ARM64-v8a
         uses: actions/upload-artifact@v4

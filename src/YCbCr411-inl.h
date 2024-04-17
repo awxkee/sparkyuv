@@ -98,7 +98,7 @@ void Pixel8ToYCbCr411(const uint8_t *SPARKYUV_RESTRICT src,
   const auto vCrG = Set(coeffTag, -CrG);
   const auto vCrB = Set(coeffTag, -CrB);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
   const uint32_t lastY = height - 1 - 4;
 
   for (uint32_t y = 0; y < height; ++y) {
@@ -389,7 +389,7 @@ void YCbCr411ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   const int lanes = Lanes(du8);
   const int uvLanes = lanes / 4;
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (int y = 0; y < height; ++y) {
     auto uSource = reinterpret_cast<const uint8_t *>(mUSrc);

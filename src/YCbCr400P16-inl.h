@@ -88,7 +88,7 @@ void Pixel16ToYCbCr400HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
   const int cutOffY = rangeY + biasY;
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int lanesForward = 1;
 
@@ -214,7 +214,7 @@ void YCbCr400P16ToXRGB(uint16_t *SPARKYUV_RESTRICT rgbaData, const uint32_t dstS
   const int lanes = Lanes(d16);
   const int lanesForward = 1;
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (int y = 0; y < height; ++y) {
     auto ySrc = reinterpret_cast<const uint16_t *>(mYSrc);

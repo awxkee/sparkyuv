@@ -39,7 +39,7 @@ void WideSurfaceFrom8BitToN(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int diff = targetBitDepth - 8;
 
@@ -171,7 +171,7 @@ void WideSurfaceFrom8BitToGEN(const uint8_t *SPARKYUV_RESTRICT src, const uint32
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int diff = targetBitDepth - 8;
 

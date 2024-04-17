@@ -82,7 +82,7 @@ void NV24ToPixel8(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
   const int lanes = Lanes(du8);
   const int uvLanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (int y = 0; y < height; ++y) {
     auto uvSource = reinterpret_cast<const uint8_t *>(mUVSrc);
@@ -237,7 +237,7 @@ void Pixel8ToNV24HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcStr
   const auto vCrG = Set(coeffTag, -CrG);
   const auto vCrB = Set(coeffTag, -CrB);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;

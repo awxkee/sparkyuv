@@ -109,7 +109,7 @@ jobs:
             rm -rf libsparkyuv.so
             cp ./out/libsparkyuv.so libsparkyuv.so
             
-            tar -cf libsparkyuv.linux-${{ matrix.arch }}.tar.gz libsparkyuv.so include
+            tar -czf libsparkyuv.linux-${{ matrix.arch }}.tar.gz libsparkyuv.so include
             cp libsparkyuv.linux-${{ matrix.arch }}.tar.gz "/artifacts/libsparkyuv.linux-${{ matrix.arch }}.tar.gz"
       - name: Upload built library
         uses: actions/upload-artifact@v4
@@ -149,25 +149,25 @@ jobs:
 
           echo "Creating arm64-v8a Package"
           cp build-arm64-v8a/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-arm64-v8a-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-arm64-v8a-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating armeabi-v7a Package"
           cp build-armeabi-v7a/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-armeabi-v7a-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-armeabi-v7a-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating x86 Package"
           cp build-x86/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-x86-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-x86-static.tar.gz libsparkyuv.a include
 
           rm -rf libsparkyuv.a
 
           echo "Creating x86_64 Package"
           cp build-x86_64/libsparkyuv.a libsparkyuv.a
-          tar -cf libsparkyuv.android-x86_64-static.tar.gz libsparkyuv.a include
+          tar -czf libsparkyuv.android-x86_64-static.tar.gz libsparkyuv.a include
 
       - name: Upload built library ARM64-v8a
         uses: actions/upload-artifact@v4
@@ -253,7 +253,7 @@ jobs:
             ctest --test-dir out
             
             cp out/libsparkyuv.so libsparkyuv.so
-            tar -cf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
+            tar -czf libsparkyuv.linux-graviton-v2.tar.gz libsparkyuv.so include
             cp libsparkyuv.linux-graviton-v2.tar.gz "/artifacts/libsparkyuv.linux-graviton-v2.tar.gz"
       - name: Upload built graviton library
         uses: actions/upload-artifact@v4

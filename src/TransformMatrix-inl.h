@@ -108,7 +108,7 @@ void TransformPixelToSample(const T *SPARKYUV_RESTRICT src, const uint32_t srcSt
   const auto vLowCutOffY = Set(di16, colorRange == sparkyuv::YUV_RANGE_TV ? biasY : 0);
   const auto viZeros = Zero(di16);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
@@ -425,7 +425,7 @@ void TransformYUVToRGBMatrix(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstSt
   const int lanesForward = getYuvChromaPixels(chromaSubsample);
   const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh16);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (int y = 0; y < height; ++y) {
     auto CbSource = reinterpret_cast<const T *>(mUSrc);

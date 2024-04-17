@@ -94,7 +94,7 @@ void Pixel8ToYCbCr422(const uint8_t *SPARKYUV_RESTRICT src,
   const auto vCrG = Set(coeffTag, -CrG);
   const auto vCrB = Set(coeffTag, -CrB);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -274,7 +274,6 @@ void YCbCr422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   const Rebind<int16_t, decltype(du8h)> di16;
   const RebindToUnsigned<decltype(di16)> du16;
   using VU16 = Vec<decltype(di16)>;
-  const Half<decltype(di16)> du16h;
 
   uint16_t biasY;
   uint16_t biasUV;
@@ -319,7 +318,7 @@ void YCbCr422ToPixel8(uint8_t *SPARKYUV_RESTRICT dst,
   const int lanes = Lanes(du8);
   const int uvLanes = Lanes(du8h);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (int y = 0; y < height; ++y) {
     auto uSource = reinterpret_cast<const uint8_t *>(mUSrc);

@@ -72,6 +72,18 @@ enum SparkYuvDefaultPixelType {
   PIXEL_ABGR
 };
 
+static inline int getPixelTypeComponents(SparkYuvDefaultPixelType pixelType) {
+  switch (pixelType) {
+    case PIXEL_RGB:
+    case PIXEL_BGR:return 3;
+    case PIXEL_RGBA:
+    case PIXEL_BGRA:
+    case PIXEL_ARGB:
+    case PIXEL_ABGR:return 4;
+  }
+  return 1;
+}
+
 enum SparkYuvChromaSubsample {
   YUV_SAMPLE_444,
   YUV_SAMPLE_422,

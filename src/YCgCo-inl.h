@@ -59,7 +59,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   auto vStore = reinterpret_cast<uint8_t *>(vPlane);
   auto mSource = reinterpret_cast<const uint8_t *>(src);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const ScalableTag<uint16_t> du16;
   const RebindToSigned<decltype(du16)> di16;
@@ -487,7 +487,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 
   const int lanesForward = getYuvChromaPixels(chromaSubsample);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const ScalableTag<uint16_t> du16;
   const RebindToSigned<decltype(du16)> di16;

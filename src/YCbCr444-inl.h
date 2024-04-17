@@ -97,7 +97,7 @@ void Pixel8ToYCbCr444HWY(const uint8_t *SPARKYUV_RESTRICT src,
   const auto vBiasY = Set(d32, iBiasY);
   const auto vBiasUV = Set(d32, iBiasUV);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -258,7 +258,7 @@ void YCbCr444ToXRGB(uint8_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const auto vZero = Zero(di16);
 

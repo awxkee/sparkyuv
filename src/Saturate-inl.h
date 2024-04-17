@@ -43,7 +43,7 @@ void SaturateSurfaceFromNBitTo8(const uint16_t *SPARKYUV_RESTRICT src, const uin
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int diff = sourceBitDepth - 8;
 
@@ -145,14 +145,14 @@ void SaturateSurface16To8(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t 
 
   const int lanes = Lanes(du8);
 
-  const int components = (PixelType == PIXEL_BGR || PixelType == PIXEL_RGB) ? 3 : 4;
+  const int components = getPixelTypeComponents(PixelType);
 
   const int diff = sourceBitDepth - 8;
 
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(dst);
 
-  for (int y = 0; y < height; ++y) {
+  for (uint32_t y = 0; y < height; ++y) {
     auto store = reinterpret_cast<uint8_t *>(mDestination);
     auto source = reinterpret_cast<const uint16_t *>(mSource);
 
