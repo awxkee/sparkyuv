@@ -32,8 +32,9 @@ using namespace hwy;
 using namespace hwy::HWY_NAMESPACE;
 
 template<class T, SparkYuvSurfaceChannels Surface = sparkyuv::SURFACE_CHANNEL,
-    std::enable_if<(Surface == SURFACE_RGBA1010102 || Surface == SURFACE_CHANNELS_4) && std::is_same<T, uint8_t>::value,
-                   int>::type = 0>
+    typename std::enable_if<
+        (Surface == SURFACE_RGBA1010102 || Surface == SURFACE_CHANNELS_4) && std::is_same<T, uint8_t>::value,
+        int>::type = 0>
 void
 TransposeClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                        T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
@@ -129,8 +130,8 @@ TransposeClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 }
 
 template<class T, SparkYuvSurfaceChannels Surface = sparkyuv::SURFACE_CHANNEL,
-    std::enable_if<!(Surface == SURFACE_RGBA1010102 && std::is_same<T, uint8_t>::value)
-                       && !(Surface == SURFACE_CHANNELS_4 && std::is_same<T, uint8_t>::value), int>::type = 0>
+    typename std::enable_if<!(Surface == SURFACE_RGBA1010102 && std::is_same<T, uint8_t>::value)
+                                && !(Surface == SURFACE_CHANNELS_4 && std::is_same<T, uint8_t>::value), int>::type = 0>
 void
 TransposeClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                        T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
@@ -186,8 +187,9 @@ TRANSPOSE_CLOCKWISE_DECLARATION(Channel16, uint16_t, CHANNEL)
 #undef TRANSPOSE_CLOCKWISE_DECLARATION
 
 template<class T, SparkYuvSurfaceChannels Surface = sparkyuv::SURFACE_CHANNEL,
-    std::enable_if<(Surface == SURFACE_RGBA1010102 || Surface == SURFACE_CHANNELS_4) && std::is_same<T, uint8_t>::value,
-                   int>::type = 0>
+    typename std::enable_if<
+        (Surface == SURFACE_RGBA1010102 || Surface == SURFACE_CHANNELS_4) && std::is_same<T, uint8_t>::value,
+        int>::type = 0>
 void
 TransposeCounterClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                               T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
@@ -269,8 +271,8 @@ TransposeCounterClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t src
 }
 
 template<class T, SparkYuvSurfaceChannels Surface = sparkyuv::SURFACE_CHANNEL,
-    std::enable_if<!(Surface == SURFACE_RGBA1010102 && std::is_same<T, uint8_t>::value)
-                       && !(Surface == SURFACE_CHANNELS_4 && std::is_same<T, uint8_t>::value), int>::type = 0>
+    typename std::enable_if<!(Surface == SURFACE_RGBA1010102 && std::is_same<T, uint8_t>::value)
+                                && !(Surface == SURFACE_CHANNELS_4 && std::is_same<T, uint8_t>::value), int>::type = 0>
 void
 TransposeCounterClockwiseImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
                               T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
