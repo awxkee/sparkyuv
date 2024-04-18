@@ -183,6 +183,22 @@ TRANSPOSE_CCW_DECLARATION_H(RGB16, uint16_t)
 TRANSPOSE_CCW_DECLARATION_H(Channel16, uint16_t)
 
 #undef TRANSPOSE_CCW_DECLARATION_H
+
+#define COPY_IMAGE_DECLARATION_H(srcPixel, storageType) \
+    void Copy##srcPixel##HWY(const storageType * src, const uint32_t srcStride,\
+                             storageType * dst, const uint32_t dstStride,\
+                             const uint32_t width, const uint32_t height);
+
+COPY_IMAGE_DECLARATION_H(RGBA, uint8_t)
+COPY_IMAGE_DECLARATION_H(RGB, uint8_t)
+COPY_IMAGE_DECLARATION_H(Channel, uint8_t)
+COPY_IMAGE_DECLARATION_H(RGBA1010102, uint8_t)
+
+COPY_IMAGE_DECLARATION_H(RGBA16, uint16_t)
+COPY_IMAGE_DECLARATION_H(RGB16, uint16_t)
+COPY_IMAGE_DECLARATION_H(Channel16, uint16_t)
+
+#undef COPY_IMAGE_DECLARATION_H
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_

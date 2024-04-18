@@ -174,15 +174,15 @@ int main() {
   });
   std::vector<uint8_t> flipped(rgbaData.size());
 
-  bench(1, ANSI_COLOR_GREEN, "Flip Vertical", [&]() {
-//    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
-//                       uPlane.data(), uvPlaneStride,
-//                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
-    sparkyuv::FlipVerticalRGBA(rgbaData.data(), rgbaStride, flipped.data(), rgbaStride, width, height);
-    rgbaData = flipped;
-//    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
-//                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
-  });
+//  bench(1, ANSI_COLOR_GREEN, "Flip Vertical", [&]() {
+////    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
+////                       uPlane.data(), uvPlaneStride,
+////                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
+//    sparkyuv::FlipVerticalRGBA(rgbaData.data(), rgbaStride, flipped.data(), rgbaStride, width, height);
+//    rgbaData = flipped;
+////    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
+////                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
+//  });
 
   std::vector<uint8_t> flipped2(rgbaData.size());
 
@@ -326,7 +326,9 @@ int main() {
 
   int trnsStride = sizeof(uint8_t) * height * 4;
   std::vector<uint8_t> transposed(trnsStride * width);
-  sparkyuv::TransposeCounterClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
+  bench(15, ANSI_COLOR_BLUE, "Transpose", [&] () {
+    sparkyuv::TransposeClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
+  });
 
   aire::JPEGEncoder encoder(rgbaData.data(), rgbaStride, width, height);
   auto encoded = encoder.encode();

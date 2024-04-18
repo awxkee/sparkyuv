@@ -156,6 +156,7 @@ FlipHorizontalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         }
         mSource += lanes * channels;
       }
+      mDestination -= channels;
     }
 
     for (; x >= 0; --x) {
@@ -171,8 +172,8 @@ FlipHorizontalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
         mDestination[2] = mSource[2];
         mDestination[3] = mSource[3];
       }
-      mDestination -= channels;
       mSource += channels;
+      mDestination -= channels;
     }
 
     mFlippedSourcePtr += srcStride;
