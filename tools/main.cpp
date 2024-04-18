@@ -172,7 +172,7 @@ int main() {
 //    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
 //                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
   });
-  std::vector<uint8_t > flipped(rgbaData.size());
+  std::vector<uint8_t> flipped(rgbaData.size());
 
   bench(1, ANSI_COLOR_GREEN, "Flip Vertical", [&]() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
@@ -184,20 +184,19 @@ int main() {
 //                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
   });
 
-  std::vector<uint8_t > flipped2(rgbaData.size());
+  std::vector<uint8_t> flipped2(rgbaData.size());
 
-  bench(15, ANSI_COLOR_GREEN, "Flip Horizontal", [&]() {
+  bench(1, ANSI_COLOR_GREEN, "Flip Horizontal", [&]() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
     sparkyuv::FlipHorizontalRGBA(rgbaData.data(), rgbaStride, flipped2.data(), rgbaStride, width, height);
     rgbaData = flipped2;
+    sparkyuv::FlipHorizontalRGBA(rgbaData.data(), rgbaStride, flipped2.data(), rgbaStride, width, height);
+    rgbaData = flipped2;
 //    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
 //                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
   });
-
-
-
 
 //  RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t)* 3, rgbaData.data(), inWidth*4* sizeof(uint8_t), width, height);
 

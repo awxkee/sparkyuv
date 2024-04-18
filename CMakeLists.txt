@@ -36,7 +36,8 @@ set(SPARKYUV_SOURCES
         src/YDbDr.cpp
         src/YCbCr400.cpp
         src/YCbCr411.cpp
-        src/Flip.cpp)
+        src/Flip.cpp
+        src/Transpose.cpp)
 
 set(HWY_SOURCES
         highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc

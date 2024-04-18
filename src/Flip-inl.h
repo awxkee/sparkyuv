@@ -43,7 +43,6 @@ FlipVerticalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   auto mDestinationPtr = reinterpret_cast<uint8_t *>(dst);
 
   for (uint32_t y = 0; y < height; ++y) {
-
     uint32_t x = 0;
 
     T *mDestination = reinterpret_cast<T *>(mDestinationPtr);
@@ -138,8 +137,8 @@ FlipHorizontalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
     const T *mSource = reinterpret_cast<const T *>(mFlippedSourcePtr);
 
     if (x - lanes >= 0) {
-      mDestination = reinterpret_cast<T *>(mDestinationPtr + width*channels);
-      while (x - lanes >= 0) {
+      mDestination += channels;
+      for (;x - lanes >= 0; x -= lanes) {
         mDestination -= lanes * channels;
         if (Surface == sparkyuv::SURFACE_CHANNEL) {
           const auto v = LoadU(d, mSource);
@@ -156,7 +155,6 @@ FlipHorizontalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
           StoreInterleaved4(Reverse(d, i1), Reverse(d, i2), Reverse(d, i3), Reverse(d, i4), d, mDestination);
         }
         mSource += lanes * channels;
-        x -= lanes;
       }
     }
 
