@@ -1,6 +1,7 @@
 # What's this
 
-Library allows to convert RGB to Y'UV formats at high speed using platform SIMD acceleration and appropriate approximation level
+Library allows to convert RGB to Y'UV formats at high speed using platform SIMD acceleration and appropriate
+approximation level. 
 
 ## Supported YUV matrix
 
@@ -21,27 +22,61 @@ When encoding to NV12/NV21, NV12/N61, 420, 422 for chroma subsampling bi-linear 
 is no option to turn this off. Bi-linear scaling probably may be not so good as libsharpyuv, however also good.
 Due to nature of this transformation in those cases it is exceptionally fast.
 
-All NV, YUV444 (4:4:4), YUV422(4:2:2), YUV420(4:2:2), YUV411 (4:1:1), YUV410 (4:1:0) do not accept nullable U and V planes, if you need to use 4:0:0 chroma subsample, please, do use 4:0:0 when it's available
+All NV, YUV444 (4:4:4), YUV422(4:2:2), YUV420(4:2:2), YUV411 (4:1:1), YUV410 (4:1:0) do not accept nullable U and V
+planes, if you need to use 4:0:0 chroma subsample, please, do use 4:0:0 when it's available
+
+### Usage example
+
+```c++
+sparkyuv::YCbCr422BT601ToRGBA(reinterpret_cast<uint16_t *>(rgba16Data.data()),
+                             rgba16Stride,
+                             inWidth, inHeight,
+                             reinterpret_cast<uint16_t *>(yPlane.data()),
+                             yPlaneStride,
+                             reinterpret_cast<uint16_t *>(uPlane.data()),
+                             uvPlaneStride,
+                             reinterpret_cast<uint16_t *>(vPlane.data()),
+                             uvPlaneStride,
+                             0.299f, 0.114f,
+                             sparkyuv::YUV_RANGE_TV);
+
+sparkyuv::YCgCoR420P8ToRGBA8(rgbaData.data(), rgbaStride, inWidth, inHeight,
+                             yPlane.data(), yPlaneStride,
+                             uPlane.data(), uvPlaneStride,
+                             vPlane.data(), uvPlaneStride, sparkyuv::YCGCO_RE);
+```
 
 ### Things to note
 
-- YCgCo-Ro/YCgCo-Re 8-bit cannot be represented in 8-bit uint storage, so YCgCo-Ro/YCgCo-Re 8-bit requires a storage buffer to be at least twice widen ( 16-bit storage type )
-- YCgCo-Ro/YCgCo-Re cannot be in limited YUV range at the moment, since it not clear how to this range reduction with dynamic bit-depth. For now, it always in full PC range.
-- YCgCo current implementation allows to do a range reduction for TV range. That approximation have significant slowdown against full range transform. If that important range reduction may be removed and potential speed up about 30-60% is expected. 10/12-bit transformations may experience about 100-200% slowdown due to range reductions.
-- YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space, however ITU-R provides implementation for any possible kr, kb.
-- YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower than other approximations. Against naive implementation current transformation about 400-600% faster.
-- YDbDr should be computed from linearized components, however library expect that content already linearized and won't do that
-- YDbDr requires very high precision matrix for decoding, however low precision approximation is used, some color info loss is highly possible especially in TV range
-- YUV (4:1:1), YUV (4:1:0) does only box scaling, it's not very good, however it's only one available at the moment to keep performance in line
+- YCgCo-Ro/YCgCo-Re 8-bit cannot be represented in 8-bit uint storage, so YCgCo-Ro/YCgCo-Re 8-bit requires a storage
+  buffer to be at least twice widen ( 16-bit storage type )
+- YCgCo-Ro/YCgCo-Re cannot be in limited YUV range at the moment, since it not clear how to this range reduction with
+  dynamic bit-depth. For now, it always in full PC range.
+- YCgCo current implementation allows to do a range reduction for TV range. That approximation have significant slowdown
+  against full range transform. If that important range reduction may be removed and potential speed up about 30-60% is
+  expected. 10/12-bit transformations may experience about 100-200% slowdown due to range reductions.
+- YcCbcCrc ( YUV constant light ) primarily intended to be used in BT.2020 CL ( BT.2020 constant light ) color space,
+  however ITU-R provides implementation for any possible kr, kb.
+- YcCbcCrc is direct transformation due to its nature, so expect it to be at least 1000% slower, than any approximation
+  matrices. It contains especially good acceleration for arm64-v8a with full FP16 support, however it still 1000% slower
+  than other approximations. Against naive implementation current transformation about 400-600% faster.
+- YDbDr should be computed from linearized components, however library expect that content already linearized and won't
+  do that
+- YDbDr requires very high precision matrix for decoding, however low precision approximation is used, some color info
+  loss is highly possible especially in TV range
+- YUV (4:1:1), YUV (4:1:0) does only box scaling, it's not very good, however it's only one available at the moment to
+  keep performance in line
 
 ## Performance
 
 #### Compare to libyuv:
+
 All tests performed on Apple M3 Pro.
 
 Not all the conversion path exists in libyuv so not everything can be benchmarked.
 
-- Since very close approach to libyuv is used for YCbCr in general performance of decoding 8 bit is very close to libyuv, it is faster on arm64-v8a ( NEON ) on other platform is should be considered same.
+- Since very close approach to libyuv is used for YCbCr in general performance of decoding 8 bit is very close to
+  libyuv, it is faster on arm64-v8a ( NEON ) on other platform is should be considered same.
 - Encoding of YCbCr 8-bit faster in libyuv.
 - 10/12 bit YCbCr in the library faster than libyuv.
 - YcCbcCrc very slow transformation.
@@ -144,7 +179,7 @@ SparkyuvSaturate10To8Fixed       307243 ns       306721 ns         2316
 SparkyuvSaturate10To8Dynamic     317039 ns       316536 ns         2233
 ```
 
-##### YcCbcCrc 
+##### YcCbcCrc
 
 Without `F16` Support
 
@@ -213,24 +248,3 @@ Sparkyuv (the same as libhwy) supports 22 targets, listed in alphabetical order 
     - `AVX3_ZEN4` (like AVX3_DL but optimized for AMD Zen4; requires opt-in by
       defining `HWY_WANT_AVX3_ZEN4` if compiling for static dispatch)
     - `AVX3_SPR` (~Sapphire Rapids, includes AVX-512FP16)
-
-### Usage example
-
-```c++
-sparkyuv::YCbCr422BT601ToRGBA(reinterpret_cast<uint16_t *>(rgba16Data.data()),
-                             rgba16Stride,
-                             inWidth, inHeight,
-                             reinterpret_cast<uint16_t *>(yPlane.data()),
-                             yPlaneStride,
-                             reinterpret_cast<uint16_t *>(uPlane.data()),
-                             uvPlaneStride,
-                             reinterpret_cast<uint16_t *>(vPlane.data()),
-                             uvPlaneStride,
-                             0.299f, 0.114f,
-                             sparkyuv::YUV_RANGE_TV);
-
-sparkyuv::YCgCoR420P8ToRGBA8(rgbaData.data(), rgbaStride, inWidth, inHeight,
-                             yPlane.data(), yPlaneStride,
-                             uPlane.data(), uvPlaneStride,
-                             vPlane.data(), uvPlaneStride, sparkyuv::YCGCO_RE);
-```

@@ -206,7 +206,7 @@ bool readYUV444P16File(const std::string &filename, const int width, const int h
 
   // Calculate the size of Y, U, and V planes
   size_t ySize = width * height * sizeof(uint16_t);
-  size_t uSize = width * height * sizeof(uint16_t);;
+  size_t uSize = width * height * sizeof(uint16_t);
   size_t vSize = uSize;;
 
   size_t total = ySize + uSize + vSize;

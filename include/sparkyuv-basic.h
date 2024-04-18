@@ -117,6 +117,40 @@ SATURATE_XXXX16_DYNAMIC_H(ARGB)
 #endif
 
 #undef SATURATE_XXXX16_DYNAMIC_E
+
+// MARK: Flip Vertical
+
+#define FLIP_VERTICAL_DECLARATION_E(srcPixel, storageType, surfaceType) \
+    void FlipVertical##srcPixel(const storageType * src, const uint32_t srcStride,\
+                                storageType * dst, const uint32_t dstStride,\
+                                const uint32_t width, const uint32_t height);
+
+FLIP_VERTICAL_DECLARATION_E(RGBA, uint8_t, CHANNELS_4)
+FLIP_VERTICAL_DECLARATION_E(RGB, uint8_t, CHANNELS_3)
+FLIP_VERTICAL_DECLARATION_E(Channel, uint8_t, CHANNEL)
+FLIP_VERTICAL_DECLARATION_E(RGBA1010102, uint8_t, RGBA1010102)
+
+FLIP_VERTICAL_DECLARATION_E(RGBA16, uint16_t, CHANNELS_4)
+FLIP_VERTICAL_DECLARATION_E(RGB16, uint16_t, CHANNELS_3)
+FLIP_VERTICAL_DECLARATION_E(Channel16, uint16_t, CHANNEL)
+
+#undef FLIP_VERTICAL_DECLARATION_E
+
+#define FLIP_HORIZONTAL_DECLARATION_H(srcPixel, storageType, surfaceType) \
+    void FlipHorizontal##srcPixel(const storageType * src, const uint32_t srcStride,\
+                                  storageType * dst, const uint32_t dstStride,\
+                                  const uint32_t width, const uint32_t height);
+
+FLIP_HORIZONTAL_DECLARATION_H(RGBA, uint8_t, CHANNELS_4)
+FLIP_HORIZONTAL_DECLARATION_H(RGB, uint8_t, CHANNELS_3)
+FLIP_HORIZONTAL_DECLARATION_H(Channel, uint8_t, CHANNEL)
+FLIP_HORIZONTAL_DECLARATION_H(RGBA1010102, uint8_t, RGBA1010102)
+
+FLIP_HORIZONTAL_DECLARATION_H(RGBA16, uint16_t, CHANNELS_4)
+FLIP_HORIZONTAL_DECLARATION_H(RGB16, uint16_t, CHANNELS_3)
+FLIP_HORIZONTAL_DECLARATION_H(Channel16, uint16_t, CHANNEL)
+
+#undef FLIP_HORIZONTAL_DECLARATION_H
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_
