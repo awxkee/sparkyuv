@@ -151,6 +151,38 @@ FLIP_HORIZONTAL_DECLARATION_H(RGB16, uint16_t, CHANNELS_3)
 FLIP_HORIZONTAL_DECLARATION_H(Channel16, uint16_t, CHANNEL)
 
 #undef FLIP_HORIZONTAL_DECLARATION_H
+
+#define TRANSPOSE_CLOCKWISE_DECLARATION_H(srcPixel, storageType) \
+    void TransposeClockwise##srcPixel(const storageType* src, const uint32_t srcStride,\
+                                      storageType * dst, const uint32_t dstStride,\
+                                      const uint32_t width, const uint32_t height);
+
+TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA, uint8_t)
+TRANSPOSE_CLOCKWISE_DECLARATION_H(RGB, uint8_t)
+TRANSPOSE_CLOCKWISE_DECLARATION_H(Channel, uint8_t)
+TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA1010102, uint8_t)
+
+TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA16, uint16_t)
+TRANSPOSE_CLOCKWISE_DECLARATION_H(RGB16, uint16_t)
+TRANSPOSE_CLOCKWISE_DECLARATION_H(Channel16, uint16_t)
+
+#undef TRANSPOSE_CLOCKWISE_DECLARATION_H
+
+#define TRANSPOSE_CCW_DECLARATION_H(srcPixel, storageType) \
+    void TransposeCounterClockwise##srcPixel(const storageType * src, const uint32_t srcStride,\
+                                           storageType * dst, const uint32_t dstStride,\
+                                           const uint32_t width, const uint32_t height);
+
+TRANSPOSE_CCW_DECLARATION_H(RGBA, uint8_t)
+TRANSPOSE_CCW_DECLARATION_H(RGB, uint8_t)
+TRANSPOSE_CCW_DECLARATION_H(Channel, uint8_t)
+TRANSPOSE_CCW_DECLARATION_H(RGBA1010102, uint8_t)
+
+TRANSPOSE_CCW_DECLARATION_H(RGBA16, uint16_t)
+TRANSPOSE_CCW_DECLARATION_H(RGB16, uint16_t)
+TRANSPOSE_CCW_DECLARATION_H(Channel16, uint16_t)
+
+#undef TRANSPOSE_CCW_DECLARATION_H
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_
