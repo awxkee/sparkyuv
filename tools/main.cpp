@@ -186,11 +186,11 @@ int main() {
 
   std::vector<uint8_t> flipped2(rgbaData.size());
 
-  bench(1, ANSI_COLOR_GREEN, "Flip Horizontal", [&]() {
+  bench(51, ANSI_COLOR_GREEN, "Rotate 180", [&]() {
 //    libyuv::I420ToABGR(yPlane.data(), yPlaneStride,
 //                       uPlane.data(), uvPlaneStride,
 //                       vPlane.data(), uvPlaneStride,  rgbaData.data(), rgbaStride, width, height);
-    sparkyuv::FlipHorizontalRGBA(rgbaData.data(), rgbaStride, flipped2.data(), rgbaStride, width, height);
+    sparkyuv::RotateRGBA(rgbaData.data(), rgbaStride, flipped2.data(), rgbaStride, width, height, sparkyuv::sRotate180);
     rgbaData = flipped2;
 //    sparkyuv::YCbCr400ToRGBA(rgbaData.data(), rgbaStride, width, height,
 //                             yPlane.data(), yPlaneStride,0.299f, 0.114f, sparkyuv::YUV_RANGE_PC);
@@ -326,7 +326,7 @@ int main() {
 
   int trnsStride = sizeof(uint8_t) * height * 4;
   std::vector<uint8_t> transposed(trnsStride * width);
-  bench(15, ANSI_COLOR_BLUE, "Transpose", [&] () {
+  bench(1, ANSI_COLOR_BLUE, "Transpose", [&] () {
     sparkyuv::TransposeClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
   });
 

@@ -225,3 +225,26 @@ void SparkyuvRGB10BitToF16(benchmark::State &state) {
                               reinterpret_cast<uint16_t *>(rgbaF16Data.data()), rgba16Stride, inWidth, inHeight, 10);
   }
 }
+
+void SparkyuvRotate180(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> rgbaData;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+  int rotatedStride = sizeof(uint8_t) * inWidth * 4;
+  std::vector<uint8_t> rotated(rotatedStride * inHeight);
+
+  for (auto _ : state) {
+    sparkyuv::RotateRGBA(reinterpret_cast<uint8_t *>(rgbaData.data()), rgbaStride,
+                         rotated.data(), rotatedStride, inWidth, inHeight, sparkyuv::sRotate180);
+  }
+}

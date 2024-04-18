@@ -38,9 +38,9 @@ COPY_IMAGE_EXPORT_DECLARATION(Channel16, uint16_t)
 #undef COPY_IMAGE_EXPORT_DECLARATION
 
 #define COPY_IMAGE_DECLARATION_E(srcPixel, storageType, surfaceType) \
-    void Copy##srcPixel##HWY(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
-                             storageType *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
-                             const uint32_t width, const uint32_t height) {\
+    void Copy##srcPixel(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                        storageType *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                        const uint32_t width, const uint32_t height) {\
         HWY_DYNAMIC_DISPATCH(Copy##srcPixel##HWY)(src, srcStride, dst, dstStride,\
                                                   width, height); \
     }

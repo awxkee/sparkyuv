@@ -39,4 +39,11 @@ enum SparkYuvSampler {
   bicubic = 9,
   box = 10
 };
+
+enum SparkYuvRotation {
+  sRotate0 = 0,
+  sRotate90 = 90,
+  sRotate180 = 180,
+  sRotate270 = 270
+};
 }

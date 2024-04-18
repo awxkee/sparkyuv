@@ -32,7 +32,7 @@ using namespace hwy;
 using namespace hwy::HWY_NAMESPACE;
 
 template<class T, SparkYuvSurfaceChannels Surface = sparkyuv::SURFACE_CHANNEL>
-void
+static void
 CopyImageImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
               T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
               const uint32_t width, const uint32_t height) {
@@ -95,7 +95,7 @@ CopyImageImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
 }
 
 #define COPY_IMAGE_DECLARATION_R(srcPixel, storageType, surfaceType) \
-    void Copy##srcPixel##HWY(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+    static void Copy##srcPixel##HWY(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                              storageType *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                              const uint32_t width, const uint32_t height) {\
         CopyImageImpl<storageType, sparkyuv::SURFACE_##surfaceType>(src, srcStride, dst, dstStride,\

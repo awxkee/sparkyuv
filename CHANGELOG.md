@@ -1,1 +1,1 @@
-Added Transpose, Flip Vertical Horizontal
+Added Transpose, Flip Vertical Horizontal, Rotation, Copy Image
