@@ -398,33 +398,77 @@ void RotateChannel16(const uint16_t *src, uint32_t srcStride,
 /**
  * @param radius do not really expected to be larger 512 for uint8_t and ~200 for uint16_t
  */
-void FastGaussianRGBA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianRGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurRGBA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurRGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
 
-void FastGaussianRGBA16(uint16_t *data, uint32_t stride,
+void FastGaussianBlurRGBA16(uint16_t *data, uint32_t stride,
                         uint32_t width, uint32_t height,
                         int radius);
-void FastGaussianRGB16(uint16_t *data, uint32_t stride,
+void FastGaussianBlurRGB16(uint16_t *data, uint32_t stride,
                        uint32_t width, uint32_t height,
                        int radius);
 
 #if SPARKYUV_FULL_CHANNELS
-void FastGaussianARGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianABGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianBGRA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianBGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurARGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurABGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurBGRA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurBGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
 #endif
 
 #if SPARKYUV_FULL_CHANNELS
-void FastGaussianARGB16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianABGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianBGRA16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianBGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurARGB16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurABGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurBGRA16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurBGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
 #endif
 
-void FastGaussianChannel(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
-void FastGaussianChannel16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurChannel(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurChannel16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
 
+/**
+ * Gaussian Blur.
+ * Not approximation just a gaussian blur, use when antialias or clear gaussian methods is needed.
+ * In-place use allowed
+ */
+
+void GaussianBlurRGBA(const uint8_t * src, uint32_t srcStride,
+                      uint8_t * dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height,
+                      int kernelSize, float sigma);
+void GaussianBlurRGB(const uint8_t * src, uint32_t srcStride,
+                      uint8_t * dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height,
+                      int kernelSize, float sigma);
+void GaussianBlurChannel(const uint8_t * src, uint32_t srcStride,
+                     uint8_t * dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height,
+                     int kernelSize, float sigma);
+
+void GaussianBlurRGBA16(const uint16_t * src, uint32_t srcStride,
+                        uint16_t * dst, uint32_t dstStride,
+                        uint32_t width, uint32_t height,
+                        int kernelSize, float sigma);
+void GaussianBlurRGB16(const uint16_t * src, uint32_t srcStride,
+                       uint16_t * dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height,
+                       int kernelSize, float sigma);
+void GaussianBlurChannel16(const uint16_t * src, uint32_t srcStride,
+                           uint16_t * dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height,
+                           int kernelSize, float sigma);
+
+void GaussianBlurRGBAF32(const float * src, uint32_t srcStride,
+                         float * dst, uint32_t dstStride,
+                        uint32_t width, uint32_t height,
+                        int kernelSize, float sigma);
+void GaussianBlurRGBF32(const float * src, uint32_t srcStride,
+                       float * dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height,
+                       int kernelSize, float sigma);
+void GaussianBlurChannelF32(const float * src, uint32_t srcStride,
+                            float * dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height,
+                           int kernelSize, float sigma);
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_

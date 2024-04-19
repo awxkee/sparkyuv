@@ -319,7 +319,7 @@ int main() {
   });
 
   bench(1, ANSI_COLOR_GREEN, "Fast Gaussian", [&]() {
-    sparkyuv::FastGaussianRGBA(rgbaData.data(), rgbaStride, width, height, 21);
+    sparkyuv::GaussianBlurRGBA(rgbaData.data(), rgbaStride, rgbaData.data(), rgbaStride, width, height, 12 * 6, 12.f);
   });
 
   aire::JPEGEncoder encoder(rgbaData.data(), rgbaStride, width, height);

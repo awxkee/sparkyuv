@@ -201,7 +201,7 @@ void HorizontalGaussianPass(T *data, const int stride, const int width, const in
 }
 
 #define FAST_GAUSSIAN_DECLARATION_R(pixelName, pixelType, storageType) \
-    void FastGaussian##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
+    void FastGaussianBlur##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
       const int threadCount = concurrency::getThreadCounts(width, height);\
       concurrency::parallel_for_segment(threadCount, width, [&](int start, int end) {\
         VerticalGaussianPass<storageType, sparkyuv::PIXEL_##pixelType>(data, stride, width, height, radius, start, end);\
@@ -232,7 +232,7 @@ FAST_GAUSSIAN_DECLARATION_R(BGR16, BGR, uint16_t)
 #undef FAST_GAUSSIAN_DECLARATION_R
 
 #define FAST_GAUSSIAN_DECLARATION_CHAN_R(pixelName, storageType) \
-    void FastGaussian##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
+    void FastGaussianBlur##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
       VerticalGaussianPassChannel<storageType>(data, stride, width, height, radius);\
       HorizontalGaussianPassChannel<storageType>(data, stride, width, height, radius);\
     }

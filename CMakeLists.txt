@@ -41,19 +41,21 @@ set(SPARKYUV_SOURCES
         src/CopyImage.cpp
         src/Rotate.cpp
         src/FastGaussian.cpp
-        src/FastGaussian.h)
+        src/FastGaussian.h
+        src/GaussianBlur.cpp)
 
 set(HWY_SOURCES
         highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc
         highway/hwy/nanobenchmark.cc highway/hwy/per_target.cc highway/hwy/timer.cc
         highway/hwy/abort.cc
         src/Eotf.cpp
-        src/Eotf-inl.h)
+        src/Eotf-inl.h
+        src/GaussianBlur-inl.h)
 
 if (BUILD_SHARED)
     add_library(sparkyuv SHARED ${SPARKYUV_SOURCES} ${HWY_SOURCES})
 else ()
-    add_library(sparkyuv STATIC ${SPARKYUV_SOURCES})
+    add_library(sparkyuv STATIC ${SPARKYUV_SOURCES} ${HWY_SOURCES})
 endif ()
 
 if (APPLE)
