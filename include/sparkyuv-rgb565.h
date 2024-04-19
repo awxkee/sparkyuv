@@ -17,84 +17,124 @@
 #pragma once
 
 namespace sparkyuv {
-#define REFORMAT_TO_RGB565_NBIT(PixelName, Pixel, T) \
-    void PixelName##ToRGB565(const T * src, uint32_t srcStride,\
-                             uint16_t * dst, uint32_t dstStride,\
-                             uint32_t width, uint32_t height);
 
-REFORMAT_TO_RGB565_NBIT(RGB, RGB, uint8_t)
-REFORMAT_TO_RGB565_NBIT(BGR, BGR, uint8_t)
-REFORMAT_TO_RGB565_NBIT(RGBA, RGBA, uint8_t)
-REFORMAT_TO_RGB565_NBIT(BGRA, BGRA, uint8_t)
-REFORMAT_TO_RGB565_NBIT(ABGR, ABGR, uint8_t)
-REFORMAT_TO_RGB565_NBIT(ARGB, ARGB, uint8_t)
-REFORMAT_TO_RGB565_NBIT(RGBA1010102, RGBA1010102, uint8_t)
+void RGBToRGB565(const uint8_t *src, uint32_t srcStride,
+                 uint16_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+void BGRToRGB565(const uint8_t *src, uint32_t srcStride,
+                 uint16_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+void RGBAToRGB565(const uint8_t *src, uint32_t srcStride,
+                  uint16_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void BGRAToRGB565(const uint8_t *src, uint32_t srcStride,
+                  uint16_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void ABGRToRGB565(const uint8_t *src, uint32_t srcStride,
+                  uint16_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void ARGBToRGB565(const uint8_t *src, uint32_t srcStride,
+                  uint16_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void RGBA1010102ToRGB565(const uint8_t *src, uint32_t srcStride,
+                         uint16_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
 
-REFORMAT_TO_RGB565_NBIT(RGBF16, RGB, uint16_t)
-REFORMAT_TO_RGB565_NBIT(BGRF16, BGR, uint16_t)
-REFORMAT_TO_RGB565_NBIT(RGBAF16, RGBA, uint16_t)
-REFORMAT_TO_RGB565_NBIT(BGRAF16, BGRA, uint16_t)
-REFORMAT_TO_RGB565_NBIT(ABGRF16, ABGR, uint16_t)
-REFORMAT_TO_RGB565_NBIT(ARGBF16, ARGB, uint16_t)
+void RGBF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height);
+void BGRF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height);
+void RGBAF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void BGRAF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ABGRF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ARGBF16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
 
-#undef REFORMAT_TO_RGB565
+void RGB16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int bitDepth);
+void BGR16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int bitDepth);
+void RGBA16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+void BGRA16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+void ABGR16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+void ARGB16ToRGB565(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
 
-#define REFORMAT_TO_RGB565(PixelName, Pixel, T) \
-    void PixelName##ToRGB565(const T * src, const uint32_t srcStride,\
-                                uint16_t * dst, const uint32_t dstStride,\
-                                const uint32_t width, const uint32_t height, const int bitDepth);
+void RGB565ToRGB(const uint16_t *src, uint32_t srcStride,
+                 uint8_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+void RGB565ToBGR(const uint16_t *src, uint32_t srcStride,
+                 uint8_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+void RGB565ToRGBA(const uint16_t *src, uint32_t srcStride,
+                  uint8_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void RGB565ToBGRA(const uint16_t *src, uint32_t srcStride,
+                  uint8_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void RGB565ToABGR(const uint16_t *src, uint32_t srcStride,
+                  uint8_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void RGB565ToARGB(const uint16_t *src, uint32_t srcStride,
+                  uint8_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height);
+void RGB565ToRGBA1010102(const uint16_t *src, uint32_t srcStride,
+                         uint8_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
 
-REFORMAT_TO_RGB565(RGB16, RGB, uint16_t)
-REFORMAT_TO_RGB565(BGR16, BGR,uint16_t)
-REFORMAT_TO_RGB565(RGBA16, RGBA, uint16_t)
-REFORMAT_TO_RGB565(BGRA16, BGRA, uint16_t)
-REFORMAT_TO_RGB565(ABGR16, ABGR, uint16_t)
-REFORMAT_TO_RGB565(ARGB16, ARGB, uint16_t)
+void RGB565ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height);
+void RGB565ToBGRF16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height);
+void RGB565ToRGBAF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void RGB565ToBGRAF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void RGB565ToABGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void RGB565ToARGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
 
-#undef REFORMAT_TO_RGB565
-
-#define REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(PixelName, Pixel, T) \
-    void RGB565To##PixelName(const uint16_t * src, const uint32_t srcStride,\
-                             T * dst, const uint32_t dstStride,\
-                             const uint32_t width, const uint32_t height);
-
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(RGB, RGB, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(BGR, BGR, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(RGBA, RGBA, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(BGRA, BGRA, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(ABGR, ABGR, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(ARGB, ARGB, uint8_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(RGBA1010102, RGBA1010102, uint8_t)
-
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(RGBF16, RGB, uint16_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(BGRF16, BGR, uint16_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(RGBAF16, RGBA, uint16_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(BGRAF16, BGRA, uint16_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(ABGRF16, ABGR, uint16_t)
-REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H(ARGBF16, ARGB, uint16_t)
-
-#undef REFORMAT_RGB565_TO_NEW_BIT_DEFINED_H
-
-#define REFORMAT_RGB565_TO_NEW_H(PixelName, Pixel, T) \
-    void RGB565To##PixelName(const uint16_t * src, const uint32_t srcStride,\
-                             T * dst, const uint32_t dstStride,\
-                             const uint32_t width, const uint32_t height, const int bitDepth);
-
-REFORMAT_RGB565_TO_NEW_H(RGB, RGB, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(BGR, BGR, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(RGBA, RGBA, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(BGRA, BGRA, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(ABGR, ABGR, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(ARGB, ARGB, uint8_t)
-REFORMAT_RGB565_TO_NEW_H(RGBA1010102, RGBA1010102, uint8_t)
-
-REFORMAT_RGB565_TO_NEW_H(RGB16, RGB, uint16_t)
-REFORMAT_RGB565_TO_NEW_H(BGR16, BGR,uint16_t)
-REFORMAT_RGB565_TO_NEW_H(RGBA16, RGBA, uint16_t)
-REFORMAT_RGB565_TO_NEW_H(BGRA16, BGRA, uint16_t)
-REFORMAT_RGB565_TO_NEW_H(ABGR16, ABGR, uint16_t)
-REFORMAT_RGB565_TO_NEW_H(ARGB16, ARGB, uint16_t)
-
-#undef REFORMAT_RGB565_TO_NEW_H
-
+void RGB565ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int bitDepth);
+void RGB565ToBGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int bitDepth);
+void RGB565ToRGBA16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int bitDepth);
+void RGB565ToBGRA16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+void RGB565ToABGR16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+void RGB565ToARGB16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
 }

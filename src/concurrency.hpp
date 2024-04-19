@@ -35,6 +35,19 @@ struct function_traits<R(Args...)> {
   using result_type = R;
 };
 
+static int getThreadCounts(uint32_t width, uint32_t height) {
+#if THREADS_SUPPORTED
+  const int
+      threadCount = static_cast<int>(std::clamp(std::min(static_cast<uint32_t>(std::thread::hardware_concurrency()),
+                                                         width * height / (256 * 256)),
+                                                static_cast<uint32_t>(1),
+                                                static_cast<uint32_t>(12)));
+#else
+  const int threadCount = 1;
+#endif
+  return threadCount;
+}
+
 template<typename Function, typename... Args>
 void parallel_for(const int numThreads, const size_t numIterations, Function &&func, Args &&... args) {
   static_assert(std::is_invocable_v<Function, int, Args...>, "func must take an int parameter for iteration id");
@@ -132,4 +145,47 @@ void parallel_for_with_thread_id(const int numThreads, const int numIterations, 
   }
 #endif
 }
+
+template<typename Function, typename... Args>
+void parallel_for_segment(const int numThreads, const int numIterations, Function &&func, Args &&... args) {
+  static_assert(std::is_invocable_v<Function, int, int, Args...>, "func must take an int parameter for iteration id");
+#if THREADS_SUPPORTED
+  std::vector<std::thread> threads;
+
+  int segmentHeight = numIterations / numThreads;
+
+  auto parallelWorker = [&](int start, int end) {
+    std::invoke(func, start, end, std::forward<Args>(args)...);
+  };
+
+  if (numThreads > 1) {
+    // Launch N-1 worker threads
+    for (int i = 1; i < numThreads; ++i) {
+      int start = i * segmentHeight;
+      int end = (i + 1) * segmentHeight;
+      if (i == numThreads - 1) {
+        end = numIterations;
+      }
+      threads.emplace_back(parallelWorker, start, end);
+    }
+  }
+
+  int start = 0;
+  int end = segmentHeight;
+  if (numThreads == 1) {
+    end = numIterations;
+  }
+  parallelWorker(start, end);
+
+  // Join all threads
+  for (auto &thread : threads) {
+    if (thread.joinable()) {
+      thread.join();
+    }
+  }
+#else
+  std::invoke(func, 0, numIterations, std::forward<Args>(args)...);
+#endif
+}
+
 }

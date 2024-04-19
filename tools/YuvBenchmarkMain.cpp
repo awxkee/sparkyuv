@@ -740,5 +740,6 @@ BENCHMARK(SparkyuvSaturate10To8Fixed);
 BENCHMARK(SparkyuvSaturate10To8Dynamic);
 
 BENCHMARK(SparkyuvRotate180);
+BENCHMARK(SparkyuvFastGuassianRGBA);
 
 BENCHMARK_MAIN();

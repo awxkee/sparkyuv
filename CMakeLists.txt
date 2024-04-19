@@ -39,7 +39,9 @@ set(SPARKYUV_SOURCES
         src/Flip.cpp
         src/Transpose.cpp
         src/CopyImage.cpp
-        src/Rotate.cpp)
+        src/Rotate.cpp
+        src/FastGaussian.cpp
+        src/FastGaussian.h)
 
 set(HWY_SOURCES
         highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc

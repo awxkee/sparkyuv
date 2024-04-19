@@ -1,7 +1,9 @@
 # What's this
 
 Library allows to convert RGB to Y'UV formats at high speed using platform SIMD acceleration and appropriate
-approximation level. 
+approximation level.
+
+Also contains a lot of convenient methods, a very fast gaussian blur with very good speed included.
 
 ## Supported YUV matrix
 

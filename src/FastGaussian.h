@@ -14,17 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef YUV_TOOLS_BENCH_YUVBENCHMARKBASE_H_
-#define YUV_TOOLS_BENCH_YUVBENCHMARKBASE_H_
+#ifndef YUV_SRC_FASTGAUSSIAN_H_
+#define YUV_SRC_FASTGAUSSIAN_H_
 
-#include <benchmark/benchmark.h>
+namespace sparkyuv {
 
-void SparkyuvWide8To10Fixed(benchmark::State &state);
-void SparkyuvWide8To10Dynamic(benchmark::State &state);
-void SparkyuvSaturate10To8Fixed(benchmark::State &state);
-void SparkyuvSaturate10To8Dynamic(benchmark::State &state);
-void SparkyuvRGB10BitToF16(benchmark::State &state);
-void SparkyuvRotate180(benchmark::State &state);
-void SparkyuvFastGuassianRGBA(benchmark::State &state);
+}
 
-#endif //YUV_TOOLS_BENCH_YUVBENCHMARKBASE_H_
+#endif //YUV_SRC_FASTGAUSSIAN_H_

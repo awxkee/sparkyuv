@@ -18,203 +18,413 @@
 #define YUV_INCLUDE_SPARKYUV_BASIC_H_
 
 namespace sparkyuv {
-#define WideXXXXFrom8ToN_DECLARATION_H(pixelType, targetBitDepth) \
-   void Wide##pixelType##8To##targetBitDepth(uint8_t* src, const uint32_t srcStride, \
-                                             uint16_t* dst, const uint32_t dstStride,\
-                                             const uint32_t width, const uint32_t height);
+void WideRGBA8To10(uint8_t *src,
+                   uint32_t srcStride,
+                   uint16_t *dst,
+                   uint32_t dstStride,
+                   uint32_t width,
+                   uint32_t height);
+void WideRGBATo10(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
 
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 10)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 10)
 #if SPARKYUV_FULL_CHANNELS
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 10)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 10)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 10)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 10)
+void WideABGR8To10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideARGBTo10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRA8To10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRTo10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
 #endif
 
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 12)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 12)
+void WideRGBA8To12(uint8_t *src,
+                   uint32_t srcStride,
+                   uint16_t *dst,
+                   uint32_t dstStride,
+                   uint32_t width,
+                   uint32_t height);
+void WideRGBATo12(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
+
 #if SPARKYUV_FULL_CHANNELS
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 12)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 12)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 12)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 12)
+void WideABGR8To12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideARGBTo12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRA8To12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRTo12(uint8_t* src, uint32_t srcStride,uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
 #endif
 
-WideXXXXFrom8ToN_DECLARATION_H(RGBA, 16)
-WideXXXXFrom8ToN_DECLARATION_H(RGB, 16)
+void WideRGBA8To16(uint8_t *src,
+                   uint32_t srcStride,
+                   uint16_t *dst,
+                   uint32_t dstStride,
+                   uint32_t width,
+                   uint32_t height);
+void WideRGBATo16(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
+
 #if SPARKYUV_FULL_CHANNELS
-WideXXXXFrom8ToN_DECLARATION_H(BGRA, 16)
-WideXXXXFrom8ToN_DECLARATION_H(ABGR, 16)
-WideXXXXFrom8ToN_DECLARATION_H(ARGB, 16)
-WideXXXXFrom8ToN_DECLARATION_H(BGR, 16)
+void WideABGR8To16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideARGBTo16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRA8To16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
+void WideBGRTo16(uint8_t* src, uint32_t srcStride,uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
 #endif
 
-#undef WideXXXXFrom8ToN_DECLARATION_H
+/**
+ * Saturate 10 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
+ */
+void SaturateRGBA10To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 
-#define SaturateXXXXFrom8ToN_DECLARATION_H(pixelType, sourceBitDepth) \
-   void Saturate##pixelType##sourceBitDepth##To8(const uint16_t* src, const uint32_t srcStride, \
-                                                 uint8_t* dst, const uint32_t dstStride,\
-                                                 const uint32_t width, const uint32_t height);
-
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 10)
+void SaturateRGB10To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
 #if SPARKYUV_FULL_CHANNELS
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 10)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 10)
+void SaturateBGRA10To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateARGB10To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void SaturateABGR10To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateBGR10To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 #endif
 
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 12)
+/**
+ * Saturate 12 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
+ */
+void SaturateRGBA12To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+
+void SaturateRGB12To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
 #if SPARKYUV_FULL_CHANNELS
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 12)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 12)
+void SaturateBGRA12To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateARGB12To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void SaturateABGR12To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateBGR12To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 #endif
 
-SaturateXXXXFrom8ToN_DECLARATION_H(RGBA, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(RGB, 16)
+/**
+ * Saturate 16 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
+ */
+void SaturateRGBA16To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+
+void SaturateRGB16To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
 #if SPARKYUV_FULL_CHANNELS
-SaturateXXXXFrom8ToN_DECLARATION_H(BGRA, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(ABGR, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(ARGB, 16)
-SaturateXXXXFrom8ToN_DECLARATION_H(BGR, 16)
+void SaturateBGRA16To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateARGB16To8(const uint16_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void SaturateABGR16To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void SaturateBGR16To8(const uint16_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 #endif
 
-#undef SaturateXXXXFrom8ToN_DECLARATION_H
+/**
+ * Wide 8 bit image to provided bit depth
+ * @param bitDepth - bit depth of the target image
+ */
+void WideRGBA8(uint8_t *src, uint32_t srcStride,
+               uint16_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height, int bitDepth);
 
-#define WIDE8_XXXX_DECLARATION_H(pixelType) \
- void Wide##pixelType##8(uint8_t * src, const uint32_t srcStride, \
-                         uint16_t * dst, const uint32_t dstStride,\
-                         const uint32_t width, const uint32_t height, const int bitDepth);
+/**
+ * Wide 8 bit image to provided bit depth
+ * @param bitDepth - bit depth of the target image
+ */
+void WideRGB8(uint8_t *src, uint32_t srcStride,
+              uint16_t *dst, uint32_t dstStride,
+              uint32_t width, uint32_t height, int bitDepth);
 
-WIDE8_XXXX_DECLARATION_H(RGBA)
-WIDE8_XXXX_DECLARATION_H(RGB)
 #if SPARKYUV_FULL_CHANNELS
-WIDE8_XXXX_DECLARATION_H(BGRA)
-WIDE8_XXXX_DECLARATION_H(ABGR)
-WIDE8_XXXX_DECLARATION_H(ARGB)
-WIDE8_XXXX_DECLARATION_H(BGR)
+void WideBGRA8(uint8_t *src, uint32_t srcStride,
+              uint16_t *dst, uint32_t dstStride,
+              uint32_t width, uint32_t height, int bitDepth);
+void WideABGR8(uint8_t *src, uint32_t srcStride,
+               uint16_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height, int bitDepth);
+void WideARGB8(uint8_t *src, uint32_t srcStride,
+               uint16_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height, int bitDepth);
+void WideBGR8(uint8_t *src, uint32_t srcStride,
+              uint16_t *dst, uint32_t dstStride,
+              uint32_t width, uint32_t height, int bitDepth);
 #endif
 
-#undef WIDE8_XXXX_DECLARATION_H
+/**
+ * Saturate uint16_t storage image with bit depth from param to 8
+ */
 
-#define SATURATE_XXXX16_DYNAMIC_H(pixelType) \
-  void Saturate##pixelType##To8(const uint16_t * src, const uint32_t srcStride, \
-                                    uint8_t * dst, const uint32_t dstStride,\
-                                    const uint32_t width, const uint32_t height, const int bitDepth);
+void SaturateRGBATo8(const uint16_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int bitDepth);
 
-SATURATE_XXXX16_DYNAMIC_H(RGBA)
-SATURATE_XXXX16_DYNAMIC_H(RGB)
+void SaturateRGBTo8(const uint16_t *src, uint32_t srcStride,
+                    uint8_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+
 #if SPARKYUV_FULL_CHANNELS
-SATURATE_XXXX16_DYNAMIC_H(BGR)
-SATURATE_XXXX16_DYNAMIC_H(BGRA)
-SATURATE_XXXX16_DYNAMIC_H(ABGR)
-SATURATE_XXXX16_DYNAMIC_H(ARGB)
+void SaturateBGRTo8(const uint16_t *src, uint32_t srcStride,
+                    uint8_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
+
+void SaturateBGRATo8(const uint16_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int bitDepth);
+
+void SaturateABGRTo8(const uint16_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int bitDepth);
+
+void SaturateARGBTo8(const uint16_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int bitDepth);
 #endif
 
-#undef SATURATE_XXXX16_DYNAMIC_E
+/**
+ * Flip Vertical
+ */
 
-// MARK: Flip Vertical
+void FlipVerticalRGBA(const uint8_t *src, uint32_t srcStride,
+                      uint8_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
 
-#define FLIP_VERTICAL_DECLARATION_E(srcPixel, storageType, surfaceType) \
-    void FlipVertical##srcPixel(const storageType * src, const uint32_t srcStride,\
-                                storageType * dst, const uint32_t dstStride,\
-                                const uint32_t width, const uint32_t height);
+void FlipVerticalRGB(const uint8_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
 
-FLIP_VERTICAL_DECLARATION_E(RGBA, uint8_t, CHANNELS_4)
-FLIP_VERTICAL_DECLARATION_E(RGB, uint8_t, CHANNELS_3)
-FLIP_VERTICAL_DECLARATION_E(Channel, uint8_t, CHANNEL)
-FLIP_VERTICAL_DECLARATION_E(RGBA1010102, uint8_t, RGBA1010102)
+void FlipVerticalChannel(const uint8_t *src, uint32_t srcStride,
+                         uint8_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
 
-FLIP_VERTICAL_DECLARATION_E(RGBA16, uint16_t, CHANNELS_4)
-FLIP_VERTICAL_DECLARATION_E(RGB16, uint16_t, CHANNELS_3)
-FLIP_VERTICAL_DECLARATION_E(Channel16, uint16_t, CHANNEL)
+void FlipVerticalRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                             uint8_t *dst, uint32_t dstStride,
+                             uint32_t width, uint32_t height);
 
-#undef FLIP_VERTICAL_DECLARATION_E
+void FlipVerticalRGBA16(const uint16_t *src, uint32_t srcStride,
+                        uint16_t *dst, uint32_t dstStride,
+                        uint32_t width, uint32_t height);
 
-#define FLIP_HORIZONTAL_DECLARATION_H(srcPixel, storageType, surfaceType) \
-    void FlipHorizontal##srcPixel(const storageType * src, const uint32_t srcStride,\
-                                  storageType * dst, const uint32_t dstStride,\
-                                  const uint32_t width, const uint32_t height);
+void FlipVerticalRGB16(const uint16_t *src, uint32_t srcStride,
+                       uint16_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 
-FLIP_HORIZONTAL_DECLARATION_H(RGBA, uint8_t, CHANNELS_4)
-FLIP_HORIZONTAL_DECLARATION_H(RGB, uint8_t, CHANNELS_3)
-FLIP_HORIZONTAL_DECLARATION_H(Channel, uint8_t, CHANNEL)
-FLIP_HORIZONTAL_DECLARATION_H(RGBA1010102, uint8_t, RGBA1010102)
+void FlipVerticalChannel16(const uint16_t *src, uint32_t srcStride,
+                           uint16_t *dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height);
 
-FLIP_HORIZONTAL_DECLARATION_H(RGBA16, uint16_t, CHANNELS_4)
-FLIP_HORIZONTAL_DECLARATION_H(RGB16, uint16_t, CHANNELS_3)
-FLIP_HORIZONTAL_DECLARATION_H(Channel16, uint16_t, CHANNEL)
+/**
+ * Flip Horizontal
+ */
 
-#undef FLIP_HORIZONTAL_DECLARATION_H
+void FlipHorizontalRGBA(const uint8_t *src, uint32_t srcStride,
+                        uint8_t *dst, uint32_t dstStride,
+                        uint32_t width, uint32_t height);
+void FlipHorizontalRGB(const uint8_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
 
-#define TRANSPOSE_CLOCKWISE_DECLARATION_H(srcPixel, storageType) \
-    void TransposeClockwise##srcPixel(const storageType* src, const uint32_t srcStride,\
-                                      storageType * dst, const uint32_t dstStride,\
-                                      const uint32_t width, const uint32_t height);
+void FlipHorizontalChannel(const uint8_t *src, uint32_t srcStride,
+                           uint8_t *dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height);
 
-TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA, uint8_t)
-TRANSPOSE_CLOCKWISE_DECLARATION_H(RGB, uint8_t)
-TRANSPOSE_CLOCKWISE_DECLARATION_H(Channel, uint8_t)
-TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA1010102, uint8_t)
+void FlipHorizontalRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                               uint8_t *dst, uint32_t dstStride,
+                               uint32_t width, uint32_t height);
 
-TRANSPOSE_CLOCKWISE_DECLARATION_H(RGBA16, uint16_t)
-TRANSPOSE_CLOCKWISE_DECLARATION_H(RGB16, uint16_t)
-TRANSPOSE_CLOCKWISE_DECLARATION_H(Channel16, uint16_t)
+void FlipHorizontalRGBA16(const uint16_t *src, uint32_t srcStride,
+                          uint16_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
 
-#undef TRANSPOSE_CLOCKWISE_DECLARATION_H
+void FlipHorizontalRGB16(const uint16_t *src, uint32_t srcStride,
+                         uint16_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
 
-#define TRANSPOSE_CCW_DECLARATION_H(srcPixel, storageType) \
-    void TransposeCounterClockwise##srcPixel(const storageType * src, const uint32_t srcStride,\
-                                           storageType * dst, const uint32_t dstStride,\
-                                           const uint32_t width, const uint32_t height);
+void FlipHorizontalChannel16(const uint16_t *src, uint32_t srcStride,
+                             uint16_t *dst, uint32_t dstStride,
+                             uint32_t width, uint32_t height);
 
-TRANSPOSE_CCW_DECLARATION_H(RGBA, uint8_t)
-TRANSPOSE_CCW_DECLARATION_H(RGB, uint8_t)
-TRANSPOSE_CCW_DECLARATION_H(Channel, uint8_t)
-TRANSPOSE_CCW_DECLARATION_H(RGBA1010102, uint8_t)
+/**
+ * Transpose clockwise
+ */
 
-TRANSPOSE_CCW_DECLARATION_H(RGBA16, uint16_t)
-TRANSPOSE_CCW_DECLARATION_H(RGB16, uint16_t)
-TRANSPOSE_CCW_DECLARATION_H(Channel16, uint16_t)
+void TransposeClockwiseRGBA(const uint8_t *src, uint32_t srcStride,
+                            uint8_t *dst, uint32_t dstStride,
+                            uint32_t width, uint32_t height);
 
-#undef TRANSPOSE_CCW_DECLARATION_H
+void TransposeClockwiseRGB(const uint8_t *src, uint32_t srcStride,
+                           uint8_t *dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height);
 
-#define COPY_IMAGE_DECLARATION_H(srcPixel, storageType) \
-    void Copy##srcPixel(const storageType * src, const uint32_t srcStride,\
-                        storageType * dst, const uint32_t dstStride,\
-                        const uint32_t width, const uint32_t height);
+void TransposeClockwiseChannel(const uint8_t *src, uint32_t srcStride,
+                               uint8_t *dst, uint32_t dstStride,
+                               uint32_t width, uint32_t height);
 
-COPY_IMAGE_DECLARATION_H(RGBA, uint8_t)
-COPY_IMAGE_DECLARATION_H(RGB, uint8_t)
-COPY_IMAGE_DECLARATION_H(Channel, uint8_t)
-COPY_IMAGE_DECLARATION_H(RGBA1010102, uint8_t)
+void TransposeClockwiseRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                                   uint8_t *dst, uint32_t dstStride,
+                                   uint32_t width, uint32_t height);
 
-COPY_IMAGE_DECLARATION_H(RGBA16, uint16_t)
-COPY_IMAGE_DECLARATION_H(RGB16, uint16_t)
-COPY_IMAGE_DECLARATION_H(Channel16, uint16_t)
+void TransposeClockwiseRGBA16(const uint16_t *src, uint32_t srcStride,
+                              uint16_t *dst, uint32_t dstStride,
+                              uint32_t width, uint32_t height);
 
-#undef COPY_IMAGE_DECLARATION_H
+void TransposeClockwiseRGB16(const uint16_t *src, uint32_t srcStride,
+                             uint16_t *dst, uint32_t dstStride,
+                             uint32_t width, uint32_t height);
 
-#define ROTATE_DECLARATION_H(srcPixel, storageType, surfaceType) \
-    void Rotate##srcPixel(const storageType * src, const uint32_t srcStride,\
-                          storageType * dst, const uint32_t dstStride,\
-                          const uint32_t width, const uint32_t height, SparkYuvRotation rotation);
+void TransposeClockwiseChannel16(const uint16_t *src, uint32_t srcStride,
+                                 uint16_t *dst, uint32_t dstStride,
+                                 uint32_t width, uint32_t height);
 
-ROTATE_DECLARATION_H(RGBA, uint8_t, CHANNELS_4)
-ROTATE_DECLARATION_H(RGB, uint8_t, CHANNELS_3)
-ROTATE_DECLARATION_H(Channel, uint8_t, CHANNEL)
-ROTATE_DECLARATION_H(RGBA1010102, uint8_t, RGBA1010102)
+/**
+ * Transpose counter clockwise
+ */
 
-ROTATE_DECLARATION_H(RGBA16, uint16_t, CHANNELS_4)
-ROTATE_DECLARATION_H(RGB16, uint16_t, CHANNELS_3)
-ROTATE_DECLARATION_H(Channel16, uint16_t, CHANNEL)
+void TransposeCounterClockwiseRGBA(const uint8_t *src, uint32_t srcStride,
+                                   uint8_t *dst, uint32_t dstStride,
+                                   uint32_t width, uint32_t height);
 
-#undef ROTATE_DECLARATION_H
+void TransposeCounterClockwiseRGB(const uint8_t *src, uint32_t srcStride,
+                                  uint8_t *dst, uint32_t dstStride,
+                                  uint32_t width, uint32_t height);
+
+void TransposeCounterClockwiseChannel(const uint8_t *src, uint32_t srcStride,
+                                      uint8_t *dst, uint32_t dstStride,
+                                      uint32_t width, uint32_t height);
+
+void TransposeCounterClockwiseRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                                          uint8_t *dst, uint32_t dstStride,
+                                          uint32_t width, uint32_t height);
+
+void TransposeCounterClockwiseRGBA16(const uint16_t *src, uint32_t srcStride,
+                                     uint16_t *dst, uint32_t dstStride,
+                                     uint32_t width, uint32_t height);
+
+void TransposeCounterClockwiseRGB16(const uint16_t *src, uint32_t srcStride,
+                                    uint16_t *dst, uint32_t dstStride,
+                                    uint32_t width, uint32_t height);
+
+void TransposeCounterClockwiseChannel16(const uint16_t *src, uint32_t srcStride,
+                                        uint16_t *dst, uint32_t dstStride,
+                                        uint32_t width, uint32_t height);
+
+/**
+ * Copy
+ */
+
+void CopyRGBA(const uint8_t *src, uint32_t srcStride,
+              uint8_t *dst, uint32_t dstStride,
+              uint32_t width, uint32_t height);
+
+void CopyRGB(const uint8_t *src, uint32_t srcStride,
+             uint8_t *dst, uint32_t dstStride,
+             uint32_t width, uint32_t height);
+
+void CopyChannel(const uint8_t *src, uint32_t srcStride,
+                 uint8_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+
+void CopyRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                     uint8_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void CopyRGBA16(const uint16_t *src, uint32_t srcStride,
+                uint16_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
+
+void CopyRGB16(const uint16_t *src, uint32_t srcStride,
+               uint16_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+
+void CopyChannel16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height);
+
+/**
+ * Rotate
+ */
+
+void RotateRGBA(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateRGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateChannel(const uint8_t *src, uint32_t srcStride,
+                   uint8_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateRGBA16(const uint16_t *src, uint32_t srcStride,
+                  uint16_t *dst, uint32_t dstStride,
+                  uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateRGB16(const uint16_t *src, uint32_t srcStride,
+                 uint16_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+void RotateChannel16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, SparkYuvRotation rotation);
+
+/**
+ * Fast gaussian approximation. Close to gaussian however some non gaussian may be detected
+ * if FFT or any advanced analysis will be involved
+ */
+
+/**
+ * @param radius do not really expected to be larger 512 for uint8_t and ~200 for uint16_t
+ */
+void FastGaussianRGBA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianRGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+
+void FastGaussianRGBA16(uint16_t *data, uint32_t stride,
+                        uint32_t width, uint32_t height,
+                        int radius);
+void FastGaussianRGB16(uint16_t *data, uint32_t stride,
+                       uint32_t width, uint32_t height,
+                       int radius);
+
+#if SPARKYUV_FULL_CHANNELS
+void FastGaussianARGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianABGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBGRA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#endif
+
+#if SPARKYUV_FULL_CHANNELS
+void FastGaussianARGB16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianABGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBGRA16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#endif
+
+void FastGaussianChannel(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianChannel16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_

@@ -248,3 +248,23 @@ void SparkyuvRotate180(benchmark::State &state) {
                          rotated.data(), rotatedStride, inWidth, inHeight, sparkyuv::sRotate180);
   }
 }
+
+void SparkyuvFastGuassianRGBA(benchmark::State &state) {
+  std::vector<uint8_t> inSrcData;
+  int inWidth, inHeight;
+
+  std::vector<uint8_t> rgbaData;
+  int rgbaStride;
+  if (!sparkyuv::decompressJPEG(filename, inSrcData, inWidth, inHeight)) {
+    std::cout << "Cannot read file (((" << std::endl;
+    return;
+  }
+
+  rgbaStride = sizeof(uint8_t) * inWidth * 4;
+  rgbaData.resize(rgbaStride * inHeight);
+  sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
+
+  for (auto _ : state) {
+    sparkyuv::FastGaussianRGBA(reinterpret_cast<uint8_t *>(rgbaData.data()), rgbaStride, inWidth, inHeight, 15);
+  }
+}
