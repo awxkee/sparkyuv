@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <cstdint>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define SPARKYUV_RESTRICT __restrict__

@@ -14,8 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "FastGaussian.h"
-#include "sparkyuv-def.h"
 #include "sparkyuv-internal.h"
 #include "PixelLoader.h"
 #include "concurrency.hpp"
