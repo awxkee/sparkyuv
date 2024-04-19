@@ -35,19 +35,18 @@ void
 RotateImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
            T *SPARKYUV_RESTRICT dst, const uint32_t newStride,
            const uint32_t width, const uint32_t height) {
-
   const ScalableTag<T> d;
   const int lanes = Lanes(d);
 
   auto mSourcePtr = reinterpret_cast<const uint8_t *>(src);
-  auto mRotatedPtr =  reinterpret_cast<uint8_t *>(dst) + (height - 1) * srcStride;
+  auto mRotatedPtr = reinterpret_cast<uint8_t *>(dst) + (height - 1) * srcStride;
 
   const int channels = Surface == SURFACE_CHANNEL ? 1 : (Surface == SURFACE_CHANNELS_3 ? 3 : 4);
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
 
-    T *mDestination = reinterpret_cast<T *>(mRotatedPtr + (width - 1)*channels);
+    T *mDestination = reinterpret_cast<T *>(mRotatedPtr + (width - 1) * channels);
     const T *mSource = reinterpret_cast<const T *>(mSourcePtr);
 
     if (x + lanes < width) {
