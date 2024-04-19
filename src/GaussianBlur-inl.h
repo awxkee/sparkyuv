@@ -43,12 +43,6 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
                            const std::vector<float> &mKernel) {
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -82,21 +76,21 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
         auto i3 = ConvertTo(df, PromoteUpperTo(d32, PromoteTo(d16, LowerHalf(vx))));
         auto i4 = ConvertTo(df, PromoteUpperTo(d32, PromoteTo(d16, UpperHalf(dh8, vx))));
 
-        float weight1 = kernel[halfOfKernel + r];
+        float weight1 = mKernel[halfOfKernel + r];
         acc = Add(acc, Mul(i1, Set(df, weight1)));
 
-        float weight2 = kernel[halfOfKernel + r + 1];
+        float weight2 = mKernel[halfOfKernel + r + 1];
         acc = Add(acc, Mul(i2, Set(df, weight2)));
 
-        float weight3 = kernel[halfOfKernel + r + 2];
+        float weight3 = mKernel[halfOfKernel + r + 2];
         acc = Add(acc, Mul(i3, Set(df, weight3)));
 
-        float weight4 = kernel[halfOfKernel + r + 3];
+        float weight4 = mKernel[halfOfKernel + r + 3];
         acc = Add(acc, Mul(i4, Set(df, weight4)));
       }
 
       for (; r <= maxKernel; ++r) {
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
         auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
         acc = Add(acc, Mul(vx, Set(df, weight)));
@@ -168,12 +162,6 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
                            const std::vector<float> &mKernel) {
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -193,7 +181,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + y * srcStride);
       auto kx = static_cast<int>(x);
       for (; r <= maxKernel; ++r) {
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 3;
         accumulator1 += localSource[sourcePX] * weight;
         accumulator2 += localSource[sourcePX + 1] * weight;
@@ -216,12 +204,6 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            const uint32_t width, const uint32_t /* height */,
                            const std::vector<float> &mKernel) {
 
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -239,7 +221,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + y * srcStride);
       auto kx = static_cast<int>(x);
       for (; r <= maxKernel; ++r) {
-        accumulator += localSource[std::clamp(kx + r, sZero, maxWidth)] * kernel[halfOfKernel + r];
+        accumulator += localSource[std::clamp(kx + r, sZero, maxWidth)] * mKernel[halfOfKernel + r];
       }
       dst[0] = static_cast<T>(::roundf(accumulator));
       dst += 1;
@@ -255,13 +237,6 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
                          const std::vector<float> &mKernel) {
-
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -281,7 +256,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(0),
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
-        accumulator += localSource[kx] * kernel[halfOfKernel + r];
+        accumulator += localSource[kx] * mKernel[halfOfKernel + r];
       }
       dst[0] = static_cast<T>(::roundf(accumulator));
       dst += 1;
@@ -297,13 +272,6 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
                          const std::vector<float> &mKernel) {
-
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -325,7 +293,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(0),
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         accumulator += localSource[kx] * weight;
         accumulator1 += localSource[kx + 1] * weight;
         accumulator2 += localSource[kx + 2] * weight;
@@ -347,13 +315,6 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
                          const std::vector<float> &mKernel) {
-
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -376,7 +337,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(0),
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         accumulator += localSource[kx] * weight;
         accumulator1 += localSource[kx + 1] * weight;
         accumulator2 += localSource[kx + 2] * weight;
@@ -400,12 +361,6 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t height,
                            const std::vector<float> &mKernel) {
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
   const int kernelSize = static_cast<int>(mKernel.size());
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
@@ -430,7 +385,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(0),
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         uint32_t sourcePX = x * 4;
         auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
         acc = Add(acc, Mul(vx, Set(df, weight)));
