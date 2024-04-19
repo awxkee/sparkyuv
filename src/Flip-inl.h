@@ -42,6 +42,8 @@ FlipVerticalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   auto mFlippedSourcePtr = reinterpret_cast<const uint8_t *>(src) + (height - 1) * srcStride;
   auto mDestinationPtr = reinterpret_cast<uint8_t *>(dst);
 
+  const int channels = Surface == SURFACE_CHANNEL ? 1 : (Surface == SURFACE_CHANNELS_3 ? 3 : 4);
+
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
 
@@ -52,44 +54,36 @@ FlipVerticalImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       if (Surface == sparkyuv::SURFACE_CHANNEL) {
         const auto v = LoadU(d, mSource);
         StoreU(v, d, mDestination);
-        mSource += lanes;
-        mDestination += lanes;
       } else if (Surface == sparkyuv::SURFACE_CHANNELS_3) {
         using V = Vec<decltype(d)>;
         V i1, i2, i3;
         LoadInterleaved3(d, mSource, i1, i2, i3);
         StoreInterleaved3(i1, i2, i3, d, mDestination);
-        mSource += lanes * 3;
-        mDestination += lanes * 3;
       } else {
         using V = Vec<decltype(d)>;
         V i1, i2, i3, i4;
         LoadInterleaved4(d, mSource, i1, i2, i3, i4);
         StoreInterleaved4(i1, i2, i3, i4, d, mDestination);
-        mSource += lanes * 4;
-        mDestination += lanes * 4;
       }
+      mSource += lanes * channels;
+      mDestination += lanes * channels;
     }
 
     for (; x < width; ++x) {
       if (Surface == sparkyuv::SURFACE_CHANNEL) {
         mDestination[0] = mSource[0];
-        mDestination++;
-        mSource++;
       } else if (Surface == sparkyuv::SURFACE_CHANNELS_3) {
         mDestination[0] = mSource[0];
         mDestination[1] = mSource[1];
         mDestination[2] = mSource[2];
-        mDestination += 3;
-        mSource += 3;
       } else {
         mDestination[0] = mSource[0];
         mDestination[1] = mSource[1];
         mDestination[2] = mSource[2];
         mDestination[3] = mSource[3];
-        mDestination += 4;
-        mSource += 4;
       }
+      mSource += channels;
+      mDestination += channels;
     }
 
     mFlippedSourcePtr -= srcStride;

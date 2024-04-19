@@ -32,12 +32,12 @@ namespace sparkyuv::HWY_NAMESPACE {
 template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
     SparkYuvChromaSubsample chromaSubsample, int bitDepth>
 std::enable_if_t<std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value, void>
-PixelToYCgCoRHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                   const uint32_t width, const uint32_t height,
-                   uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                   uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
-                   uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
-                   const SparkYuvYCgCoRType rType) {
+PixelToYCgCoRImpl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                  const uint32_t width, const uint32_t height,
+                  uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                  uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
+                  uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
+                  const SparkYuvYCgCoRType rType) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
   static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
                     || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");
@@ -93,7 +93,7 @@ PixelToYCgCoRHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       const auto iB = BitCast(di16, B);
 
       const auto iCo = Sub(iR, iB);
-      const auto t =  Add(iB, ShiftRight<1>(iCo));
+      const auto t = Add(iB, ShiftRight<1>(iCo));
       const auto iCg = Sub(iG, t);
       const auto iY = Add(Add(t, ShiftRight<1>(iCg)), vBiasY);
 
@@ -281,7 +281,7 @@ void PixelType##bit##To##yuvname##P##bit##HWY(const T *SPARKYUV_RESTRICT src, co
                     uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,                         \
                     uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,                         \
                     const SparkYuvYCgCoRType rType) {                           \
-      PixelToYCgCoRHWY<T, sparkyuv::PIXEL_##PixelType, chroma, bit>(src, srcStride, width, height,    \
+      PixelToYCgCoRImpl<T, sparkyuv::PIXEL_##PixelType, chroma, bit>(src, srcStride, width, height,    \
                                                                yPlane, yStride,                  \
                                                                uPlane, uStride,                  \
                                                                vPlane, vStride,                  \
@@ -365,11 +365,11 @@ PIXEL_TO_YCCBCCRC(uint16_t, BGR, 12, YCgCoR420, sparkyuv::YUV_SAMPLE_420)
 template<typename T, SparkYuvDefaultPixelType PixelType = sparkyuv::PIXEL_RGBA,
     SparkYuvChromaSubsample chromaSubsample, int bitDepth>
 void YCgCoRToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
-                    const uint32_t width, const uint32_t height,
-                    const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
-                    const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
-                    const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
-                    const SparkYuvYCgCoRType rType) {
+                  const uint32_t width, const uint32_t height,
+                  const uint16_t *SPARKYUV_RESTRICT yPlane, const uint32_t yStride,
+                  const uint16_t *SPARKYUV_RESTRICT uPlane, const uint32_t uStride,
+                  const uint16_t *SPARKYUV_RESTRICT vPlane, const uint32_t vStride,
+                  const SparkYuvYCgCoRType rType) {
   static_assert(bitDepth >= 8, "Invalid bit depth");
   static_assert(chromaSubsample == YUV_SAMPLE_422 || chromaSubsample == YUV_SAMPLE_420
                     || chromaSubsample == YUV_SAMPLE_444, "Unexpected chroma sample type");

@@ -41,8 +41,8 @@ ROTATE_EXPORT(Channel16, uint16_t)
 
 #define ROTATE_DECLARATION_E(srcPixel, storageType, surfaceType) \
     void Rotate##srcPixel(const storageType *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
-                                      storageType *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
-                                      const uint32_t width, const uint32_t height, SparkYuvRotation rotation) {\
+                          storageType *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                          const uint32_t width, const uint32_t height, SparkYuvRotation rotation) {\
         HWY_DYNAMIC_DISPATCH(Rotate##srcPixel##HWY)(src, srcStride, dst, dstStride, width, height, rotation); \
     }
 

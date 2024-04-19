@@ -37,11 +37,11 @@ namespace sparkyuv {
                       const uint8_t *SPARKYUV_RESTRICT vSrc, const uint32_t vPlaneStride,\
                       const float kr, const float kb, const SparkYuvColorRange colorRange) {\
     HWY_DYNAMIC_DISPATCH(YCbCr420To##pixelType##HWY)(rgba, rgbaStride,\
-                                                   width, height,\
-                                                   ySrc, yPlaneStride,\
-                                                   uSrc, uPlaneStride,\
-                                                   vSrc, vPlaneStride,\
-                                                   kr, kb, colorRange); \
+                                                    width, height,\
+                                                    ySrc, yPlaneStride,\
+                                                    uSrc, uPlaneStride,\
+                                                    vSrc, vPlaneStride,\
+                                                    kr, kb, colorRange);\
   }
 
 #define YCbCr420ToXXXX_DECLARATION_HWY(pixelType) HWY_EXPORT(YCbCr420To##pixelType##HWY);

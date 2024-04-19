@@ -29,9 +29,9 @@ HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 template<class T, SparkYuvReformatPixelType PixelType = sparkyuv::REFORMAT_RGBA>
 void
-ReformatSurfaceToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                           uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
-                           const uint32_t width, const uint32_t height, const int bitDepth) {
+ReformatSurfaceToRGB565Impl(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                            uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
+                            const uint32_t width, const uint32_t height, const int bitDepth) {
   const int rbShiftDiff = bitDepth - 5;
   const int gShiftDiff = bitDepth - 6;
 
@@ -170,9 +170,9 @@ ReformatSurfaceToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStr
 
 template<SparkYuvReformatPixelType PixelType = sparkyuv::REFORMAT_RGBA>
 void
-RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-               uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
-               const uint32_t width, const uint32_t height) {
+RGB565ToF16Impl(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
+                const uint32_t width, const uint32_t height) {
   static_assert(PixelType != REFORMAT_RGBA1010102, "RGBA1010102 has no sense in F16");
 
   auto mSource = reinterpret_cast<const uint8_t *>(src);
@@ -190,7 +190,7 @@ RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const auto vGScale = Set(df, hwy::F16FromF32(gMaxColors));
   const int lanes = Lanes(df);
   using V = Vec<decltype(df)>;
-  const Rebind<uint16_t , decltype(df)> d16;
+  const Rebind<uint16_t, decltype(df)> d16;
   const auto vEraseRB = Set(d16, 0x1F);
   const auto vEraseG = Set(d16, 0x3F);
   const auto A = Set(df, hwy::F16FromF32(1.0f));
@@ -213,10 +213,10 @@ RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       G = Mul(G, vGScale);
       B = Mul(B, vRBScale);
 
-      StoreReformatRGBA<PixelType>(df, reinterpret_cast<hwy::float16_t*>(dstPixels), R, G, B, A);
+      StoreReformatRGBA<PixelType>(df, reinterpret_cast<hwy::float16_t *>(dstPixels), R, G, B, A);
 
       srcPixels += lanes;
-      dstPixels += components*lanes;
+      dstPixels += components * lanes;
     }
 #endif
 
@@ -270,7 +270,7 @@ RGB565ToF16HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
     void RGB565To##PixelName##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                  uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                   const uint32_t width, const uint32_t height) {\
-        RGB565ToF16HWY<sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
+        RGB565ToF16Impl<sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
                                                    width, height);\
     }
 
@@ -285,9 +285,9 @@ F16_TO_RGB565(ARGBF16, ARGB)
 
 template<SparkYuvReformatPixelType PixelType = sparkyuv::REFORMAT_RGBA>
 void
-ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                       uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
-                       const uint32_t width, const uint32_t height) {
+ReformatF16ToRGB565Impl(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                        uint16_t *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
+                        const uint32_t width, const uint32_t height) {
   static_assert(PixelType != REFORMAT_RGBA1010102, "RGBA1010102 has no sense in F16");
   auto mSource = reinterpret_cast<const uint8_t *>(src);
   auto mDestination = reinterpret_cast<uint8_t *>(destination);
@@ -302,7 +302,7 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
   const auto vGScale = Set(df, hwy::F16FromF32(gMaxColors));
   const int lanes = Lanes(df);
   using V = Vec<decltype(df)>;
-  const Rebind<uint16_t , decltype(df)> d16;
+  const Rebind<uint16_t, decltype(df)> d16;
 #endif
 
   for (uint32_t y = 0; y < height; ++y) {
@@ -317,7 +317,7 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
       V G;
       V B;
       V A;
-      LoadReformatRGBA<PixelType>(df, reinterpret_cast<const hwy::float16_t*>(srcPixels), R, G, B, A);
+      LoadReformatRGBA<PixelType>(df, reinterpret_cast<const hwy::float16_t *>(srcPixels), R, G, B, A);
 
       R = Mul(R, vRBScale);
       G = Mul(G, vGScale);
@@ -328,9 +328,9 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
       const auto B32h = ConvertTo(d16, B);
       const auto px = Or(Or(R32h, G32h), B32h);
 
-      StoreU(px, d16, reinterpret_cast<uint16_t*>(dstPixels));
+      StoreU(px, d16, reinterpret_cast<uint16_t *>(dstPixels));
 
-      srcPixels += components*lanes;
+      srcPixels += components * lanes;
       dstPixels += lanes;
     }
 #endif
@@ -393,7 +393,7 @@ ReformatF16ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t src
     void PixelName##ToRGB565HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                 uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                 const uint32_t width, const uint32_t height) {\
-        ReformatF16ToRGB565HWY<sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
+        ReformatF16ToRGB565Impl<sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
                                                            width, height);\
     }
 
@@ -410,7 +410,7 @@ REFORMATF16_TO_RGB565(ARGBF16, ARGB)
     void PixelName##ToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                 uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                 const uint32_t width, const uint32_t height) {\
-        ReformatSurfaceToRGB565HWY<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
+        ReformatSurfaceToRGB565Impl<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
                                                                   width, height, depth);\
     }
 
@@ -428,7 +428,7 @@ REFORMAT_TO_RGB565_BIT_DEFINED(RGBA1010102, RGBA1010102, uint8_t, 10)
     void PixelName##ToRGB565HWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                 uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
                                 const uint32_t width, const uint32_t height, const int bitDepth) {\
-        ReformatSurfaceToRGB565HWY<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
+        ReformatSurfaceToRGB565Impl<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, dst, dstStride,\
                                                                   width, height, bitDepth);\
     }
 
@@ -443,9 +443,9 @@ REFORMAT_TO_RGB565(ARGB16, ARGB, uint16_t)
 
 template<class T, SparkYuvReformatPixelType PixelType = sparkyuv::REFORMAT_RGBA>
 void
-RGB565ReformatToSurfaceHWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
-                           T *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
-                           const uint32_t width, const uint32_t height, const int bitDepth) {
+RGB565ReformatToSurfaceImpl(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,
+                            T *SPARKYUV_RESTRICT destination, const uint32_t dstStride,
+                            const uint32_t width, const uint32_t height, const int bitDepth) {
   const int rbShiftDiff = bitDepth - 5;
   const int gShiftDiff = bitDepth - 6;
 
@@ -522,8 +522,8 @@ RGB565ReformatToSurfaceHWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t
     void RGB565To##PixelName##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                   T *SPARKYUV_RESTRICT destination, const uint32_t dstStride,\
                                   const uint32_t width, const uint32_t height) {\
-        RGB565ReformatToSurfaceHWY<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, destination, dstStride,\
-                                                                  width, height, depth);\
+        RGB565ReformatToSurfaceImpl<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, destination, dstStride,\
+                                                                   width, height, depth);\
     }
 
 REFORMAT_RGB565_TO_NEW_BIT(RGB, RGB, uint8_t, 8)
@@ -540,8 +540,8 @@ REFORMAT_RGB565_TO_NEW_BIT(RGBA1010102, RGBA1010102, uint8_t, 10)
     void RGB565To##PixelName##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
                                   T *SPARKYUV_RESTRICT destination, const uint32_t dstStride,\
                                   const uint32_t width, const uint32_t height, const int bitDepth) {\
-        RGB565ReformatToSurfaceHWY<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, destination, dstStride,\
-                                                                  width, height, bitDepth);\
+        RGB565ReformatToSurfaceImpl<T, sparkyuv::REFORMAT_##Pixel>(src, srcStride, destination, dstStride,\
+                                                                   width, height, bitDepth);\
     }
 
 REFORMAT_RGB565_TO_NEW_SURFACE(RGB16, RGB, uint16_t)
