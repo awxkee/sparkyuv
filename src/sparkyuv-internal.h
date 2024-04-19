@@ -101,6 +101,7 @@ static inline int getYuvChromaPixels(SparkYuvChromaSubsample chroma) {
     case YUV_SAMPLE_411:
     case YUV_SAMPLE_410:return 4;
   }
+  return 1;
 }
 
 enum SparkYuvReformatPixelType {
