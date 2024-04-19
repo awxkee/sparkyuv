@@ -36,136 +36,10 @@ void NV21ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-#define NV21ToGEN(pixelType, name, kr, kb, range) \
-    static void NV21##name##To##pixelType(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, \
-                                   const uint8_t *ySrc, uint32_t yStride, \
-                                   const uint8_t *uv, uint32_t uvStride) {  \
-         NV21To##pixelType(src, dstStride, width, height, ySrc, yStride, \
-                           uv, uvStride, kr, kb, range); \
-    }
-
-// MARK: NV21 BT.601
-
-#define NV21ToGEN601(pixelType) NV21ToGEN(pixelType, BT601, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV)
-
-NV21ToGEN601(RGBA)
-NV21ToGEN601(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV21ToGEN601(BGRA)
-NV21ToGEN601(ARGB)
-NV21ToGEN601(ABGR)
-NV21ToGEN601(BGR)
-#endif
-
-#undef NV21ToGEN601
-
-// MARK: NV21 BT.709
-
-#define NV21ToGEN709(pixelType) NV21ToGEN(pixelType, BT709, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV)
-
-NV21ToGEN709(RGBA)
-NV21ToGEN709(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV21ToGEN709(BGRA)
-NV21ToGEN709(ARGB)
-NV21ToGEN709(ABGR)
-NV21ToGEN709(BGR)
-#endif
-
-#undef NV21ToGEN709
-
-// MARK: NV21 BT.2020 NCL
-
-#define NV21ToGEN2020NCL(pixelType) NV21ToGEN(pixelType, BT2020, 0.2627f, 0.0593f, sparkyuv::YUV_RANGE_TV)
-
-NV21ToGEN2020NCL(RGBA)
-NV21ToGEN2020NCL(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV21ToGEN2020NCL(BGRA)
-NV21ToGEN2020NCL(ARGB)
-NV21ToGEN2020NCL(ABGR)
-NV21ToGEN2020NCL(BGR)
-#endif
-
-#undef NV21ToGEN2020NCL
-
-#undef NV21ToGEN
-
-// MARK: NV12 Declarations
-
-void NV12ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-void NV12ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-#if SPARKYUV_FULL_CHANNELS
-void NV12ToABGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-void NV12ToARGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-void NV12ToBGRA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-void NV12ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
-#endif
-
-#define NV12ToGEN(pixelType, name, kr, kb, range) \
-    static void NV12##name##To##pixelType(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, \
-                                          const uint8_t *ySrc, uint32_t yStride, \
-                                          const uint8_t *uv, uint32_t uvStride) {  \
-         NV12To##pixelType(src, dstStride, width, height, ySrc, yStride, \
-                           uv, uvStride, kr, kb, range); \
-    }
-
-// MARK: NV12 BT.601
-
-#define NV12ToGEN601(pixelType) NV12ToGEN(pixelType, BT601, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV)
-
-NV12ToGEN601(RGBA)
-NV12ToGEN601(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV12ToGEN601(ARGB)
-NV12ToGEN601(ABGR)
-NV12ToGEN601(BGRA)
-NV12ToGEN601(BGR)
-#endif
-
-#undef NV12ToGEN601
-
-// MARK: NV12 BT.709
-
-#define NV12ToGEN709(pixelType) NV12ToGEN(pixelType, BT709, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV)
-
-NV12ToGEN709(RGBA)
-NV12ToGEN709(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV12ToGEN709(ARGB)
-NV12ToGEN709(ABGR)
-NV12ToGEN709(BGRA)
-NV12ToGEN709(BGR)
-#endif
-
-#undef NV12ToGEN709
-
-// MARK: NV12 BT.2020 NCL
-
-#define NV12ToGEN2020NCL(pixelType) NV12ToGEN(pixelType, BT2020, 0.2627f, 0.0593f, sparkyuv::YUV_RANGE_TV)
-
-NV12ToGEN2020NCL(RGBA)
-NV12ToGEN2020NCL(RGB)
-#if SPARKYUV_FULL_CHANNELS
-NV12ToGEN2020NCL(ARGB)
-NV12ToGEN2020NCL(ABGR)
-NV12ToGEN2020NCL(BGRA)
-NV12ToGEN2020NCL(BGR)
-#endif
-
-#undef NV12ToGEN2020NCL
-#undef NV12ToGEN
-
 void RGBAToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 void RGBToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+               uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
 void ARGBToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
@@ -311,6 +185,132 @@ void NV42ToBGRA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t heigh
 void NV42ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
+
+#define NV21ToGEN(pixelType, name, kr, kb, range) \
+    static void NV21##name##To##pixelType(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, \
+                                   const uint8_t *ySrc, uint32_t yStride, \
+                                   const uint8_t *uv, uint32_t uvStride) {  \
+         NV21To##pixelType(src, dstStride, width, height, ySrc, yStride, \
+                           uv, uvStride, kr, kb, range); \
+    }
+
+// MARK: NV21 BT.601
+
+#define NV21ToGEN601(pixelType) NV21ToGEN(pixelType, BT601, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV)
+
+NV21ToGEN601(RGBA)
+NV21ToGEN601(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV21ToGEN601(BGRA)
+NV21ToGEN601(ARGB)
+NV21ToGEN601(ABGR)
+NV21ToGEN601(BGR)
+#endif
+
+#undef NV21ToGEN601
+
+// MARK: NV21 BT.709
+
+#define NV21ToGEN709(pixelType) NV21ToGEN(pixelType, BT709, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV)
+
+NV21ToGEN709(RGBA)
+NV21ToGEN709(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV21ToGEN709(BGRA)
+NV21ToGEN709(ARGB)
+NV21ToGEN709(ABGR)
+NV21ToGEN709(BGR)
+#endif
+
+#undef NV21ToGEN709
+
+// MARK: NV21 BT.2020 NCL
+
+#define NV21ToGEN2020NCL(pixelType) NV21ToGEN(pixelType, BT2020, 0.2627f, 0.0593f, sparkyuv::YUV_RANGE_TV)
+
+NV21ToGEN2020NCL(RGBA)
+NV21ToGEN2020NCL(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV21ToGEN2020NCL(BGRA)
+NV21ToGEN2020NCL(ARGB)
+NV21ToGEN2020NCL(ABGR)
+NV21ToGEN2020NCL(BGR)
+#endif
+
+#undef NV21ToGEN2020NCL
+
+#undef NV21ToGEN
+
+// MARK: NV12 Declarations
+
+void NV12ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV12ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void NV12ToABGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV12ToARGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV12ToBGRA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV12ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
+                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+#endif
+
+#define NV12ToGEN(pixelType, name, kr, kb, range) \
+    static void NV12##name##To##pixelType(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, \
+                                          const uint8_t *ySrc, uint32_t yStride, \
+                                          const uint8_t *uv, uint32_t uvStride) {  \
+         NV12To##pixelType(src, dstStride, width, height, ySrc, yStride, \
+                           uv, uvStride, kr, kb, range); \
+    }
+
+// MARK: NV12 BT.601
+
+#define NV12ToGEN601(pixelType) NV12ToGEN(pixelType, BT601, 0.299f, 0.114f, sparkyuv::YUV_RANGE_TV)
+
+NV12ToGEN601(RGBA)
+NV12ToGEN601(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV12ToGEN601(ARGB)
+NV12ToGEN601(ABGR)
+NV12ToGEN601(BGRA)
+NV12ToGEN601(BGR)
+#endif
+
+#undef NV12ToGEN601
+
+// MARK: NV12 BT.709
+
+#define NV12ToGEN709(pixelType) NV12ToGEN(pixelType, BT709, 0.2126f, 0.0722f, sparkyuv::YUV_RANGE_TV)
+
+NV12ToGEN709(RGBA)
+NV12ToGEN709(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV12ToGEN709(ARGB)
+NV12ToGEN709(ABGR)
+NV12ToGEN709(BGRA)
+NV12ToGEN709(BGR)
+#endif
+
+#undef NV12ToGEN709
+
+// MARK: NV12 BT.2020 NCL
+
+#define NV12ToGEN2020NCL(pixelType) NV12ToGEN(pixelType, BT2020, 0.2627f, 0.0593f, sparkyuv::YUV_RANGE_TV)
+
+NV12ToGEN2020NCL(RGBA)
+NV12ToGEN2020NCL(RGB)
+#if SPARKYUV_FULL_CHANNELS
+NV12ToGEN2020NCL(ARGB)
+NV12ToGEN2020NCL(ABGR)
+NV12ToGEN2020NCL(BGRA)
+NV12ToGEN2020NCL(BGR)
+#endif
+
+#undef NV12ToGEN2020NCL
+#undef NV12ToGEN
 
 #define XXXXToNVXXNAME_DECLARATION_H(Pixel, NV, Name, kr, kb, range) \
      static void Pixel##To##NV##Name(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, \
