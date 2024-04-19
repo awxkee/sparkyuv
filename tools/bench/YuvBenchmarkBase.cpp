@@ -265,6 +265,6 @@ void SparkyuvFastGuassianRGBA(benchmark::State &state) {
   sparkyuv::RGBToRGBA(inSrcData.data(), inWidth * sizeof(uint8_t) * 3, rgbaData.data(), rgbaStride, inWidth, inHeight);
 
   for (auto _ : state) {
-    sparkyuv::FastGaussianRGBA(reinterpret_cast<uint8_t *>(rgbaData.data()), rgbaStride, inWidth, inHeight, 15);
+    sparkyuv::FastGaussianBlurRGBA(reinterpret_cast<uint8_t *>(rgbaData.data()), rgbaStride, inWidth, inHeight, 15);
   }
 }
