@@ -42,8 +42,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
-                           const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                           const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -111,14 +110,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
-                           const std::vector<float> &mKernel) {
-  float kernel[mKernel.size()];
-
-  for (size_t i = 0; i < mKernel.size(); ++i) {
-    kernel[i] = mKernel[i];
-  }
-
-  const int kernelSize = static_cast<int>(mKernel.size());
+                           const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -138,7 +130,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + y * srcStride);
       auto kx = static_cast<int>(x);
       for (; r <= maxKernel; ++r) {
-        float weight = kernel[halfOfKernel + r];
+        float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
         accumulator1 += static_cast<float>(localSource[sourcePX]) * weight;
         accumulator2 += static_cast<float>(localSource[sourcePX + 1]) * weight;
@@ -161,8 +153,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
-                           const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                           const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -202,9 +193,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
                            T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                            const uint32_t startY, const uint32_t endY,
                            const uint32_t width, const uint32_t /* height */,
-                           const std::vector<float> &mKernel) {
-
-  const int kernelSize = static_cast<int>(mKernel.size());
+                           const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -236,8 +225,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                         const float* mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -271,8 +259,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                         const float* mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -314,8 +301,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                         const float* mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -357,11 +343,10 @@ template<class T, SparkYuvSurfaceChannels Surface,
     typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type = 0>
 void
 GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
-                           T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
-                           const uint32_t startY, const uint32_t endY,
-                           const uint32_t width, const uint32_t height,
-                           const std::vector<float> &mKernel) {
-  const int kernelSize = static_cast<int>(mKernel.size());
+                         T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
+                         const uint32_t startY, const uint32_t endY,
+                         const uint32_t width, const uint32_t height,
+                         const float* mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -407,6 +392,8 @@ GaussianBlurImpl(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
   const auto kernel = Get1DGaussianKernel(kernelSize, sigma);
   const auto transient = hwy::AllocateAligned<uint8_t>(newStride * height);
   const auto threadCount = concurrency::getThreadCounts(width, height);
+  const auto alignedKernel = hwy::AllocateAligned<float>(kernel.size());
+  std::copy(kernel.begin(), kernel.end(), alignedKernel.get());
   concurrency::parallel_for_segment(threadCount, height, [&](int start, int end) {
     GaussianBlurHorizontalPass<T, Surface>(mSource,
                                            srcStride,
@@ -416,7 +403,8 @@ GaussianBlurImpl(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                                            end,
                                            width,
                                            height,
-                                           kernel);
+                                           reinterpret_cast<const float*>(alignedKernel.get()),
+                                           kernel.size());
   });
 
   concurrency::parallel_for_segment(threadCount, height, [&](int start, int end) {
@@ -428,7 +416,8 @@ GaussianBlurImpl(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                                          end,
                                          width,
                                          height,
-                                         kernel);
+                                         reinterpret_cast<const float*>(alignedKernel.get()),
+                                         kernel.size());
   });
 }
 
