@@ -22,13 +22,23 @@
 #include <cmath>
 #include <algorithm>
 
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+#include <cmath>
+
+#ifndef M_PI_F
+#define M_PI_F 3.14159265358979323846
+#endif
+
 namespace {
 using namespace std;
 vector<float> Get1DGaussianKernel(int width, float sigma) {
   vector<float> kernel(ceil(width));
   int mean = width / 2;
   float sum = 0.f;
-  const float scale = 1.f / (::sqrtf(2 * M_PI) * sigma);
+  const float scale = 1.f / (::sqrtf(2.f * M_PI_F) * sigma);
   for (int x = 0; x < width; x++) {
     kernel[x] = ::expf(-0.5f * ::powf(static_cast<float>(x - mean) / sigma, 2.0f)) * scale;
     sum += kernel[x];

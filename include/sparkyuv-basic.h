@@ -429,6 +429,7 @@ void FastGaussianBlurChannel16(uint16_t *data, uint32_t stride, uint32_t width, 
  * Gaussian Blur.
  * Not approximation just a gaussian blur, use when antialias or clear gaussian methods is needed.
  * In-place use allowed
+ * For this method A channel position doesn't matter. You may pass any 4-channel image and expect valid results
  */
 
 void GaussianBlurRGBA(const uint8_t * src, uint32_t srcStride,
