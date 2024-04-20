@@ -77,23 +77,23 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
         auto i4 = ConvertTo(df, PromoteUpperTo(d32, PromoteTo(d16, UpperHalf(dh8, vx))));
 
         float weight1 = mKernel[halfOfKernel + r];
-        acc = Add(acc, Mul(i1, Set(df, weight1)));
+        acc = MulAdd(i1, Set(df, weight1), acc);
 
         float weight2 = mKernel[halfOfKernel + r + 1];
-        acc = Add(acc, Mul(i2, Set(df, weight2)));
+        acc = MulAdd(i2, Set(df, weight2), acc);
 
         float weight3 = mKernel[halfOfKernel + r + 2];
-        acc = Add(acc, Mul(i3, Set(df, weight3)));
+        acc = MulAdd(i3, Set(df, weight3), acc);
 
         float weight4 = mKernel[halfOfKernel + r + 3];
-        acc = Add(acc, Mul(i4, Set(df, weight4)));
+        acc = MulAdd(i4, Set(df, weight4), acc);
       }
 
       for (; r <= maxKernel; ++r) {
         float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
         auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
-        acc = Add(acc, Mul(vx, Set(df, weight)));
+        acc = MulAdd(vx, Set(df, weight), acc);
       }
       acc = Round(acc);
       auto newPX = DemoteTo(d8x4, ConvertTo(d32, acc));
@@ -150,7 +150,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
         const auto pxf16 = BitCast(df16x4, LoadU(d16x4, reinterpret_cast<const uint16_t*>(&localSource[kx])));
         pixelData = PromoteTo(df, pxf16);
 #endif
-        accumulator = Add(accumulator, Mul(pixelData, Set(df, weight)));
+        accumulator = MulAdd(pixelData, Set(df, weight), accumulator);
       }
 
 #if SPARKYUV_ALLOW_FLOAT16
@@ -217,8 +217,8 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
         pixelData2 = PromoteUpperTo(df, pxf16);
 #endif
 
-        accumulator = Add(accumulator, Mul(pixelData1, Set(df, weight1)));
-        accumulator = Add(accumulator, Mul(pixelData2, Set(df, weight2)));
+        accumulator = MulAdd(pixelData1, Set(df, weight1), accumulator);
+        accumulator = MulAdd(pixelData2, Set(df, weight2), accumulator);
       }
 
       for (; r <= maxKernel; ++r) {
@@ -233,7 +233,7 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
         const auto pxf16 = BitCast(df16x4, LoadU(d16x4, reinterpret_cast<const uint16_t*>(movedSrc)));
         pixelData = PromoteTo(df, pxf16);
 #endif
-        accumulator = Add(accumulator, Mul(pixelData, Set(df, weight)));
+        accumulator = MulAdd(pixelData, Set(df, weight), accumulator);
       }
 
 #if SPARKYUV_ALLOW_FLOAT16
@@ -284,7 +284,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
         float weight = mKernel[halfOfKernel + r];
         uint32_t sourcePX = x * 4;
         auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
-        acc = Add(acc, Mul(vx, Set(df, weight)));
+        acc = MulAdd(vx, Set(df, weight), acc);
       }
       acc = Round(acc);
       auto newPX = DemoteTo(d8x4, ConvertTo(d32, acc));
@@ -605,7 +605,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
         float weight = mKernel[halfOfKernel + r];
         uint32_t sourcePX = x * 4;
         auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
-        acc = Add(acc, Mul(vx, Set(df, weight)));
+        acc = MulAdd(vx, Set(df, weight), acc);
       }
       acc = Round(acc);
       auto newPX = DemoteTo(d8x4, ConvertTo(d32, acc));
