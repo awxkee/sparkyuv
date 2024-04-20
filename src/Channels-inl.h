@@ -24,6 +24,7 @@
 #include "hwy/highway.h"
 #include "yuv-inl.h"
 #include "sparkyuv-internal.h"
+#include "TypeSupport.h"
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -319,47 +320,45 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
 
       uint16_t out0, out1, out2, out3;
 
+      auto f16Source = reinterpret_cast<const hwy::float16_t*>(srcPixels);
+
       switch (Surface) {
         case SURFACE_CHANNEL: {
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[0])) * scale;
+          r = LoadFloat(&f16Source[0]) * scale;
           out0 = static_cast<uint16_t>(r);
         }
           break;
         case SURFACE_CHANNELS_3: {
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[0])) * scale;
+          r = LoadFloat(&f16Source[0]) * scale;
           out0 = static_cast<uint16_t>(r);
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1])) * scale;
+          g = LoadFloat(&f16Source[1]) * scale;
           out1 = static_cast<uint16_t>(g);
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2])) * scale;
+          b = LoadFloat(&f16Source[2]) * scale;
           out2 = static_cast<uint16_t>(b);
         }
           break;
         case SURFACE_CHANNELS_4: {
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[0])) * scale;
+          r = LoadFloat(&f16Source[0]) * scale;
           out0 = static_cast<uint16_t>(r);
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1])) * scale;
+          g = LoadFloat(&f16Source[1]) * scale;
           out1 = static_cast<uint16_t>(g);
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2])) * scale;
+          b = LoadFloat(&f16Source[2]) * scale;
           out2 = static_cast<uint16_t>(b);
-          a = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[3])) * scale;
+          a = LoadFloat(&f16Source[3]) * scale;
           out3 = static_cast<uint16_t>(a);
         }
           break;
         case SURFACE_RGBA1010102: {
-          uint16_t bits0 = srcPixels[0];
-          float s1 = hwy::F32FromF16(hwy::float16_t::FromBits(bits0));
+          float s1 = LoadFloat(&f16Source[0]);
           r = ::roundf(s1 * scale);
           out0 = static_cast<uint16_t>(r);
-          uint16_t bits1 = srcPixels[1];
-          float s2 = hwy::F32FromF16(hwy::float16_t::FromBits(bits1));
+          float s2 = LoadFloat(&f16Source[1]);
           g = ::roundf(s2 * scale);
           out1 = static_cast<uint16_t>(g);
-          uint16_t bits2 = srcPixels[2];
-          float s3 = hwy::F32FromF16(hwy::float16_t::FromBits(bits2));
+          float s3 = LoadFloat(&f16Source[2]);
           b = ::roundf(s3 * scale);
           out2 = static_cast<uint16_t>(b);
-          uint16_t bits3 = srcPixels[3];
-          float s4 = hwy::F32FromF16(hwy::float16_t::FromBits(bits3));
+          float s4 = LoadFloat(&f16Source[3]);
           a = std::min(::roundf(s4 * 3.f), 3.f);
           out3 = static_cast<uint16_t>(a);
         }

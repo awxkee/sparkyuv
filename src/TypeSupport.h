@@ -32,7 +32,7 @@
 
 template<typename T, ENABLE_TYPE_IS_F16(T)>
 TYPE_INLINE float LoadFloat(const T *src) {
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 || HWY_HAVE_SCALAR_F16_OPERATORS
   return static_cast<float>(src[0]);
 #else
   auto uSource = reinterpret_cast<const uint16_t *>(src);
@@ -47,7 +47,7 @@ TYPE_INLINE float LoadFloat(const T *src) {
 
 template<typename V, typename T, ENABLE_TYPE_IS_F16(T)>
 TYPE_INLINE V LoadPixel(const T *src) {
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 || HWY_HAVE_SCALAR_F16_OPERATORS
   return static_cast<V>(src[0]);
 #else
   auto uSource = reinterpret_cast<const uint16_t *>(src);
@@ -67,7 +67,7 @@ TYPE_INLINE V TransformCast(T t) {
 
 template<typename V, typename T, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE V TransformCast(T t) {
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 || HWY_HAVE_SCALAR_F16_OPERATORS
   return static_cast<hwy::float16_t>(t);
 #else
   return hwy::F16FromF32(t);
@@ -81,7 +81,7 @@ TYPE_INLINE void StoreRoundedFloat(V *v, T t) {
 
 template<typename T, typename V, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE void StoreRoundedFloat(V *v, T t) {
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 || HWY_HAVE_SCALAR_F16_OPERATORS
   v[0] = static_cast<V>(::roundf(t));
 #else
   reinterpret_cast<uint16_t *>(v)[0] = hwy::F16FromF32(::roundf(t)).bits;
@@ -95,7 +95,7 @@ TYPE_INLINE void StoreFloat(V *v, T t) {
 
 template<typename T, typename V, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE void StoreFloat(V *v, T t) {
-#if HWY_HAVE_FLOAT16
+#if HWY_HAVE_FLOAT16 || HWY_HAVE_SCALAR_F16_OPERATORS
   v[0] = static_cast<V>(t);
 #else
   reinterpret_cast<uint16_t *>(v)[0] = hwy::F16FromF32(t).bits;

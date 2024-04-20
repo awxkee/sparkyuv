@@ -24,6 +24,7 @@
 #include "hwy/highway.h"
 #include "src/yuv-inl.h"
 #include "src/sparkyuv-internal.h"
+#include "TypeSupport.h"
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -340,31 +341,33 @@ ReformatF16ToRGB565Impl(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t sr
       float g;
       float b;
 
+      auto castedSource = reinterpret_cast<const hwy::float16_t*>(srcPixels);
+
       switch (PixelType) {
         case REFORMAT_RGBA:
         case REFORMAT_RGB: {
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[0]));
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1]));
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2]));
+          r = LoadFloat(&castedSource[0]);
+          g = LoadFloat(&castedSource[1]);
+          b = LoadFloat(&castedSource[2]);
         }
           break;
         case REFORMAT_BGRA:
         case REFORMAT_BGR: {
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[0]));
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1]));
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2]));
+          b = LoadFloat(&castedSource[0]);
+          g = LoadFloat(&castedSource[1]);
+          r = LoadFloat(&castedSource[2]);
         }
           break;
         case REFORMAT_ARGB: {
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1]));
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2]));
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[3]));
+          r = LoadFloat(&castedSource[1]);
+          g = LoadFloat(&castedSource[2]);
+          b = LoadFloat(&castedSource[3]);
         }
           break;
         case REFORMAT_ABGR: {
-          b = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[1]));
-          g = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[2]));
-          r = hwy::F32FromF16(hwy::float16_t::FromBits(srcPixels[3]));
+          b = LoadFloat(&castedSource[1]);
+          g = LoadFloat(&castedSource[2]);
+          r = LoadFloat(&castedSource[3]);
         }
           break;
       }
