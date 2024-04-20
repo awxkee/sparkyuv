@@ -17,14 +17,14 @@
 #ifndef YUV_SRC_TYPESUPPORT_H_
 #define YUV_SRC_TYPESUPPORT_H_
 
-#include "hwy/base.h"
+#include "hwy/highway.h"
 #include <cstdint>
 #include <algorithm>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define TYPE_INLINE static __attribute__((flatten)) inline
 #else
-#define SPARKYUV_INLINE static inline
+#define TYPE_INLINE static inline
 #endif
 
 #define ENABLE_TYPE_IS_F16(T) typename std::enable_if<(std::is_same<T, hwy::float16_t>::value), int>::type = 0
@@ -32,8 +32,12 @@
 
 template<typename T, ENABLE_TYPE_IS_F16(T)>
 TYPE_INLINE float LoadFloat(const T *src) {
+#if HWY_HAVE_FLOAT16
+  return static_cast<float>(src[0]);
+#else
   auto uSource = reinterpret_cast<const uint16_t *>(src);
   return hwy::F32FromF16(hwy::float16_t::FromBits(uSource[0]));
+#endif
 }
 
 template<typename T, ENABLE_TYPE_IS_NOT_F16(T)>
@@ -43,8 +47,12 @@ TYPE_INLINE float LoadFloat(const T *src) {
 
 template<typename V, typename T, ENABLE_TYPE_IS_F16(T)>
 TYPE_INLINE V LoadPixel(const T *src) {
+#if HWY_HAVE_FLOAT16
+  return static_cast<V>(src[0]);
+#else
   auto uSource = reinterpret_cast<const uint16_t *>(src);
   return static_cast<V>(hwy::F32FromF16(hwy::float16_t::FromBits(uSource[0])));
+#endif
 }
 
 template<typename V, typename T, ENABLE_TYPE_IS_NOT_F16(T)>
@@ -59,27 +67,39 @@ TYPE_INLINE V TransformCast(T t) {
 
 template<typename V, typename T, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE V TransformCast(T t) {
+#if HWY_HAVE_FLOAT16
+  return static_cast<hwy::float16_t>(t);
+#else
   return hwy::F16FromF32(t);
+#endif
 }
 
 template<typename T, typename V, ENABLE_TYPE_IS_NOT_F16(V)>
 TYPE_INLINE void StoreRoundedFloat(V *v, T t) {
-  v[0] = ::roundf(t);
+  v[0] = static_cast<V>(::roundf(t));
 }
 
 template<typename T, typename V, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE void StoreRoundedFloat(V *v, T t) {
+#if HWY_HAVE_FLOAT16
+  v[0] = static_cast<V>(::roundf(t));
+#else
   reinterpret_cast<uint16_t *>(v)[0] = hwy::F16FromF32(::roundf(t)).bits;
+#endif
 }
 
 template<typename T, typename V, ENABLE_TYPE_IS_NOT_F16(V)>
 TYPE_INLINE void StoreFloat(V *v, T t) {
-  v[0] = roundf(t);
+  v[0] = static_cast<V>(t);
 }
 
 template<typename T, typename V, ENABLE_TYPE_IS_F16(V)>
 TYPE_INLINE void StoreFloat(V *v, T t) {
+#if HWY_HAVE_FLOAT16
+  v[0] = static_cast<V>(t);
+#else
   reinterpret_cast<uint16_t *>(v)[0] = hwy::F16FromF32(t).bits;
+#endif
 }
 
 #endif //YUV_SRC_TYPESUPPORT_H_
