@@ -561,12 +561,12 @@ void ScaleChannel(const uint8_t *input, uint32_t srcStride,
 // Mark scale F16
 
 
-void ScaleChannelRGBF16(const uint16_t *input, uint32_t srcStride,
+void ScaleRGBF16(const uint16_t *input, uint32_t srcStride,
                         uint32_t inputWidth, uint32_t inputHeight,
                         uint16_t *output, uint32_t dstStride,
                         uint32_t outputWidth, uint32_t outputHeight,
                         SparkYuvSampler option);
-void ScaleChannelRGBAF16(const uint16_t *input, uint32_t srcStride,
+void ScaleRGBAF16(const uint16_t *input, uint32_t srcStride,
                          uint32_t inputWidth, uint32_t inputHeight,
                          uint16_t *output, uint32_t dstStride,
                          uint32_t outputWidth, uint32_t outputHeight,
