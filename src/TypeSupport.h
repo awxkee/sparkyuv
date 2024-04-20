@@ -18,6 +18,7 @@
 #define YUV_SRC_TYPESUPPORT_H_
 
 #include "hwy/base.h"
+#include <cstdint>
 #include <algorithm>
 
 #if defined(__GNUC__) || defined(__clang__)

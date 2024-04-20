@@ -1,8 +1,5 @@
 FROM mcr.microsoft.com/windows/server:ltsc2022-KB5035857-amd64
 
-# Restore the default Windows shell for correct batch processing.
-SHELL ["cmd", "/S", "/C"]
-
 RUN ` \
     # Download the Build Tools bootstrapper.
     curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe ` \

@@ -62,7 +62,7 @@ if (APPLE)
     add_definitions(-DHWY_COMPILE_ONLY_STATIC)
 endif ()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
+if (CMAKE_BUILD_TYPE STREQUAL "Release" AND NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif ()
 
