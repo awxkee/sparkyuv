@@ -440,10 +440,49 @@ void FastGaussianBlurChannel(uint8_t *data, uint32_t stride, uint32_t width, uin
 void FastGaussianBlurChannel16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
 
 /**
+ * Fast Gaussian Next Blur.
+ * Approximation.
+ * In-place use allowed
+ * Slower that Fast Gaussian however better results, still much more faster than naive blur
+ * Close to gaussian however some non gaussian may be detected if FFT or any advanced analysis will be involved
+ */
+
+void FastGaussianNextBlurRGBA(uint8_t *src, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurRGB(uint8_t *src, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#if SPARKYUV_FULL_CHANNELS
+void FastGaussianNextARGB(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextABGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBGRA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBGR(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#endif
+
+void FastGaussianBlurNextRGBA16(uint16_t *src, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianBlurNextRGB16(uint16_t *src, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#if SPARKYUV_FULL_CHANNELS
+void FastGaussianNextBlurRARGB16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurRABGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurRBGRA16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurRBGR16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#endif
+
+void FastGaussianNextBlurRGBAF16(uint16_t *data, uint32_t stride,
+                                 uint32_t width, uint32_t height,
+                                 int radius);
+void FastGaussianNextBlurRGBF16(uint16_t *data, uint32_t stride,
+                                uint32_t width, uint32_t height,
+                                int radius);
+
+#if SPARKYUV_FULL_CHANNELS
+void FastGaussianNextBlurARGBF16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurABGRF16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurBGRAF16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+void FastGaussianNextBlurBGRF16(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius);
+#endif
+
+/**
  * Gaussian Blur.
  * Not approximation just a gaussian blur, use when antialias or clear gaussian methods is needed.
  * In-place use allowed
- * For this method A channel position doesn't matter. You may pass any 4-channel image and expect valid results
  */
 
 void GaussianBlurRGBA(const uint8_t *src, uint32_t srcStride,
@@ -497,6 +536,72 @@ void GaussianBlurChannelF32(const float *src, uint32_t srcStride,
                             float *dst, uint32_t dstStride,
                             uint32_t width, uint32_t height,
                             int kernelSize, float sigma);
+
+/**
+ * Scaling functions
+ */
+
+// Mark scale U8
+
+void ScaleRGB(const uint8_t *input, uint32_t srcStride,
+              uint32_t inputWidth, uint32_t inputHeight,
+              uint8_t *output, uint32_t dstStride,
+              uint32_t outputWidth, uint32_t outputHeight,
+              SparkYuvSampler option);
+void ScaleRGBA(const uint8_t *input, uint32_t srcStride,
+               uint32_t inputWidth, uint32_t inputHeight,
+               uint8_t *output, uint32_t dstStride,
+               uint32_t outputWidth, uint32_t outputHeight,
+               SparkYuvSampler option);
+void ScaleChannel(const uint8_t *input, uint32_t srcStride,
+                  uint32_t inputWidth, uint32_t inputHeight,
+                  uint8_t *output, uint32_t dstStride,
+                  uint32_t outputWidth, uint32_t outputHeight,
+                  SparkYuvSampler option);
+// Mark scale F16
+
+
+void ScaleChannelRGBF16(const uint16_t *input, uint32_t srcStride,
+                        uint32_t inputWidth, uint32_t inputHeight,
+                        uint16_t *output, uint32_t dstStride,
+                        uint32_t outputWidth, uint32_t outputHeight,
+                        SparkYuvSampler option);
+void ScaleChannelRGBAF16(const uint16_t *input, uint32_t srcStride,
+                         uint32_t inputWidth, uint32_t inputHeight,
+                         uint16_t *output, uint32_t dstStride,
+                         uint32_t outputWidth, uint32_t outputHeight,
+                         SparkYuvSampler option);
+
+void ScaleChannelF16(const uint16_t *input, uint32_t srcStride,
+                     uint32_t inputWidth, uint32_t inputHeight,
+                     uint16_t *output, uint32_t dstStride,
+                     uint32_t outputWidth, uint32_t outputHeight,
+                     SparkYuvSampler option);
+
+// Mark: Scale RGBA1010102
+
+void ScaleRGBA1010102(const uint8_t *input, uint32_t srcStride,
+                      uint32_t inputWidth, uint32_t inputHeight,
+                      uint8_t *output, uint32_t dstStride,
+                      uint32_t outputWidth, uint32_t outputHeight,
+                      SparkYuvSampler option);
+
+void ScaleRGBA16(const uint16_t *input, uint32_t srcStride,
+                 uint32_t inputWidth, uint32_t inputHeight,
+                 uint16_t *output, uint32_t dstStride,
+                 uint32_t outputWidth, uint32_t outputHeight,
+                 int depth, SparkYuvSampler option);
+void ScaleRGB16(const uint16_t *input, uint32_t srcStride,
+                uint32_t inputWidth, uint32_t inputHeight,
+                uint16_t *output, uint32_t dstStride,
+                uint32_t outputWidth, uint32_t outputHeight,
+                int depth, SparkYuvSampler option);
+void ScaleChannel16(const uint16_t *input, uint32_t srcStride,
+                    uint32_t inputWidth, uint32_t inputHeight,
+                    uint16_t *output, uint32_t dstStride,
+                    uint32_t outputWidth, uint32_t outputHeight,
+                    int depth, SparkYuvSampler option);
+
 }
 
 #endif //YUV_INCLUDE_SPARKYUV_BASIC_H_

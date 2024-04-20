@@ -32,7 +32,7 @@ void VerticalGaussianPassChannel(T *data, const int stride, const int width, con
 
   for (int x = 0; x < width; ++x) {
     V dif = 0, sum = (radius * radius) >> 1;
-    for (int y = 0 - 2 * radius; y < height; ++y) {
+    for (int y = 0 - 2 * radius; y < static_cast<int>(height); ++y) {
       auto src = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
       if (y >= 0) {
         int arrIndex = (y - radius) & bufLength;
@@ -64,7 +64,7 @@ void HorizontalGaussianPassChannel(T *data, const int stride, const int width, c
 
   for (int y = 0; y < height; ++y) {
     V dif = 0, sum = (radius * radius) >> 1;
-    for (int x = 0 - 2 * radius; x < width; ++x) {
+    for (int x = 0 - 2 * radius; x < static_cast<int>(width); ++x) {
       auto src = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
       if (x >= 0) {
         int arrIndex = (x - radius) & bufLength;
@@ -108,10 +108,10 @@ void VerticalGaussianPass(T *data, const int stride,
       sumG = (radius * radius) >> 1;
       sumB = (radius * radius) >> 1;
     }
-    for (int y = 0 - 2 * radius; y < height; ++y) {
-      auto src = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
+    for (int y = 0 - 2 * radius; y < static_cast<int>(height); ++y) {
+      auto mSrc = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
       if (y >= 0) {
-        auto store = src + x * channels;
+        auto store = mSrc + x * channels;
         const T newR = TransformCast<T, float>(static_cast<float>(sumR) * weight);
         int arrIndex = (y - radius) & bufLength;
         int dArrIndex = y & bufLength;
@@ -170,11 +170,9 @@ void HorizontalGaussianPass(T *data, const int stride, const int width, const in
       sumG = (radius * radius) >> 1;
       sumB = (radius * radius) >> 1;
     }
-    for (int x = 0 - 2 * radius; x < width; ++x) {
-      auto src = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
+    auto store = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
+    for (int x = 0 - 2 * radius; x < static_cast<int>(width); ++x) {
       if (x >= 0) {
-        auto store = src + x * channels;
-
         int arrIndex = (x - radius) & bufLength;
         int dArrIndex = x & bufLength;
 
@@ -188,6 +186,7 @@ void HorizontalGaussianPass(T *data, const int stride, const int width, const in
         difB += bufferB[arrIndex] - 2 * bufferB[dArrIndex];
 
         StoreRGB<T, T, PixelType>(store, newR, newG, newB);
+        store += channels;
       } else if (x + radius >= 0) {
         int dx = x & bufLength;
         difR -= 2 * bufferR[dx];
@@ -212,6 +211,140 @@ void HorizontalGaussianPass(T *data, const int stride, const int width, const in
 
       sumB += difB += pB;
       bufferB[arrIndex] = pB;
+    }
+  }
+}
+
+template<typename T, typename V, SparkYuvDefaultPixelType PixelType>
+void VerticalFastGaussianPassNext(T *data, const uint32_t stride, const int width, const int height,
+                                  const int radius, const int start, const int end) {
+  const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius) * static_cast<float>(radius));
+
+  constexpr int bufLength = 1023;
+  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
+  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
+  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+
+  const int channels = getPixelTypeComponents(PixelType);
+
+  for (int x = start; x < static_cast<int>(width) && x < end; ++x) {
+    V difR = 0, derR = 0, difG = 0, derG = 0,
+        difB = 0, derB = 0;
+    float sumR = 0, sumG = 0, sumB = 0;
+    for (int y = 0 - 3 * radius; y < static_cast<int>(height); ++y) {
+      auto store = reinterpret_cast<T*>(reinterpret_cast<uint8_t *>(data) + y * stride);
+      int px = x * channels;
+      if (y >= 0) {
+        int mpy = y & bufLength;
+        int mpyPRadius = (y + radius) & bufLength;
+        int mpyMRadius = (y - radius) & bufLength;
+        difR += 3 * (bufferR[mpy] - bufferR[mpyPRadius]) - bufferR[mpyMRadius];
+        const T newR = TransformCast<T, float>(static_cast<float>(sumR) * weight);
+
+        difG += 3 * (bufferG[mpy] - bufferG[mpyPRadius]) - bufferG[mpyMRadius];
+        const T newG = TransformCast<T, float>(static_cast<float>(sumG) * weight);
+
+        difB += 3 * (bufferB[mpy] - bufferB[mpyPRadius]) - bufferB[mpyMRadius];
+        const T newB = TransformCast<T, float>(static_cast<float>(sumB) * weight);
+        StoreRGB<T, T, PixelType>(&store[px], newR, newG, newB);
+      } else if (y + radius >= 0) {
+        int mpy = y & bufLength;
+        int mpyPRadius = (y + radius) & bufLength;
+        difR += 3 * (bufferR[mpy] - bufferR[mpyPRadius]);
+        difG += 3 * (bufferG[mpy] - bufferG[mpyPRadius]);
+        difB += 3 * (bufferB[mpy] - bufferB[mpyPRadius]);
+      } else if (y + 2 * radius >= 0) {
+        int mpyPRadius = (y + radius) & bufLength;
+        difR -= 3 * bufferR[mpyPRadius];
+        difG -= 3 * bufferG[mpyPRadius];
+        difB -= 3 * bufferB[mpyPRadius];
+      }
+
+      int mPNextRad = (y + 2 * radius) & bufLength;
+
+      auto srcNext = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data)
+          + std::clamp(static_cast<int>(y + 3 * radius / 2), 0, static_cast<int>(height - 1)) * stride);
+      srcNext += px;
+
+      V pR, pG, pB, pA;
+      LoadRGBA<T, V, PixelType>(srcNext, pR, pG, pB, pA);
+
+      sumR += derR += difR += pR;
+      bufferR[mPNextRad] = pR;
+
+      sumG += derG += difG += pG;
+      bufferG[mPNextRad] = pG;
+
+      sumB += derB += difB += pB;
+      bufferB[mPNextRad] = pB;
+    }
+  }
+}
+
+template<typename T, typename V, SparkYuvDefaultPixelType PixelType>
+void HorizontalFastGaussianNext(T *data, const uint32_t stride,
+                                const int width, const int height, const int radius,
+                                const int start, const int end) {
+  const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius) * static_cast<float>(radius));
+
+  constexpr int bufLength = 1023;
+  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
+  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
+  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+
+  const int channels = getPixelTypeComponents(PixelType);
+
+  for (int y = start; y < height && y < end; ++y) {
+    auto store = reinterpret_cast<T*>(reinterpret_cast<uint8_t *>(data) + y * stride);
+    V difR = 0, derR = 0, difG = 0, derG = 0, difB = 0, derB = 0;
+    float sumR = 0, sumG = 0, sumB = 0;
+    for (int x = 0 - 3 * radius; x < width; ++x) {
+      if (x >= 0) {
+        int mpy = x & bufLength;
+        int mpyPRadius = (x + radius) & bufLength;
+        int mpyMRadius = (x - radius) & bufLength;
+
+        difR += 3 * (bufferR[mpy] - bufferR[mpyPRadius]) - bufferR[mpyMRadius];
+        const T newR = TransformCast<T, float>(static_cast<float>(sumR) * weight);
+
+        difG += 3 * (bufferG[mpy] - bufferG[mpyPRadius]) - bufferG[mpyMRadius];
+        const T newG = TransformCast<T, float>(static_cast<float>(sumG) * weight);
+
+        difB += 3 * (bufferB[mpy] - bufferB[mpyPRadius]) - bufferB[mpyMRadius];
+        const T newB = TransformCast<T, float>(static_cast<float>(sumB) * weight);
+        StoreRGB<T, T, PixelType>(store, newR, newG, newB);
+
+        store += channels;
+      } else if (x + radius >= 0) {
+        int mpy = x & bufLength;
+        int mpyPRadius = (x + radius) & bufLength;
+        difR += 3 * (bufferR[mpy] - bufferR[mpyPRadius]);
+        difG += 3 * (bufferG[mpy] - bufferG[mpyPRadius]);
+        difB += 3 * (bufferB[mpy] - bufferB[mpyPRadius]);
+      } else if (x + 2 * radius >= 0) {
+        int mpyPRadius = (x + radius) & bufLength;
+        difR -= 3 * bufferR[mpyPRadius];
+        difG -= 3 * bufferG[mpyPRadius];
+        difB -= 3 * bufferB[mpyPRadius];
+      }
+
+      int mPNextRad = (x + 2 * radius) & bufLength;
+
+      auto srcNext = reinterpret_cast<T*>(reinterpret_cast<uint8_t *>(data) + y * stride);
+      int px = std::clamp(x + radius, 0, static_cast<int>(width - 1)) * channels;
+      srcNext += px;
+
+      V pR, pG, pB, pA;
+      LoadRGBA<T, V, PixelType>(srcNext, pR, pG, pB, pA);
+
+      sumR += derR += difR += pR;
+      bufferR[mPNextRad] = pR;
+
+      sumG += derG += difG += pG;
+      bufferG[mPNextRad] = pG;
+
+      sumB += derB += difB += pB;
+      bufferB[mPNextRad] = pB;
     }
   }
 }
@@ -281,4 +414,61 @@ FAST_GAUSSIAN_DECLARATION_CHAN_R(Channel, uint8_t)
 FAST_GAUSSIAN_DECLARATION_CHAN_R(Channel16, uint16_t)
 
 #undef FAST_GAUSSIAN_DECLARATION_CHAN_R
+
+#define FAST_GAUSSIAN_NEXT_DECLARATION_R(pixelName, pixelType, storageType) \
+    void FastGaussianNextBlur##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
+      const int threadCount = concurrency::getThreadCounts(width, height);\
+      concurrency::parallel_for_segment(threadCount, width, [&](int start, int end) {\
+        VerticalFastGaussianPassNext<storageType, int, sparkyuv::PIXEL_##pixelType>(data, stride,  \
+                width, height, radius, start, end);\
+      });\
+      concurrency::parallel_for_segment(threadCount, height, [&](int start, int end) {\
+        HorizontalFastGaussianNext<storageType, int, sparkyuv::PIXEL_##pixelType>(data, stride,\
+                width, height, radius, start, end);\
+      });\
+    }
+
+FAST_GAUSSIAN_NEXT_DECLARATION_R(RGBA, RGBA, uint8_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(RGB, RGB, uint8_t)
+#if SPARKYUV_FULL_CHANNELS
+FAST_GAUSSIAN_NEXT_DECLARATION_R(ARGB, ARGB, uint8_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(ABGR, ABGR, uint8_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(BGRA, BGRA, uint8_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(BGR, BGR, uint8_t)
+#endif
+
+FAST_GAUSSIAN_NEXT_DECLARATION_R(RGBA16, RGBA, uint16_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(RGB16, RGB, uint16_t)
+#if SPARKYUV_FULL_CHANNELS
+FAST_GAUSSIAN_NEXT_DECLARATION_R(ARGB16, ARGB, uint16_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(ABGR16, ABGR, uint16_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(BGRA16, BGRA, uint16_t)
+FAST_GAUSSIAN_NEXT_DECLARATION_R(BGR16, BGR, uint16_t)
+#endif
+
+#undef FAST_GAUSSIAN_NEXT_DECLARATION_R
+
+#define FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(pixelName, pixelType) \
+    void FastGaussianNextBlur##pixelName(uint16_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
+      const int threadCount = concurrency::getThreadCounts(width, height);\
+      concurrency::parallel_for_segment(threadCount, width, [&](int start, int end) {\
+        VerticalFastGaussianPassNext<hwy::float16_t, float, sparkyuv::PIXEL_##pixelType>(reinterpret_cast<hwy::float16_t*>(data), \
+                            stride, width, height, radius, start, end);\
+      });\
+      concurrency::parallel_for_segment(threadCount, height, [&](int start, int end) {\
+        HorizontalFastGaussianNext<hwy::float16_t, float, sparkyuv::PIXEL_##pixelType>(reinterpret_cast<hwy::float16_t*>(data), \
+                stride, width, height, radius, start, end);\
+      });\
+    }
+
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(RGBAF16, RGBA)
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(RGBF16, RGB)
+#if SPARKYUV_FULL_CHANNELS
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(ARGBF16, ARGB)
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(ABGRF16, ABGR)
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(BGRAF16, BGRA)
+FAST_GAUSSIAN_NEXT_DECLARATION_R_F16(BGRF16, BGR)
+#endif
+
+#undef FAST_GAUSSIAN_NEXT_DECLARATION_R_F16
 }

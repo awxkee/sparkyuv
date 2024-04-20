@@ -5,6 +5,8 @@ approximation level.
 
 Also contains a lot of convenient methods, a very fast gaussian blur with very good speed included.
 
+Some useful info in [documentation](DOC.md)
+
 ## Supported YUV matrix
 
 Almost all YUV formats supported, everything you might need :)

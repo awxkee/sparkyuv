@@ -33,24 +33,46 @@
 
 namespace sparkyuv {
 
-#define YCbCr420ToXXXX_DECLARATION_H(pixelType) \
-  void YCbCr420To##pixelType(uint8_t * dst, uint32_t rgbaStride,\
-                           uint32_t width, uint32_t height,\
-                           const uint8_t * ySrc, uint32_t yPlaneStride,\
-                           const uint8_t * uSrc, uint32_t uPlaneStride,\
-                           const uint8_t * vSrc, uint32_t vPlaneStride,\
-                           float kr, float kb, SparkYuvColorRange colorRange);
+void YCbCr420ToRGBA(uint8_t *dst, uint32_t rgbaStride,
+                    uint32_t width, uint32_t height,
+                    const uint8_t *ySrc, uint32_t yPlaneStride,
+                    const uint8_t *uSrc, uint32_t uPlaneStride,
+                    const uint8_t *vSrc, uint32_t vPlaneStride,
+                    float kr, float kb, SparkYuvColorRange colorRange);
 
-YCbCr420ToXXXX_DECLARATION_H(RGBA)
-YCbCr420ToXXXX_DECLARATION_H(RGB)
+void YCbCr420ToRGB(uint8_t *dst, uint32_t rgbaStride,
+                   uint32_t width, uint32_t height,
+                   const uint8_t *ySrc, uint32_t yPlaneStride,
+                   const uint8_t *uSrc, uint32_t uPlaneStride,
+                   const uint8_t *vSrc, uint32_t vPlaneStride,
+                   float kr, float kb, SparkYuvColorRange colorRange);
+
 #if SPARKYUV_FULL_CHANNELS
-YCbCr420ToXXXX_DECLARATION_H(ARGB)
-YCbCr420ToXXXX_DECLARATION_H(ABGR)
-YCbCr420ToXXXX_DECLARATION_H(BGRA)
-YCbCr420ToXXXX_DECLARATION_H(BGR)
+void YCbCr420ToABGR(uint8_t *dst, uint32_t rgbaStride,
+                    uint32_t width, uint32_t height,
+                    const uint8_t *ySrc, uint32_t yPlaneStride,
+                    const uint8_t *uSrc, uint32_t uPlaneStride,
+                    const uint8_t *vSrc, uint32_t vPlaneStride,
+                    float kr, float kb, SparkYuvColorRange colorRange);
+void YCbCr420ToARGB(uint8_t *dst, uint32_t rgbaStride,
+                    uint32_t width, uint32_t height,
+                    const uint8_t *ySrc, uint32_t yPlaneStride,
+                    const uint8_t *uSrc, uint32_t uPlaneStride,
+                    const uint8_t *vSrc, uint32_t vPlaneStride,
+                    float kr, float kb, SparkYuvColorRange colorRange);
+void YCbCr420ToBGRA(uint8_t *dst, uint32_t rgbaStride,
+                    uint32_t width, uint32_t height,
+                    const uint8_t *ySrc, uint32_t yPlaneStride,
+                    const uint8_t *uSrc, uint32_t uPlaneStride,
+                    const uint8_t *vSrc, uint32_t vPlaneStride,
+                    float kr, float kb, SparkYuvColorRange colorRange);
+void YCbCr420ToBGR(uint8_t *dst, uint32_t rgbaStride,
+                    uint32_t width, uint32_t height,
+                    const uint8_t *ySrc, uint32_t yPlaneStride,
+                    const uint8_t *uSrc, uint32_t uPlaneStride,
+                    const uint8_t *vSrc, uint32_t vPlaneStride,
+                    float kr, float kb, SparkYuvColorRange colorRange);
 #endif
-
-#undef YCbCr420ToXXXX_DECLARATION_H
 
 #define YCbCr420ToGEN(pixelType, name, kr, kb, range) \
     static void YCbCr420##name##To##pixelType(uint8_t * dst, \
@@ -825,56 +847,5 @@ UNPREMULTIPLY_ALPHA_DECLARATION_H(ABGR)
 UNPREMULTIPLY_ALPHA_DECLARATION_H(BGRA)
 
 #undef UNPREMULTIPLY_ALPHA_DECLARATION_H
-
-// Mark scale U8
-
-#define SCALE_CHANNEL_DECLARE_H(channelName) \
-      void Scale##channelName(const uint8_t *input, uint32_t srcStride,\
-                              uint32_t inputWidth, uint32_t inputHeight,\
-                              uint8_t *output, uint32_t dstStride,\
-                              uint32_t outputWidth, uint32_t outputHeight,\
-                              SparkYuvSampler option);
-
-SCALE_CHANNEL_DECLARE_H(Channel)
-SCALE_CHANNEL_DECLARE_H(RGB)
-SCALE_CHANNEL_DECLARE_H(RGBA)
-
-#undef SCALE_CHANNEL_DECLARE_H
-
-// Mark scale F16
-
-#define SCALE_CHANNEL_F16_DECLARE_H(channelName) \
-      void Scale##channelName(const uint16_t *input, uint32_t srcStride,\
-                              uint32_t inputWidth, uint32_t inputHeight,\
-                              uint16_t *output, uint32_t dstStride,\
-                              uint32_t outputWidth, uint32_t outputHeight,\
-                              SparkYuvSampler option);
-
-SCALE_CHANNEL_F16_DECLARE_H(ChannelF16)
-SCALE_CHANNEL_F16_DECLARE_H(RGBF16)
-SCALE_CHANNEL_F16_DECLARE_H(RGBAF16)
-
-#undef SCALE_CHANNEL_F16_DECLARE_H
-
-// Mark: Scale RGBA1010102
-
-void ScaleRGBA1010102(const uint8_t *input, uint32_t srcStride,
-                      uint32_t inputWidth, uint32_t inputHeight,
-                      uint8_t *output, uint32_t dstStride,
-                      uint32_t outputWidth, uint32_t outputHeight,
-                      SparkYuvSampler option);
-
-#define SCALE_CHANNEL_16_TYPE_H(channelName) \
-      void Scale##channelName(const uint16_t *input, const uint32_t srcStride,\
-                              uint32_t inputWidth, uint32_t inputHeight,\
-                              uint16_t *output, const uint32_t dstStride,\
-                              uint32_t outputWidth, uint32_t outputHeight,    \
-                              const int depth, const SparkYuvSampler option);
-
-SCALE_CHANNEL_16_TYPE_H(Channel16)
-SCALE_CHANNEL_16_TYPE_H(RGB16)
-SCALE_CHANNEL_16_TYPE_H(RGBA16)
-
-#undef SCALE_CHANNEL_16_TYPE_H
 
 }
