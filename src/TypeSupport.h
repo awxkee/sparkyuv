@@ -26,8 +26,8 @@
 #define SPARKYUV_INLINE static inline
 #endif
 
-#define ENABLE_TYPE_IS_F16(T) typename std::enable_if<std::is_same<T, hwy::float16_t>::value, int>::type = 0
-#define ENABLE_TYPE_IS_NOT_F16(T) typename std::enable_if<!std::is_same<T, hwy::float16_t>::value, int>::type = 0
+#define ENABLE_TYPE_IS_F16(T) typename std::enable_if<(std::is_same<T, hwy::float16_t>::value), int>::type = 0
+#define ENABLE_TYPE_IS_NOT_F16(T) typename std::enable_if<(!std::is_same<T, hwy::float16_t>::value), int>::type = 0
 
 template<typename T, ENABLE_TYPE_IS_F16(T)>
 TYPE_INLINE float LoadFloat(const T *src) {
