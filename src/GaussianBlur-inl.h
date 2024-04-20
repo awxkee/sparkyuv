@@ -27,6 +27,7 @@
 #include "math/gaussian.h"
 #include "hwy/aligned_allocator.h"
 #include "concurrency.hpp"
+#include "TypeSupport.h"
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -132,15 +133,24 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       for (; r <= maxKernel; ++r) {
         float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
-        accumulator1 += static_cast<float>(localSource[sourcePX]) * weight;
-        accumulator2 += static_cast<float>(localSource[sourcePX + 1]) * weight;
-        accumulator3 += static_cast<float>(localSource[sourcePX + 2]) * weight;
-        accumulator4 += static_cast<float>(localSource[sourcePX + 3]) * weight;
+        auto movedSrc = localSource + sourcePX;
+        // Stupid workaround to avoid errors where hwy f16 not really properly works
+        accumulator1 += LoadFloat<T>(&movedSrc[0]) * weight;
+        accumulator2 += LoadFloat<T>(&movedSrc[1]) * weight;
+        accumulator3 += LoadFloat<T>(&movedSrc[2]) * weight;
+        accumulator4 += LoadFloat<T>(&movedSrc[3]) * weight;
       }
-      dst[0] = static_cast<T>(::roundf(accumulator1));
-      dst[1] = static_cast<T>(::roundf(accumulator2));
-      dst[2] = static_cast<T>(::roundf(accumulator3));
-      dst[3] = static_cast<T>(::roundf(accumulator4));
+      if (!std::is_same<hwy::float16_t, T>::value) {
+        StoreRoundedFloat(&dst[0], accumulator1);
+        StoreRoundedFloat(&dst[1], accumulator2);
+        StoreRoundedFloat(&dst[2], accumulator3);
+        StoreRoundedFloat(&dst[3], accumulator4);
+      } else {
+        StoreFloat(&dst[0], accumulator1);
+        StoreFloat(&dst[1], accumulator2);
+        StoreFloat(&dst[2], accumulator3);
+        StoreFloat(&dst[3], accumulator4);
+      }
       dst += 4;
     }
   }
@@ -174,13 +184,19 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       for (; r <= maxKernel; ++r) {
         float weight = mKernel[halfOfKernel + r];
         int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 3;
-        accumulator1 += localSource[sourcePX] * weight;
-        accumulator2 += localSource[sourcePX + 1] * weight;
-        accumulator3 += localSource[sourcePX + 2] * weight;
+        accumulator1 += LoadFloat<T>(&localSource[sourcePX]) * weight;
+        accumulator2 += LoadFloat<T>(&localSource[sourcePX + 1]) * weight;
+        accumulator3 += LoadFloat<T>(&localSource[sourcePX + 2]) * weight;
       }
-      dst[0] = static_cast<T>(::roundf(accumulator1));
-      dst[1] = static_cast<T>(::roundf(accumulator2));
-      dst[2] = static_cast<T>(::roundf(accumulator3));
+      if (!std::is_same<T, hwy::float16_t>::value) {
+        StoreRoundedFloat(&dst[0], accumulator1);
+        StoreRoundedFloat(&dst[1], accumulator2);
+        StoreRoundedFloat(&dst[2], accumulator3);
+      } else {
+        StoreFloat(&dst[0], accumulator1);
+        StoreFloat(&dst[1], accumulator2);
+        StoreFloat(&dst[2], accumulator3);
+      }
       dst += 3;
     }
   }
@@ -210,9 +226,13 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
       auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + y * srcStride);
       auto kx = static_cast<int>(x);
       for (; r <= maxKernel; ++r) {
-        accumulator += localSource[std::clamp(kx + r, sZero, maxWidth)] * mKernel[halfOfKernel + r];
+        accumulator += LoadFloat<T>(&localSource[std::clamp(kx + r, sZero, maxWidth)]) * mKernel[halfOfKernel + r];
       }
-      dst[0] = static_cast<T>(::roundf(accumulator));
+      if (!std::is_same<T, hwy::float16_t>::value) {
+        StoreRoundedFloat(&dst[0], accumulator);
+      } else {
+        StoreFloat(&dst[0], accumulator);
+      }
       dst += 1;
     }
   }
@@ -225,7 +245,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const float* mKernel, const int kernelSize) {
+                         const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -244,9 +264,14 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(0),
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
-        accumulator += localSource[kx] * mKernel[halfOfKernel + r];
+        // Stupid workaround to avoid errors where hwy f16 not really properly works
+        accumulator += LoadFloat<T>(&localSource[kx]) * mKernel[halfOfKernel + r];
       }
-      dst[0] = static_cast<T>(::roundf(accumulator));
+      if (!std::is_same<T, hwy::float16_t>::value) {
+        StoreRoundedFloat(&dst[0], accumulator);
+      } else {
+        StoreFloat(&dst[0], accumulator);
+      }
       dst += 1;
     }
   }
@@ -259,7 +284,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const float* mKernel, const int kernelSize) {
+                         const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -281,13 +306,19 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
         float weight = mKernel[halfOfKernel + r];
-        accumulator += localSource[kx] * weight;
-        accumulator1 += localSource[kx + 1] * weight;
-        accumulator2 += localSource[kx + 2] * weight;
+        accumulator += LoadFloat<T>(&localSource[kx]) * weight;
+        accumulator1 += LoadFloat<T>(&localSource[kx + 1]) * weight;
+        accumulator2 += LoadFloat<T>(&localSource[kx + 2]) * weight;
       }
-      dst[0] = static_cast<T>(::roundf(accumulator));
-      dst[1] = static_cast<T>(::roundf(accumulator1));
-      dst[2] = static_cast<T>(::roundf(accumulator2));
+      if (!std::is_same<T, hwy::float16_t>::value) {
+        StoreRoundedFloat(&dst[0], accumulator);
+        StoreRoundedFloat(&dst[1], accumulator1);
+        StoreRoundedFloat(&dst[2], accumulator2);
+      } else {
+        StoreFloat(&dst[0], accumulator);
+        StoreFloat(&dst[1], accumulator1);
+        StoreFloat(&dst[2], accumulator2);
+      }
       dst += 3;
     }
   }
@@ -301,7 +332,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const float* mKernel, const int kernelSize) {
+                         const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -324,15 +355,23 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                                      static_cast<int64_t>(maxHeight));
         auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
         float weight = mKernel[halfOfKernel + r];
-        accumulator += localSource[kx] * weight;
-        accumulator1 += localSource[kx + 1] * weight;
-        accumulator2 += localSource[kx + 2] * weight;
-        accumulator3 += localSource[kx + 3] * weight;
+        // Stupid workaround to avoid errors where hwy f16 not really properly works
+        accumulator += LoadFloat<T>(&localSource[kx]) * weight;
+        accumulator1 += LoadFloat<T>(&localSource[kx + 1]) * weight;
+        accumulator2 += LoadFloat<T>(&localSource[kx + 2]) * weight;
+        accumulator3 += LoadFloat<T>(&localSource[kx + 3]) * weight;
       }
-      dst[0] = static_cast<T>(::roundf(accumulator));
-      dst[1] = static_cast<T>(::roundf(accumulator1));
-      dst[2] = static_cast<T>(::roundf(accumulator2));
-      dst[3] = static_cast<T>(::roundf(accumulator3));
+      if (!std::is_same<T, hwy::float16_t>::value) {
+        StoreRoundedFloat(&dst[0], accumulator);
+        StoreRoundedFloat(&dst[1], accumulator1);
+        StoreRoundedFloat(&dst[2], accumulator2);
+        StoreRoundedFloat(&dst[3], accumulator3);
+      } else {
+        StoreFloat(&dst[0], accumulator);
+        StoreFloat(&dst[1], accumulator1);
+        StoreFloat(&dst[2], accumulator2);
+        StoreFloat(&dst[3], accumulator3);
+      }
       dst += 4;
     }
   }
@@ -346,7 +385,7 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
                          const uint32_t startY, const uint32_t endY,
                          const uint32_t width, const uint32_t height,
-                         const float* mKernel, const int kernelSize) {
+                         const float *mKernel, const int kernelSize) {
   const int halfOfKernel = kernelSize / 2;
   const bool isEven = kernelSize % 2 == 0;
   const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
@@ -403,7 +442,7 @@ GaussianBlurImpl(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                                            end,
                                            width,
                                            height,
-                                           reinterpret_cast<const float*>(alignedKernel.get()),
+                                           reinterpret_cast<const float *>(alignedKernel.get()),
                                            kernel.size());
   });
 
@@ -416,7 +455,7 @@ GaussianBlurImpl(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                                          end,
                                          width,
                                          height,
-                                         reinterpret_cast<const float*>(alignedKernel.get()),
+                                         reinterpret_cast<const float *>(alignedKernel.get()),
                                          kernel.size());
   });
 }
@@ -443,6 +482,21 @@ GAUSSIAN_BLUR_DECLARATION_R(RGBF32, float, CHANNELS_3)
 GAUSSIAN_BLUR_DECLARATION_R(ChannelF32, float, CHANNEL)
 
 #undef GAUSSIAN_BLUR_DECLARATION_R
+
+#define GAUSSIAN_BLUR_DECLARATION_R_F16(srcPixel, surfaceType) \
+    void GaussianBlur##srcPixel##HWY(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                    uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                    const uint32_t width, const uint32_t height,  \
+                                    const int kernelSize, const float sigma) {\
+        GaussianBlurImpl<hwy::float16_t, sparkyuv::SURFACE_##surfaceType>(reinterpret_cast<const hwy::float16_t*>(src), \
+            srcStride, reinterpret_cast<hwy::float16_t*>(dst), dstStride, width, height, kernelSize, sigma); \
+    }
+
+GAUSSIAN_BLUR_DECLARATION_R_F16(RGBAF16, CHANNELS_4)
+GAUSSIAN_BLUR_DECLARATION_R_F16(RGBF16, CHANNELS_3)
+GAUSSIAN_BLUR_DECLARATION_R_F16(ChannelF16, CHANNEL)
+
+#undef GAUSSIAN_BLUR_DECLARATION_R_F16
 
 }
 HWY_AFTER_NAMESPACE();

@@ -314,13 +314,26 @@ int main() {
 
   int trnsStride = sizeof(uint8_t) * height * 4;
   std::vector<uint8_t> transposed(trnsStride * width);
-  bench(1, ANSI_COLOR_BLUE, "Transpose", [&] () {
+  bench(1, ANSI_COLOR_BLUE, "Transpose", [&]() {
     sparkyuv::TransposeClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
   });
 
+  std::vector<uint8_t> f16Store(width * 4 * sizeof(uint16_t) * height);
+
+  sparkyuv::RGBAToRGBAF16(rgbaData.data(),
+                          rgbaStride,
+                          reinterpret_cast<uint16_t *>( f16Store.data()),
+                          width * 4 * sizeof(uint16_t),
+                          width,
+                          height);
+
   bench(1, ANSI_COLOR_GREEN, "Fast Gaussian", [&]() {
-    sparkyuv::GaussianBlurRGBA(rgbaData.data(), rgbaStride, rgbaData.data(), rgbaStride, width, height, 12 * 6, 12.f);
+    sparkyuv::FastGaussianBlurRGBAF16(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
+                                  width, height, 15);
   });
+  sparkyuv::RGBAF16ToRGBA(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
+                          rgbaData.data(),
+                          rgbaStride,width,height);
 
   aire::JPEGEncoder encoder(rgbaData.data(), rgbaStride, width, height);
   auto encoded = encoder.encode();

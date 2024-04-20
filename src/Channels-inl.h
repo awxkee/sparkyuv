@@ -100,18 +100,19 @@ ReformatSurfaceF16ToU(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcS
         VF in1, in2, in3, in4;
 
 #if SPARKYUV_ALLOW_FLOAT16
+        auto castedSource = reinterpret_cast<const hwy::float16_t *>(srcPixels);
         switch (Surface) {
           case SURFACE_CHANNEL: {
-            in1 = LoadU(f16, reinterpret_cast<const hwy::float16_t *>(srcPixels));
+            in1 = LoadU(f16, castedSource);
           }
             break;
           case SURFACE_CHANNELS_3: {
-            LoadInterleaved3(f16, reinterpret_cast<const hwy::float16_t *>(srcPixels), in1, in2, in3);
+            LoadInterleaved3(f16, castedSource, in1, in2, in3);
           }
             break;
           case SURFACE_RGBA1010102:
           case SURFACE_CHANNELS_4: {
-            LoadInterleaved4(f16, reinterpret_cast<const hwy::float16_t *>(srcPixels), in1, in2, in3, in4);
+            LoadInterleaved4(f16, castedSource, in1, in2, in3, in4);
           }
             break;
 

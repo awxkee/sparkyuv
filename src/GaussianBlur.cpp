@@ -33,6 +33,9 @@ GAUSSIAN_BLUR_DECLARE_EXPORT(Channel)
 GAUSSIAN_BLUR_DECLARE_EXPORT(RGBA16)
 GAUSSIAN_BLUR_DECLARE_EXPORT(RGB16)
 GAUSSIAN_BLUR_DECLARE_EXPORT(Channel16)
+GAUSSIAN_BLUR_DECLARE_EXPORT(RGBAF16)
+GAUSSIAN_BLUR_DECLARE_EXPORT(RGBF16)
+GAUSSIAN_BLUR_DECLARE_EXPORT(ChannelF16)
 GAUSSIAN_BLUR_DECLARE_EXPORT(RGBAF32)
 GAUSSIAN_BLUR_DECLARE_EXPORT(RGBF32)
 GAUSSIAN_BLUR_DECLARE_EXPORT(ChannelF32)
@@ -60,5 +63,20 @@ GAUSSIAN_BLUR_DECLARATION_E(RGBF32, float)
 GAUSSIAN_BLUR_DECLARATION_E(ChannelF32, float)
 
 #undef GAUSSIAN_BLUR_DECLARATION_E
+
+#define GAUSSIAN_BLUR_DECLARATION_R_F16(srcPixel, surfaceType) \
+    void GaussianBlur##srcPixel(const uint16_t *SPARKYUV_RESTRICT src, const uint32_t srcStride,\
+                                uint16_t *SPARKYUV_RESTRICT dst, const uint32_t dstStride,\
+                                const uint32_t width, const uint32_t height,  \
+                                const int kernelSize, const float sigma) {\
+        HWY_DYNAMIC_DISPATCH(GaussianBlur##srcPixel##HWY)(src, srcStride, dst, dstStride, \
+          width, height, kernelSize, sigma); \
+    }
+
+GAUSSIAN_BLUR_DECLARATION_R_F16(RGBAF16, CHANNELS_4)
+GAUSSIAN_BLUR_DECLARATION_R_F16(RGBF16, CHANNELS_3)
+GAUSSIAN_BLUR_DECLARATION_R_F16(ChannelF16, CHANNEL)
+
+#undef GAUSSIAN_BLUR_DECLARATION_R_F16
 }
 #endif

@@ -126,8 +126,8 @@ void RGB565ToBGR16(const uint16_t *src, uint32_t srcStride,
                    uint16_t *dst, uint32_t dstStride,
                    uint32_t width, uint32_t height, int bitDepth);
 void RGB565ToRGBA16(const uint16_t *src, uint32_t srcStride,
-                   uint16_t *dst, uint32_t dstStride,
-                   uint32_t width, uint32_t height, int bitDepth);
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int bitDepth);
 void RGB565ToBGRA16(const uint16_t *src, uint32_t srcStride,
                     uint16_t *dst, uint32_t dstStride,
                     uint32_t width, uint32_t height, int bitDepth);

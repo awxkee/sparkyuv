@@ -18,6 +18,8 @@
 #define YUV_SRC_PIXELLOADER_H_
 
 #include "sparkyuv-internal.h"
+#include "base.h"
+#include "TypeSupport.h"
 
 #if defined(__GNUC__) || defined(__clang__)
 #define PIXEL_INLINE __attribute__((flatten)) inline
@@ -29,33 +31,33 @@ namespace sparkyuv {
 template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
 PIXEL_INLINE static void LoadRGBA(const T *source, C &r, C &g, C &b, C &a) {
   switch (PixelType) {
-    case PIXEL_RGB:r = static_cast<C>(source[0]);
-      g = static_cast<C>(source[1]);
-      b = static_cast<C>(source[2]);
+    case PIXEL_RGB:r = LoadPixel<C, T>(&source[0]);
+      g = LoadPixel<C, T>(&source[1]);
+      b = LoadPixel<C, T>(&source[2]);
       break;
-    case PIXEL_RGBA:r = static_cast<C>(source[0]);
-      g = static_cast<C>(source[1]);
-      b = static_cast<C>(source[2]);
-      a = static_cast<C>(source[3]);
+    case PIXEL_RGBA:r = LoadPixel<C, T>(&source[0]);
+      g = LoadPixel<C, T>(&source[1]);
+      b = LoadPixel<C, T>(&source[2]);
+      a = LoadPixel<C, T>(&source[3]);
       break;
-    case PIXEL_BGRA:b = static_cast<C>(source[0]);
-      g = static_cast<C>(source[1]);
-      r = static_cast<C>(source[2]);
-      a = static_cast<C>(source[3]);
+    case PIXEL_BGRA:b = LoadPixel<C, T>(&source[0]);
+      g = LoadPixel<C, T>(&source[1]);
+      r = LoadPixel<C, T>(&source[2]);
+      a = LoadPixel<C, T>(&source[3]);
       break;
-    case PIXEL_BGR:b = static_cast<C>(source[0]);
-      g = static_cast<C>(source[1]);
-      r = static_cast<C>(source[2]);
+    case PIXEL_BGR:b = LoadPixel<C, T>(&source[0]);
+      g = LoadPixel<C, T>(&source[1]);
+      r = LoadPixel<C, T>(&source[2]);
       break;
-    case PIXEL_ARGB:a = static_cast<C>(source[0]);
-      r = static_cast<C>(source[1]);
-      g = static_cast<C>(source[2]);
-      b = static_cast<C>(source[3]);
+    case PIXEL_ARGB:a = LoadPixel<C, T>(&source[0]);
+      r = LoadPixel<C, T>(&source[1]);
+      g = LoadPixel<C, T>(&source[2]);
+      b = LoadPixel<C, T>(&source[3]);
       break;
-    case PIXEL_ABGR:a = static_cast<C>(source[0]);
-      b = static_cast<C>(source[1]);
-      g = static_cast<C>(source[2]);
-      r = static_cast<C>(source[3]);
+    case PIXEL_ABGR:a = LoadPixel<C, T>(&source[0]);
+      b = LoadPixel<C, T>(&source[1]);
+      g = LoadPixel<C, T>(&source[2]);
+      r = LoadPixel<C, T>(&source[3]);
       break;
   }
 }
@@ -112,7 +114,38 @@ PIXEL_INLINE static void StoreRGBA(T *store, C r, C g, C b, C a) {
   }
 }
 
-template<typename T, typename C, SparkYuvDefaultPixelType PixelType>
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType,
+    typename std::enable_if<std::is_same<T, hwy::float16_t>::value, int>::type = 0,
+    typename std::enable_if<std::is_same<C, hwy::float16_t>::value, int>::type = 0>
+PIXEL_INLINE static void StoreRGB(T *store, C r, C g, C b) {
+  auto uStore = reinterpret_cast<uint16_t *>(store);
+  switch (PixelType) {
+    case PIXEL_RGBA:
+    case PIXEL_RGB:uStore[0] = r.bits;
+      uStore[1] = g.bits;
+      uStore[2] = b.bits;
+      break;
+    case PIXEL_BGRA:
+    case PIXEL_BGR:uStore[2] = r.bits;
+      uStore[1] = g.bits;
+      uStore[0] = b.bits;
+      break;
+    case PIXEL_ABGR:uStore[3] = r.bits;
+      uStore[2] = g.bits;
+      uStore[1] = b.bits;
+      break;
+    case PIXEL_ARGB: {
+      uStore[1] = r.bits;
+      uStore[2] = g.bits;
+      uStore[3] = b.bits;
+    }
+      break;
+  }
+}
+
+template<typename T, typename C, SparkYuvDefaultPixelType PixelType,
+    typename std::enable_if<!std::is_same<T, hwy::float16_t>::value, int>::type = 0,
+    typename std::enable_if<!std::is_same<C, hwy::float16_t>::value, int>::type = 0>
 PIXEL_INLINE static void StoreRGB(T *store, C r, C g, C b) {
   switch (PixelType) {
     case PIXEL_RGBA:
@@ -125,8 +158,7 @@ PIXEL_INLINE static void StoreRGB(T *store, C r, C g, C b) {
       store[1] = static_cast<T>(g);
       store[0] = static_cast<T>(b);
       break;
-    case PIXEL_ABGR:
-      store[3] = static_cast<T>(r);
+    case PIXEL_ABGR:store[3] = static_cast<T>(r);
       store[2] = static_cast<T>(g);
       store[1] = static_cast<T>(b);
       break;
