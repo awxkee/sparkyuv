@@ -105,7 +105,199 @@ GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t sr
 
 template<class T, SparkYuvSurfaceChannels Surface,
     typename std::enable_if<Surface == sparkyuv::SURFACE_CHANNELS_4, int>::type = 0,
-    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0>
+    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0,
+    ENABLE_TYPE_IS_F16(T)>
+void
+GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
+                         T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
+                         const uint32_t startY, const uint32_t endY,
+                         const uint32_t width, const uint32_t height,
+                         const float *mKernel, const int kernelSize) {
+  const int halfOfKernel = kernelSize / 2;
+  const bool isEven = kernelSize % 2 == 0;
+  const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
+
+  auto mDst = reinterpret_cast<uint8_t *>(mDestination);
+  int64_t maxHeight = static_cast<int>(height) - 1;
+
+  const FixedTag<uint16_t, 8> d16x8;
+  const FixedTag<uint16_t, 4> d16x4;
+  const FixedTag<hwy::float16_t, 8> df16;
+  const FixedTag<hwy::float16_t, 4> df16x4;
+  const FixedTag<hwy::float32_t, 4> df;
+  using VF = Vec<decltype(df)>;
+
+  for (uint32_t y = startY; y < endY; ++y) {
+    auto dst = reinterpret_cast<T *>(mDst + dstStride * y);
+    for (uint32_t x = 0; x < width; ++x) {
+      int r = -halfOfKernel;
+
+      VF accumulator = Zero(df);
+
+      auto kx = static_cast<int>(x) * 4;
+
+      for (; r <= maxKernel; ++r) {
+        uint32_t shiftX = std::clamp(static_cast<int64_t>(y) + static_cast<int64_t>(r),
+                                     static_cast<int64_t>(0),
+                                     static_cast<int64_t>(maxHeight));
+        auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
+        float weight = mKernel[halfOfKernel + r];
+        VF pixelData;
+#if SPARKYUV_ALLOW_FLOAT16
+        const auto pxf16 = LoadU(df16x4, &localSource[kx]);
+        pixelData = PromoteTo(df, pxf16);
+#else
+        const auto pxf16 = BitCast(df16x4, LoadU(d16x4, reinterpret_cast<const uint16_t*>(&localSource[kx])));
+        pixelData = PromoteTo(df, pxf16);
+#endif
+        accumulator = Add(accumulator, Mul(pixelData, Set(df, weight)));
+      }
+
+#if SPARKYUV_ALLOW_FLOAT16
+      StoreU(DemoteTo(df16x4, accumulator), df16x4, dst);
+#else
+      auto duStore = BitCast(d16x4, DemoteTo(df16x4, accumulator));
+      StoreU(duStore, d16x4, reinterpret_cast<uint16_t*>(dst));
+#endif
+
+      dst += 4;
+    }
+  }
+}
+
+template<class T, SparkYuvSurfaceChannels Surface,
+    typename std::enable_if<Surface == sparkyuv::SURFACE_CHANNELS_4, int>::type = 0,
+    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0,
+    ENABLE_TYPE_IS_F16(T)>
+void
+GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
+                           T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
+                           const uint32_t startY, const uint32_t endY,
+                           const uint32_t width, const uint32_t /* height */,
+                           const float *mKernel, const int kernelSize) {
+  const int halfOfKernel = kernelSize / 2;
+  const bool isEven = kernelSize % 2 == 0;
+  const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
+
+  auto mDst = reinterpret_cast<uint8_t *>(mDestination);
+  int maxWidth = static_cast<int>(width) - 1;
+  int sZero = 0;
+
+  const FixedTag<uint16_t, 8> d16x8;
+  const FixedTag<uint16_t, 4> d16x4;
+  const FixedTag<hwy::float16_t, 8> df16;
+  const FixedTag<hwy::float16_t, 4> df16x4;
+  const FixedTag<hwy::float32_t, 4> df;
+  using VF = Vec<decltype(df)>;
+
+  for (uint32_t y = startY; y < endY; ++y) {
+    auto dst = reinterpret_cast<T *>(mDst + dstStride * y);
+    auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + y * srcStride);
+    for (uint32_t x = 0; x < width; ++x) {
+      int r = -halfOfKernel;
+
+      VF accumulator = Zero(df);
+      auto kx = static_cast<int>(x);
+
+      for (; r + 2 <= maxKernel && kx + x + 2 < width; r += 2) {
+        int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
+        auto movedSrc = localSource + sourcePX;
+        const float weight1 = mKernel[halfOfKernel + r];
+        const float weight2 = mKernel[halfOfKernel + r + 1];
+        VF pixelData1;
+        VF pixelData2;
+
+#if SPARKYUV_ALLOW_FLOAT16
+        const auto pxf16 = LoadU(df16, movedSrc);
+        pixelData1 = PromoteLowerTo(df, pxf16);
+        pixelData2 = PromoteUpperTo(df, pxf16);
+#else
+        const auto pxf16 = BitCast(df16, LoadU(d16x8, reinterpret_cast<const uint16_t*>(movedSrc)));
+        pixelData1 = PromoteLowerTo(df, pxf16);
+        pixelData2 = PromoteUpperTo(df, pxf16);
+#endif
+
+        accumulator = Add(accumulator, Mul(pixelData1, Set(df, weight1)));
+        accumulator = Add(accumulator, Mul(pixelData2, Set(df, weight2)));
+      }
+
+      for (; r <= maxKernel; ++r) {
+        float weight = mKernel[halfOfKernel + r];
+        int sourcePX = std::clamp(kx + r, sZero, maxWidth) * 4;
+        auto movedSrc = localSource + sourcePX;
+        VF pixelData;
+#if SPARKYUV_ALLOW_FLOAT16
+        const auto pxf16 = LoadU(df16x4, movedSrc);
+        pixelData = PromoteTo(df, pxf16);
+#else
+        const auto pxf16 = BitCast(df16x4, LoadU(d16x4, reinterpret_cast<const uint16_t*>(movedSrc)));
+        pixelData = PromoteTo(df, pxf16);
+#endif
+        accumulator = Add(accumulator, Mul(pixelData, Set(df, weight)));
+      }
+
+#if SPARKYUV_ALLOW_FLOAT16
+      StoreU(DemoteTo(df16x4, accumulator), df16x4, dst);
+#else
+      auto duStore = BitCast(d16x4, DemoteTo(df16x4, accumulator));
+      StoreU(duStore, d16x4, reinterpret_cast<uint16_t*>(dst));
+#endif
+
+      dst += 4;
+    }
+  }
+}
+
+template<class T, SparkYuvSurfaceChannels Surface,
+    typename std::enable_if<Surface == sparkyuv::SURFACE_CHANNELS_4, int>::type = 0,
+    typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type = 0,
+    ENABLE_TYPE_IS_F16(T)>
+void
+GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
+                         T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
+                         const uint32_t startY, const uint32_t endY,
+                         const uint32_t width, const uint32_t height,
+                         const float *mKernel, const int kernelSize) {
+  const int halfOfKernel = kernelSize / 2;
+  const bool isEven = kernelSize % 2 == 0;
+  const int maxKernel = isEven ? halfOfKernel - 1 : halfOfKernel;
+
+  auto mDst = reinterpret_cast<uint8_t *>(mDestination);
+  int64_t maxHeight = static_cast<int>(height) - 1;
+
+  const FixedTag<uint8_t, 4> d8x4;
+  const FixedTag<uint32_t, 4> d32;
+  const FixedTag<float, 4> df;
+  using VF = Vec<decltype(df)>;
+
+  for (uint32_t y = startY; y < endY; ++y) {
+    auto dst = reinterpret_cast<T *>(mDst + dstStride * y);
+    for (uint32_t x = 0; x < width; ++x) {
+      int r = -halfOfKernel;
+      VF acc = Zero(df);
+
+      for (; r <= maxKernel; ++r) {
+        uint32_t shiftX = std::clamp(static_cast<int64_t>(y) + static_cast<int64_t>(r),
+                                     static_cast<int64_t>(0),
+                                     static_cast<int64_t>(maxHeight));
+        auto localSource = reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(mSource) + shiftX * srcStride);
+        float weight = mKernel[halfOfKernel + r];
+        uint32_t sourcePX = x * 4;
+        auto vx = ConvertTo(df, PromoteTo(d32, LoadU(d8x4, &localSource[sourcePX])));
+        acc = Add(acc, Mul(vx, Set(df, weight)));
+      }
+      acc = Round(acc);
+      auto newPX = DemoteTo(d8x4, ConvertTo(d32, acc));
+      StoreU(newPX, d8x4, dst);
+      dst += 4;
+    }
+  }
+}
+
+template<class T, SparkYuvSurfaceChannels Surface,
+    typename std::enable_if<Surface == sparkyuv::SURFACE_CHANNELS_4, int>::type = 0,
+    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0,
+    ENABLE_TYPE_IS_NOT_F16(T)>
 void
 GaussianBlurHorizontalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                            T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
@@ -326,7 +518,8 @@ GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcS
 
 template<class T, SparkYuvSurfaceChannels Surface,
     typename std::enable_if<Surface == sparkyuv::SURFACE_CHANNELS_4, int>::type = 0,
-    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0>
+    typename std::enable_if<!std::is_same<T, uint8_t>::value, int>::type = 0,
+    HWY_IF_NOT_F16(T)>
 void
 GaussianBlurVerticalPass(const T *SPARKYUV_RESTRICT mSource, const uint32_t srcStride,
                          T *SPARKYUV_RESTRICT mDestination, const uint32_t dstStride,
