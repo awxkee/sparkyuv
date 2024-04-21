@@ -19,8 +19,17 @@
 namespace sparkyuv {
 // MARK: NV21 Declarations
 
-void NV21ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-               const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV21ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 
 void NV21ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
@@ -36,8 +45,17 @@ void NV21ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV21(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -51,8 +69,17 @@ void BGRToNV21(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV12(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV12(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV12(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -66,8 +93,17 @@ void BGRToNV12(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV16(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV16(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV16(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -81,8 +117,17 @@ void BGRToNV16(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV61(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV61(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV61(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -96,8 +141,17 @@ void BGRToNV61(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV24(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV24(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV24(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -111,8 +165,17 @@ void BGRToNV24(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void RGBAToNV42(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
-                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void RGBAToNV42(const uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                uint8_t *ySrc,
+                uint32_t yStride,
+                uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void RGBToNV42(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, uint8_t *ySrc, uint32_t yStride,
                uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -126,8 +189,17 @@ void BGRToNV42(const uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t 
                 uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void NV16ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV16ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void NV16ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -141,8 +213,17 @@ void NV16ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void NV61ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV61ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void NV61ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -156,8 +237,17 @@ void NV61ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void NV24ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV24ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void NV24ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -171,8 +261,17 @@ void NV24ToBGR(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #endif
 
-void NV42ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV42ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void NV42ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
@@ -243,8 +342,17 @@ NV21ToGEN2020NCL(BGR)
 
 // MARK: NV12 Declarations
 
-void NV12ToRGBA(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
-                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
+void NV12ToRGBA(uint8_t *src,
+                uint32_t dstStride,
+                uint32_t width,
+                uint32_t height,
+                const uint8_t *ySrc,
+                uint32_t yStride,
+                const uint8_t *uv,
+                uint32_t uvStride,
+                float kr,
+                float kb,
+                SparkYuvColorRange colorRange);
 void NV12ToRGB(uint8_t *src, uint32_t dstStride, uint32_t width, uint32_t height, const uint8_t *ySrc, uint32_t yStride,
                const uint8_t *uv, uint32_t uvStride, float kr, float kb, SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS

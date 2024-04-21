@@ -17,6 +17,9 @@
 #ifndef YUV_INCLUDE_SPARKYUV_BASIC_H_
 #define YUV_INCLUDE_SPARKYUV_BASIC_H_
 
+#include <cstdint>
+#include "sparkyuv-def.h"
+
 namespace sparkyuv {
 void WideRGBA8To10(uint8_t *src,
                    uint32_t srcStride,
@@ -26,13 +29,6 @@ void WideRGBA8To10(uint8_t *src,
                    uint32_t height);
 void WideRGBATo10(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
 
-#if SPARKYUV_FULL_CHANNELS
-void WideABGR8To10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideARGBTo10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRA8To10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRTo10(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-#endif
-
 void WideRGBA8To12(uint8_t *src,
                    uint32_t srcStride,
                    uint16_t *dst,
@@ -40,13 +36,6 @@ void WideRGBA8To12(uint8_t *src,
                    uint32_t width,
                    uint32_t height);
 void WideRGBATo12(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
-
-#if SPARKYUV_FULL_CHANNELS
-void WideABGR8To12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideARGBTo12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRA8To12(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRTo12(uint8_t* src, uint32_t srcStride,uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-#endif
 
 void WideRGBA8To16(uint8_t *src,
                    uint32_t srcStride,
@@ -56,12 +45,6 @@ void WideRGBA8To16(uint8_t *src,
                    uint32_t height);
 void WideRGBATo16(uint8_t *src, uint32_t srcStride, uint16_t *dst, uint32_t dstStride, uint32_t width, uint32_t height);
 
-#if SPARKYUV_FULL_CHANNELS
-void WideABGR8To16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideARGBTo16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRA8To16(uint8_t* src, uint32_t srcStride, uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-void WideBGRTo16(uint8_t* src, uint32_t srcStride,uint16_t* dst, uint32_t dstStride, uint32_t width, uint32_t height);
-#endif
 
 /**
  * Saturate 10 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
@@ -73,20 +56,6 @@ void SaturateRGBA10To8(const uint16_t *src, uint32_t srcStride,
 void SaturateRGB10To8(const uint16_t *src, uint32_t srcStride,
                       uint8_t *dst, uint32_t dstStride,
                       uint32_t width, uint32_t height);
-#if SPARKYUV_FULL_CHANNELS
-void SaturateBGRA10To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateARGB10To8(const uint16_t *src, uint32_t srcStride,
-                      uint8_t *dst, uint32_t dstStride,
-                      uint32_t width, uint32_t height);
-void SaturateABGR10To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateBGR10To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-#endif
 
 /**
  * Saturate 12 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
@@ -98,20 +67,6 @@ void SaturateRGBA12To8(const uint16_t *src, uint32_t srcStride,
 void SaturateRGB12To8(const uint16_t *src, uint32_t srcStride,
                       uint8_t *dst, uint32_t dstStride,
                       uint32_t width, uint32_t height);
-#if SPARKYUV_FULL_CHANNELS
-void SaturateBGRA12To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateARGB12To8(const uint16_t *src, uint32_t srcStride,
-                      uint8_t *dst, uint32_t dstStride,
-                      uint32_t width, uint32_t height);
-void SaturateABGR12To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateBGR12To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-#endif
 
 /**
  * Saturate 16 bit image to 8 bit, faster that dynamic version where bit depth comes into a parameter
@@ -123,20 +78,6 @@ void SaturateRGBA16To8(const uint16_t *src, uint32_t srcStride,
 void SaturateRGB16To8(const uint16_t *src, uint32_t srcStride,
                       uint8_t *dst, uint32_t dstStride,
                       uint32_t width, uint32_t height);
-#if SPARKYUV_FULL_CHANNELS
-void SaturateBGRA16To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateARGB16To8(const uint16_t *src, uint32_t srcStride,
-                      uint8_t *dst, uint32_t dstStride,
-                      uint32_t width, uint32_t height);
-void SaturateABGR16To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-void SaturateBGR16To8(const uint16_t *src, uint32_t srcStride,
-                       uint8_t *dst, uint32_t dstStride,
-                       uint32_t width, uint32_t height);
-#endif
 
 /**
  * Wide 8 bit image to provided bit depth
@@ -154,21 +95,6 @@ void WideRGB8(uint8_t *src, uint32_t srcStride,
               uint16_t *dst, uint32_t dstStride,
               uint32_t width, uint32_t height, int bitDepth);
 
-#if SPARKYUV_FULL_CHANNELS
-void WideBGRA8(uint8_t *src, uint32_t srcStride,
-              uint16_t *dst, uint32_t dstStride,
-              uint32_t width, uint32_t height, int bitDepth);
-void WideABGR8(uint8_t *src, uint32_t srcStride,
-               uint16_t *dst, uint32_t dstStride,
-               uint32_t width, uint32_t height, int bitDepth);
-void WideARGB8(uint8_t *src, uint32_t srcStride,
-               uint16_t *dst, uint32_t dstStride,
-               uint32_t width, uint32_t height, int bitDepth);
-void WideBGR8(uint8_t *src, uint32_t srcStride,
-              uint16_t *dst, uint32_t dstStride,
-              uint32_t width, uint32_t height, int bitDepth);
-#endif
-
 /**
  * Saturate uint16_t storage image with bit depth from param to 8
  */
@@ -180,24 +106,6 @@ void SaturateRGBATo8(const uint16_t *src, uint32_t srcStride,
 void SaturateRGBTo8(const uint16_t *src, uint32_t srcStride,
                     uint8_t *dst, uint32_t dstStride,
                     uint32_t width, uint32_t height, int bitDepth);
-
-#if SPARKYUV_FULL_CHANNELS
-void SaturateBGRTo8(const uint16_t *src, uint32_t srcStride,
-                    uint8_t *dst, uint32_t dstStride,
-                    uint32_t width, uint32_t height, int bitDepth);
-
-void SaturateBGRATo8(const uint16_t *src, uint32_t srcStride,
-                     uint8_t *dst, uint32_t dstStride,
-                     uint32_t width, uint32_t height, int bitDepth);
-
-void SaturateABGRTo8(const uint16_t *src, uint32_t srcStride,
-                     uint8_t *dst, uint32_t dstStride,
-                     uint32_t width, uint32_t height, int bitDepth);
-
-void SaturateARGBTo8(const uint16_t *src, uint32_t srcStride,
-                     uint8_t *dst, uint32_t dstStride,
-                     uint32_t width, uint32_t height, int bitDepth);
-#endif
 
 /**
  * Alpha multiplication
@@ -855,6 +763,146 @@ void ABGRF16ToRGBAF16(const uint16_t *src, uint32_t srcStride,
 void ARGBF16ToBGRAF16(const uint16_t *src, uint32_t srcStride,
                       uint16_t *dst, uint32_t dstStride,
                       uint32_t width, uint32_t height);
+
+// MARK: Channels reformat 16 bit with dynamic bit depth
+
+/**
+ * Reformat bitmap to AR30(1010102) from RGBA of given depth
+ * @param depth Bit depth of source image
+ */
+void RGBA16ToRGBA1010102(const uint16_t *src, uint32_t srcStride,
+                         uint16_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Reformat from source pixel format to another using uint16_t pixel storage type
+*
+* This function takes two integers as input and returns their sum.
+*
+* @param depth Bit depth of the image, will be used to set alpha channel at peak of the current bit depth if alpha
+* channel will be added
+*/
+void RGB16ToRGBA16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void BGR16ToBGRA16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void BGR16ToABGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void RGB16ToARGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+
+void RGBA16ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void BGRA16ToBGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void ABGR16ToBGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void ARGB16ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+
+void BGRA16ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void RGBA16ToBGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void ABGR16ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+void ARGB16ToBGR16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+
+void BGRA16ToRGBA16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int depth);
+void BGRA16ToARGB16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int depth);
+void RGBA16ToABGR16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int depth);
+void ABGR16ToRGBA16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int depth);
+void ARGB16ToBGRA16(const uint16_t *src, uint32_t srcStride,
+                    uint16_t *dst, uint32_t dstStride,
+                    uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Reformat from source pixel format to another using uint8_t pixel storage type
+* If alpha channel will be added it will be set to peak value of 8 bit.
+*
+*/
+void RGBAToRGBA1010102(const uint8_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+void RGBA1010102ToRGBA(const uint8_t *src, uint32_t srcStride,
+                       uint8_t *dst, uint32_t dstStride,
+                       uint32_t width, uint32_t height);
+
+void RGBToRGBA(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void BGRToBGRA(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void BGRToABGR(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void RGBToARGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+
+void RGBAToRGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void BGRAToBGR(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void ABGRToBGR(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void ARGBToRGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+
+void BGRAToRGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void RGBAToBGR(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void ABGRToRGB(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+void ARGBToBGR(const uint8_t *src, uint32_t srcStride,
+               uint8_t *dst, uint32_t dstStride,
+               uint32_t width, uint32_t height);
+
+void BGRAToRGBA(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
+void BGRAToARGB(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
+void RGBAToABGR(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
+void ABGRToRGBA(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
+void ARGBToBGRA(const uint8_t *src, uint32_t srcStride,
+                uint8_t *dst, uint32_t dstStride,
+                uint32_t width, uint32_t height);
 
 }
 
