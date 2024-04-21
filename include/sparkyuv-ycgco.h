@@ -17,173 +17,758 @@
 #ifndef YUV_INCLUDE_SPARKYUV_YCGCO_H_
 #define YUV_INCLUDE_SPARKYUV_YCGCO_H_
 namespace sparkyuv {
-#define PIXEL_TO_YCGCO_H(T, PixelType, bit, yuvname) \
-void PixelType##bit##To##yuvname##P##bit(const T * src, const uint32_t srcStride,\
-                    const uint32_t width, const uint32_t height,\
-                    T * yPlane, const uint32_t yStride,  \
-                    T * uPlane, const uint32_t uStride,\
-                    T * vPlane, const uint32_t vStride, \
-                    const SparkYuvColorRange colorRange);
 
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 10, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 10, YCgCo444)
+/**
+ * Convert RGB to YCgCo 444 10 bit
+ */
+void RGBA10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 10, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 10, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 10, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 10, YCgCo444)
+void BGRA10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR10ToYCgCo444P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#endif
+/**
+ * Convert RGB to YCgCo 444 12 bit
+ */
+void RGBA12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void BGRA12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR12ToYCgCo444P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 12, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 12, YCgCo444)
+/**
+ * Convert RGB to YCgCo 422 10 bit
+ */
+void RGBA10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 12, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 12, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 12, YCgCo444)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 12, YCgCo444)
+void BGRA10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR10ToYCgCo422P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#endif
+/**
+ * Convert RGB to YCgCo 422 12 bit
+ */
+void RGBA12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void BGRA12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR12ToYCgCo422P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 10, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 10, YCgCo422)
+/**
+ * Convert RGB to YCgCo 420 10 bit
+ */
+void RGBA10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 10, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 10, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 10, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 10, YCgCo422)
+void BGRA10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR10ToYCgCo420P10(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#endif
+/**
+ * Convert RGB to YCgCo 420 12 bit
+ */
+void RGBA12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void RGB12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void BGRA12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ABGR12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void ARGB12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         uint16_t *yPlane, uint32_t yStride,
+                         uint16_t *uPlane, uint32_t uStride,
+                         uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void BGR12ToYCgCo420P12(const uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        uint16_t *yPlane, uint32_t yStride,
+                        uint16_t *uPlane, uint32_t uStride,
+                        uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 12, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 12, YCgCo422)
+/**
+ * Convert RGB to YCgCo 420 8 bit
+ */
+void RGBA8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void RGB8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 12, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 12, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 12, YCgCo422)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 12, YCgCo422)
+void BGRA8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ABGR8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ARGB8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void BGR8ToYCgCo420P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 10, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 10, YCgCo420)
+/**
+ * Convert RGB to YCgCo 422 8 bit
+ */
+void RGBA8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void RGB8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 10, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 10, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 10, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 10, YCgCo420)
+void BGRA8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ABGR8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ARGB8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void BGR8ToYCgCo422P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint16_t, RGBA, 12, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, RGB, 12, YCgCo420)
+/**
+ * Convert RGB to YCgCo 444 8 bit
+ */
+void RGBA8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void RGB8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint16_t, BGRA, 12, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, ABGR, 12, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, ARGB, 12, YCgCo420)
-PIXEL_TO_YCGCO_H(uint16_t, BGR, 12, YCgCo420)
+void BGRA8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ABGR8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void ARGB8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       uint8_t *yPlane, uint32_t yStride,
+                       uint8_t *uPlane, uint32_t uStride,
+                       uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void BGR8ToYCgCo444P8(const uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      uint8_t *yPlane, uint32_t yStride,
+                      uint8_t *uPlane, uint32_t uStride,
+                      uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint8_t, RGBA, 8, YCgCo420)
-PIXEL_TO_YCGCO_H(uint8_t, RGB, 8, YCgCo420)
+/**
+ * Convert YCgCo 4:4:4 10 bit to RGBA 10 bit
+ */
+void YCgCo444P10ToRGBA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P10ToRGB10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint8_t, BGRA, 8, YCgCo420)
-PIXEL_TO_YCGCO_H(uint8_t, ABGR, 8, YCgCo420)
-PIXEL_TO_YCGCO_H(uint8_t, ARGB, 8, YCgCo420)
-PIXEL_TO_YCGCO_H(uint8_t, BGR, 8, YCgCo420)
+void YCgCo444P10ToBGRA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P10ToABGR10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P10ToARGB10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P10ToBGR10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint8_t, RGBA, 8, YCgCo422)
-PIXEL_TO_YCGCO_H(uint8_t, RGB, 8, YCgCo422)
+/**
+ * Convert YCgCo 4:4:4 12 bit to RGBA 12 bit
+ */
+void YCgCo444P12ToRGBA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P12ToRGB12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint8_t, BGRA, 8, YCgCo422)
-PIXEL_TO_YCGCO_H(uint8_t, ABGR, 8, YCgCo422)
-PIXEL_TO_YCGCO_H(uint8_t, ARGB, 8, YCgCo422)
-PIXEL_TO_YCGCO_H(uint8_t, BGR, 8, YCgCo422)
+void YCgCo444P12ToBGRA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P12ToABGR12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P12ToARGB12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo444P12ToBGR12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-PIXEL_TO_YCGCO_H(uint8_t, RGBA, 8, YCgCo444)
-PIXEL_TO_YCGCO_H(uint8_t, RGB, 8, YCgCo444)
+/**
+ * Convert YCgCo 4:2:2 10 bit to RGBA 10 bit
+ */
+void YCgCo422P10ToRGBA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P10ToRGB10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-PIXEL_TO_YCGCO_H(uint8_t, BGRA, 8, YCgCo444)
-PIXEL_TO_YCGCO_H(uint8_t, ABGR, 8, YCgCo444)
-PIXEL_TO_YCGCO_H(uint8_t, ARGB, 8, YCgCo444)
-PIXEL_TO_YCGCO_H(uint8_t, BGR, 8, YCgCo444)
+void YCgCo422P10ToBGRA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P10ToABGR10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P10ToARGB10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P10ToBGR10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-#undef PIXEL_TO_YCGCO_H
-
-#define YCGCO_TO_PX_DECLARATION_H(T, pixel, bit, yuv) \
-    void yuv##P##bit##To##pixel##bit(T * src, const uint32_t srcStride,\
-                                             const uint32_t width, const uint32_t height,\
-                                             const T * yPlane, const uint32_t yStride,\
-                                             const T * uPlane, const uint32_t uStride,\
-                                             const T * vPlane, const uint32_t vStride,\
-                                             const SparkYuvColorRange colorRange);
-
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 10, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 10, YCgCo420)
-
+/**
+ * Convert YCgCo 4:2:2 12 bit to RGBA 12 bit
+ */
+void YCgCo422P12ToRGBA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P12ToRGB12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 10, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 10, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 10, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 10, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 10, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 10, YCgCo420)
+void YCgCo422P12ToBGRA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P12ToABGR12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P12ToARGB12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo422P12ToBGR12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGBA, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGB, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGBA, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGB, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGBA, 8, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, RGB, 8, YCgCo420)
-
+/**
+ * Convert YCgCo 4:2:0 10 bit to RGBA 10 bit
+ */
+void YCgCo420P10ToRGBA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P10ToRGB10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGRA, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ABGR, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ARGB, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGR, 8, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGRA, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ABGR, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ARGB, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGR, 8, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGRA, 8, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ABGR, 8, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, ARGB, 8, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint8_t, BGR, 8, YCgCo420)
+void YCgCo420P10ToBGRA10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P10ToABGR10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P10ToARGB10(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P10ToBGR10(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGBA, 12, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, RGB, 12, YCgCo420)
-
+/**
+ * Convert YCgCo 4:2:0 12 bit to RGBA 12 bit
+ */
+void YCgCo420P12ToRGBA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P12ToRGB12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #if SPARKYUV_FULL_CHANNELS
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 12, YCgCo444)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 12, YCgCo422)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGRA, 12, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ABGR, 12, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, ARGB, 12, YCgCo420)
-YCGCO_TO_PX_DECLARATION_H(uint16_t, BGR, 12, YCgCo420)
+void YCgCo420P12ToBGRA12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P12ToABGR12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P12ToARGB12(uint16_t *src, uint32_t srcStride,
+                         uint32_t width, uint32_t height,
+                         const uint16_t *yPlane, uint32_t yStride,
+                         const uint16_t *uPlane, uint32_t uStride,
+                         const uint16_t *vPlane, uint32_t vStride,
+                         SparkYuvColorRange colorRange);
+void YCgCo420P12ToBGR12(uint16_t *src, uint32_t srcStride,
+                        uint32_t width, uint32_t height,
+                        const uint16_t *yPlane, uint32_t yStride,
+                        const uint16_t *uPlane, uint32_t uStride,
+                        const uint16_t *vPlane, uint32_t vStride,
+                        SparkYuvColorRange colorRange);
 #endif
 
-#undef YCGCO_TO_PX_DECLARATION_H
+/**
+ * Convert YCgCo 4:4:4 8 bit to RGBA 8 bit
+ */
+void YCgCo444P8ToRGBA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo444P8ToRGB8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void YCgCo444P8ToBGRA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo444P8ToABGR8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo444P8ToARGB8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo444P8ToBGR8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#endif
 
+/**
+ * Convert YCgCo 4:2:2 8 bit to RGBA 8 bit
+ */
+void YCgCo422P8ToRGBA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo422P8ToRGB8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void YCgCo422P8ToBGRA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo422P8ToABGR8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo422P8ToARGB8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo422P8ToBGR8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#endif
+
+/**
+ * Convert YCgCo 4:2:0 8 bit to RGBA 8 bit
+ */
+void YCgCo420P8ToRGBA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo420P8ToRGB8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#if SPARKYUV_FULL_CHANNELS
+void YCgCo420P8ToBGRA8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo420P8ToABGR8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo420P8ToARGB8(uint8_t *src, uint32_t srcStride,
+                       uint32_t width, uint32_t height,
+                       const uint8_t *yPlane, uint32_t yStride,
+                       const uint8_t *uPlane, uint32_t uStride,
+                       const uint8_t *vPlane, uint32_t vStride,
+                       SparkYuvColorRange colorRange);
+void YCgCo420P8ToBGR8(uint8_t *src, uint32_t srcStride,
+                      uint32_t width, uint32_t height,
+                      const uint8_t *yPlane, uint32_t yStride,
+                      const uint8_t *uPlane, uint32_t uStride,
+                      const uint8_t *vPlane, uint32_t vStride,
+                      SparkYuvColorRange colorRange);
+#endif
 }
 #endif //YUV_INCLUDE_SPARKYUV_YCGCO_H_

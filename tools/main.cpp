@@ -327,9 +327,8 @@ int main() {
                           height);
 
   bench(15, ANSI_COLOR_GREEN, "Fast Gaussian", [&]() {
-    sparkyuv::GaussianBlurRGBAF16(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
-                                  reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
-                                  width, height, 15 * 6.f, 6.f);
+    sparkyuv::FastGaussianBlurRGBAF16(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
+                                  width, height, 15);
   });
   sparkyuv::RGBAF16ToRGBA(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
                           rgbaData.data(),
