@@ -1004,8 +1004,8 @@ XXXToYCbCr444GEN2020(BGR)
                                           uint8_t * yPlane, uint32_t yStride,\
                                           uint8_t * uPlane, uint32_t uStride,\
                                           uint8_t * vPlane, uint32_t vStride) {\
-          pixelType##ToYCbCr422(src, srcStride, width, height,                                  \
-                              yPlane, yStride, uPlane, uStride, vPlane, vStride,              \
+          pixelType##ToYCbCr422(src, srcStride, width, height,\
+                              yPlane, yStride, uPlane, uStride, vPlane, vStride,   \
                               kr, kb, range); \
     }
 
