@@ -71,8 +71,8 @@ sparkyuv::RGBA10ToYCbCr422P10(reinterpret_cast<uint16_t *>(rgba16Data.data()),
 
 Contains some basic functions to work with planar images:
 
-- GaussianBlur ( original gaussian with no approximation used )
-- FastGaussianBlur ( good quality and very fast approximation of gaussian based on binomial polynomials )
+- Gaussian Blur ( original gaussian with no approximation used )
+- Fast Gaussian Blur ( good quality and very fast approximation of gaussian based on binomial polynomials )
 - Rotate
 - Copy image
 - Transpose

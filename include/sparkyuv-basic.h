@@ -200,6 +200,70 @@ void SaturateARGBTo8(const uint16_t *src, uint32_t srcStride,
 #endif
 
 /**
+ * Alpha multiplication
+ */
+
+/**
+* @brief Pre multiplies alpha for rendering
+*/
+void RGBAPremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                          uint8_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+* @brief Pre multiplies alpha for rendering
+*/
+void ABGRPremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                          uint8_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+* @brief Pre multiplies alpha for rendering
+*/
+void ARGBPremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                          uint8_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+* @brief Pre multiplies alpha for rendering
+*/
+void BGRAPremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                          uint8_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+ * Alpha un pre multiplication
+ */
+
+/**
+ * @brief Un premultiply alpha
+ */
+void RGBAUnpremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                            uint8_t *dst, uint32_t dstStride,
+                            uint32_t width, uint32_t height);
+
+/**
+ * @brief Un premultiply alpha
+ */
+void ABGRUnpremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                            uint8_t *dst, uint32_t dstStride,
+                            uint32_t width, uint32_t height);
+
+/**
+ * @brief Un premultiply alpha
+ */
+void ARGBUnpremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                            uint8_t *dst, uint32_t dstStride,
+                            uint32_t width, uint32_t height);
+
+/**
+ * @brief Un premultiply alpha
+ */
+void BGRAUnpremultiplyAlpha(const uint8_t *src, uint32_t srcStride,
+                            uint8_t *dst, uint32_t dstStride,
+                            uint32_t width, uint32_t height);
+
+/**
  * Flip Vertical
  */
 
@@ -562,15 +626,15 @@ void ScaleChannel(const uint8_t *input, uint32_t srcStride,
 
 
 void ScaleRGBF16(const uint16_t *input, uint32_t srcStride,
-                        uint32_t inputWidth, uint32_t inputHeight,
-                        uint16_t *output, uint32_t dstStride,
-                        uint32_t outputWidth, uint32_t outputHeight,
-                        SparkYuvSampler option);
+                 uint32_t inputWidth, uint32_t inputHeight,
+                 uint16_t *output, uint32_t dstStride,
+                 uint32_t outputWidth, uint32_t outputHeight,
+                 SparkYuvSampler option);
 void ScaleRGBAF16(const uint16_t *input, uint32_t srcStride,
-                         uint32_t inputWidth, uint32_t inputHeight,
-                         uint16_t *output, uint32_t dstStride,
-                         uint32_t outputWidth, uint32_t outputHeight,
-                         SparkYuvSampler option);
+                  uint32_t inputWidth, uint32_t inputHeight,
+                  uint16_t *output, uint32_t dstStride,
+                  uint32_t outputWidth, uint32_t outputHeight,
+                  SparkYuvSampler option);
 
 void ScaleChannelF16(const uint16_t *input, uint32_t srcStride,
                      uint32_t inputWidth, uint32_t inputHeight,
@@ -601,6 +665,196 @@ void ScaleChannel16(const uint16_t *input, uint32_t srcStride,
                     uint16_t *output, uint32_t dstStride,
                     uint32_t outputWidth, uint32_t outputHeight,
                     int depth, SparkYuvSampler option);
+
+/**
+ * Convert from U8 to F16
+ */
+
+/**
+* @brief Converts an image to F16 type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBAToRGBAF16(const uint8_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image to F16 type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBToRGBF16(const uint8_t *src, uint32_t srcStride,
+                 uint16_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image to F16 type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBA1010102ToRGBAF16(const uint8_t *src, uint32_t srcStride,
+                          uint16_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image to F16 type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void ChannelToChannelF16(const uint8_t *src, uint32_t srcStride,
+                         uint16_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
+
+/**
+ * Convert from U16 to F16
+ */
+
+/**
+* @brief Converts an image to F16 (float16) type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBA16ToRGBAF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Converts an image to F16 (float16) type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGB16ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Converts an image to F16 (float16) type, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void Channel16ToChannelF16(const uint16_t *src, uint32_t srcStride,
+                           uint16_t *dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height, int depth);
+
+/**
+ * Convert from F16 to U8
+ */
+
+/**
+* @brief Converts an image from F16 (float16) type to uint8_t 8 bit, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBAF16ToRGBA(const uint16_t *src, uint32_t srcStride,
+                   uint8_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image from F16 (float16) type to uint8_t 8 bit, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBF16ToRGB(const uint16_t *src, uint32_t srcStride,
+                 uint8_t *dst, uint32_t dstStride,
+                 uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image from F16 (float16) type to uint8_t 8 bit, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void ChannelF16ToChannel(const uint16_t *src, uint32_t srcStride,
+                         uint8_t *dst, uint32_t dstStride,
+                         uint32_t width, uint32_t height);
+
+/**
+* @brief Converts an image from F16 (float16) type to uint8_t 8 bit, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBAF16ToRGBA1010102(const uint16_t *src, uint32_t srcStride,
+                          uint8_t *dst, uint32_t dstStride,
+                          uint32_t width, uint32_t height);
+
+/**
+ * Convert from F16 to U16
+ */
+
+/**
+* @brief Converts an image from F16 (float16) type to uint16_t with provided bit depth, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBAF16ToRGBA16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Converts an image from F16 (float16) type to uint16_t with provided bit depth, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void RGBF16ToRGB16(const uint16_t *src, uint32_t srcStride,
+                   uint16_t *dst, uint32_t dstStride,
+                   uint32_t width, uint32_t height, int depth);
+
+/**
+* @brief Converts an image from F16 (float16) type to uint16_t with provided bit depth, channel order is preserved
+* @param depth Bit depth of the image
+*/
+void ChannelF16ToChannel16(const uint16_t *src, uint32_t srcStride,
+                           uint16_t *dst, uint32_t dstStride,
+                           uint32_t width, uint32_t height, int depth);
+
+/**
+ * Reformat F16 to other F16
+ */
+
+void RGBF16ToRGBAF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void BGRF16ToBGRAF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void BGRF16ToABGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void RGBF16ToARGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void RGBAF16ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void BGRAF16ToBGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ABGRF16ToBGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ARGBF16ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void BGRAF16ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void RGBAF16ToBGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ABGRF16ToRGBF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+void ARGBF16ToBGRF16(const uint16_t *src, uint32_t srcStride,
+                     uint16_t *dst, uint32_t dstStride,
+                     uint32_t width, uint32_t height);
+
+void BGRAF16ToRGBAF16(const uint16_t *src, uint32_t srcStride,
+                      uint16_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+
+void BGRAF16ToARGBF16(const uint16_t *src, uint32_t srcStride,
+                      uint16_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void RGBAF16ToABGRF16(const uint16_t *src, uint32_t srcStride,
+                      uint16_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void ABGRF16ToRGBAF16(const uint16_t *src, uint32_t srcStride,
+                      uint16_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
+void ARGBF16ToBGRAF16(const uint16_t *src, uint32_t srcStride,
+                      uint16_t *dst, uint32_t dstStride,
+                      uint32_t width, uint32_t height);
 
 }
 
