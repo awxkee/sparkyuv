@@ -24,10 +24,19 @@
 #include "ScaleRowSampler.hpp"
 #include <cstdint>
 #include <algorithm>
-#include "sampler-inl.h"
 #include "sampler.h"
 #include "src/math/math-inl.h"
 #include <cmath>
+
+#if HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2 && HWY_TARGET != HWY_SVE_256 && HWY_TARGET != HWY_SVE2_128
+#define WEIGHTED_WINDOW6_HWY 1
+#else
+#define WEIGHTED_WINDOW6_HWY 0
+#endif
+
+#if WEIGHTED_WINDOW6_HWY
+#include "sampler-inl.h"
+#endif
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -166,7 +175,9 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
     switch (op) {
       case WEIGHTED_ROW6_LANCZOS_SINC: {
         sampler = sparkyuv::Lanczos3Sinc;
+#if WEIGHTED_WINDOW6_HWY
         samplerHWY = Lanczos3Sinc;
+#endif
       }
         break;
     }
@@ -177,6 +188,7 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
 
     const int components = Components;
 
+#if WEIGHTED_WINDOW6_HWY
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<int32_t, 4> dix4;
     const FixedTag<uint32_t, 4> dux4;
@@ -187,9 +199,11 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
 
     const VF4 vfZeros = Zero(dfx4);
     const VF4 maxColorsV = Set(dfx4, maxColors);
+#endif
 
     uint32_t x = 0;
 
+#if WEIGHTED_WINDOW6_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       float srcX = (float) x * this->xScale;
@@ -268,6 +282,7 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
       }
     }
 #endif
+#endif
 
     for (; x < this->outputWidth; ++x) {
       float srcX = (float) x * this->xScale;
@@ -308,7 +323,6 @@ class WeightedWindow6RowSampler : public ScaleRowSampler<uint8_t> {
       }
 
       const int px = x * components;
-      const float invWeightScale = weightSum != 0.f ? 1.f / weightSum : 0.f;
 
 #if defined(__clang__)
 #pragma clang loop unroll(full)
@@ -431,7 +445,9 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
     switch (op) {
       case WEIGHTED_ROW6_LANCZOS_SINC: {
         sampler = sparkyuv::Lanczos3Sinc;
+#if WEIGHTED_WINDOW6_HWY
         samplerHWY = Lanczos3Sinc;
+#endif
       }
         break;
     }
@@ -448,12 +464,11 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
     const auto src8 = reinterpret_cast<const uint8_t *>(this->mSource);
     auto dst16 = reinterpret_cast<uint16_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
 
-    const int mMaxWidth = this->inputWidth - 1;
-
     const int components = Components;
 
     uint32_t x = 0;
 
+#if WEIGHTED_WINDOW6_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       float srcX = (float) x * this->xScale;
@@ -523,6 +538,7 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       }
     }
 #endif
+#endif
 
     for (; x < this->outputWidth; ++x) {
       float srcX = (float) x * this->xScale;
@@ -578,13 +594,17 @@ class WeightedWindow6RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
   ~WeightedWindow6RowSamplerF16Bit() override = default;
 
  private:
-  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
-
   const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
   ScaleWeightSampler sampler;
+
+#if WEIGHTED_WINDOW6_HWY
+  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
   ScaleWeightSamplerHWY samplerHWY;
+#endif
 };
 }
 HWY_AFTER_NAMESPACE();
+
+#undef WEIGHTED_WINDOW6_HWY
 
 #endif

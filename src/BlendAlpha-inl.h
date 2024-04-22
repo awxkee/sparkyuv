@@ -161,11 +161,12 @@ UnpremultiplyAlpha8HWY(const uint8_t *SPARKYUV_RESTRICT src, const uint32_t srcS
       auto Ah = PromoteUpperTo(du16, A);
       auto Al = PromoteLowerTo(du16, A);
 
+#if HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2 && HWY_TARGET != HWY_SVE_256 && HWY_TARGET != HWY_SVE2_128
       const auto ahMask = Ah == zeros;
       const auto alMask = Ah == zeros;
-
       Ah = IfThenElse(ahMask, mScale, Ah);
       Al = IfThenElse(alMask, mScale, Al);
+#endif
 
       const auto Rh = Div(WidenMulHigh(du8, R, scale), Ah);
       const auto Rl = Div(WidenMul(dhu8, LowerHalf(R), lScale), Al);

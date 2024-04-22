@@ -26,8 +26,17 @@
 #include <algorithm>
 #include "ScaleRowSampler.hpp"
 #include "src/sampler/sampler.h"
-#include "src/sampler/sampler-inl.h"
 #include <cmath>
+
+#if HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2 && HWY_TARGET != HWY_SVE_256 && HWY_TARGET != HWY_SVE2_128
+#define WEIGHTED_WINDOW4_HWY 1
+#else
+#define WEIGHTED_WINDOW4_HWY 0
+#endif
+
+#if WEIGHTED_WINDOW4_HWY
+#include "src/sampler/sampler-inl.h"
+#endif
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -63,32 +72,44 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
     switch (op) {
       case WEIGHTED_ROW4_HERMITE: {
         sampler = CubicHermite;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CubicHermiteV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_CATMULL_ROM: {
         sampler = CatmullRom;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CatmullRomV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_BSPLINE: {
         sampler = BSpline;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CubicBSplineV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_CUBIC: {
         sampler = SimpleCubic;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = SimpleCubicV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_BICUBIC: {
         sampler = BiCubicSpline;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = BiCubicSplineV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_MITCHELL: {
         sampler = MitchellNetravalli;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = MitchellNetravaliV;
+#endif
       }
         break;
     }
@@ -103,15 +124,13 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
     using VF4 = Vec<decltype(dfx4)>;
     using VU8x4 = Vec<decltype(du8x4)>;
 
-    const VF4 vfZeros = Zero(dfx4);
-    const VF4 maxColorsV = Set(dfx4, maxColors);
-
     auto dst = reinterpret_cast<uint8_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
 
     const int components = Components;
 
     uint32_t x = 0;
 
+#if WEIGHTED_WINDOW4_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       float srcX = (float) x * this->xScale;
@@ -157,6 +176,7 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
       VU8x4 u8Color = DemoteTo(du8x4, ConvertTo(dux4, color));
       StoreU(u8Color, du8x4, reinterpret_cast<uint8_t *>(&dst[x * components]));
     }
+#endif
 #endif
 
     for (; x < this->outputWidth; ++x) {
@@ -214,11 +234,13 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
   ~WeightedWindow4RowSampler() override = default;
 
  private:
-  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
-
   const float maxColors = ::powf(2.0f, (float) 8.f) - 1.0f;
   ScaleWeightSampler sampler;
+
+#if WEIGHTED_WINDOW4_HWY
+  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
   ScaleWeightSamplerHWY samplerHWY;
+#endif
 };
 
 template<WeightedRow4Operation op, int Components>
@@ -474,32 +496,44 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
     switch (op) {
       case WEIGHTED_ROW4_HERMITE: {
         sampler = CubicHermite;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CubicHermiteV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_CATMULL_ROM: {
         sampler = CatmullRom;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CatmullRomV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_BSPLINE: {
         sampler = BSpline;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = CubicBSplineV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_CUBIC: {
         sampler = SimpleCubic;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = SimpleCubicV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_BICUBIC: {
         sampler = BiCubicSpline;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = BiCubicSplineV;
+#endif
       }
         break;
       case WEIGHTED_ROW4_MITCHELL: {
         sampler = MitchellNetravalli;
+#if WEIGHTED_WINDOW4_HWY
         samplerHWY = MitchellNetravaliV;
+#endif
       }
         break;
     }
@@ -513,8 +547,6 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
     using VF4 = Vec<decltype(dfx4)>;
     using VF16x4 = Vec<decltype(df16x4)>;
 
-    const int mMaxWidth = this->inputWidth - 1;
-
     const auto src8 = reinterpret_cast<const uint8_t *>(this->mSource);
     auto dst16 = reinterpret_cast<uint16_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
 
@@ -522,6 +554,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
     uint32_t x = 0;
 
+#if WEIGHTED_WINDOW4_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       float srcX = (float) x * this->xScale;
@@ -570,6 +603,7 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
       VF16x4 f16Color = DemoteTo(df16x4, color);
       StoreU(f16Color, df16x4, reinterpret_cast<hwy::float16_t *>(&dst16[x * components]));
     }
+#endif
 #endif
 
     for (; x < this->outputWidth; ++x) {
@@ -630,13 +664,16 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
   ~WeightedWindow4RowSamplerF16Bit() override = default;
 
  private:
-  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
-
   ScaleWeightSampler sampler;
+#if WEIGHTED_WINDOW4_HWY
+  typedef Vec<FixedTag<float32_t, 4>> (*ScaleWeightSamplerHWY)(FixedTag<float32_t, 4>, Vec<FixedTag<float32_t, 4>>);
   ScaleWeightSamplerHWY samplerHWY;
+#endif
 };
 
 }
 HWY_AFTER_NAMESPACE();
+
+#undef WEIGHTED_WINDOW4_HWY
 
 #endif

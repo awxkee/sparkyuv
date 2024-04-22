@@ -26,6 +26,12 @@
 #include "sparkyuv-internal.h"
 #include "Eotf-inl.h"
 
+#if HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2 && HWY_TARGET != HWY_SVE_256 && HWY_TARGET != HWY_SVE2_128
+#define YCCBCCRC_HWY_ENABLED 1
+#else
+#define YCCBCCRC_HWY_ENABLED 0
+#endif
+
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
 
@@ -42,6 +48,7 @@ void computeYcCbcCrcCutoffs(const SparkYuvTransferFunction transferFunction,
   Pr = 1.f - Oetf(kr, transferFunction);
 }
 
+#if YCCBCCRC_HWY_ENABLED
 template<typename D, typename V = Vec<D>, HWY_IF_FLOAT_D(D)>
 EOTF_INLINE V computeYcCbcCrcEquation(D d, V dx, V low, V high, V scaleLow, V scaleHigh) {
   const auto zeros = Zero(d);
@@ -49,6 +56,7 @@ EOTF_INLINE V computeYcCbcCrcEquation(D d, V dx, V low, V high, V scaleLow, V sc
   v = IfThenElse(And(dx > zeros, dx < high), Mul(dx, scaleHigh), v);
   return v;
 }
+#endif
 
 EOTF_INLINE float computeYcCbcCrcEquation(float dx, float low, float high, float scaleLow, float scaleHigh) {
   float Eb;
@@ -113,17 +121,17 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const float divisor2 = 1.f / 2.f;
   const float divisor4 = 1.f / 4.f;
 
+#if YCCBCCRC_HWY_ENABLED
   const ScalableTag<uint16_t> du16;
   const Half<decltype(du16)> dhu16;
   const Rebind<T, decltype(du16)> d;
   const Half<decltype(d)> dh;
-  const int lanes = Lanes(d);
-  const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh);
   const Rebind<uint32_t, decltype(dhu16)> du32;
   const Rebind<float, decltype(du32)> df;
   using VF = Vec<decltype(df)>;
   using VU = Vec<decltype(du16)>;
-
+  const int lanes = Lanes(d);
+  const int uvLanes = (chromaSubsample == YUV_SAMPLE_444) ? lanes : Lanes(dh);
   const auto vScaleRangeY = Set(df, rangeY);
   const auto vScaleRangeUV = Set(df, rangeUV);
   const auto vBiasY = Set(df, biasY);
@@ -142,6 +150,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
   const auto vKg = Set(df, kg);
   const auto alpha = Set(d, maxColors);
   const auto v420Scale = Set(df, 0.5f);
+#endif
 
   for (uint32_t y = 0; y < height; ++y) {
     uint32_t x = 0;
@@ -151,6 +160,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
     auto vDst = reinterpret_cast<T *>(vStore);
     auto mSrc = reinterpret_cast<const T *>(mSource);
 
+#if YCCBCCRC_HWY_ENABLED
     for (; x + lanes < width; x += lanes) {
       VF Rh, Rl, Gh, Gl, Bh, Bl;
       if (std::is_same<T, uint16_t>::value) {
@@ -317,6 +327,7 @@ PixelToYcCbcCrcHWY(const T *SPARKYUV_RESTRICT src, const uint32_t srcStride,
       vDst += uvLanes;
       mSrc += lanes*components;
     }
+#endif
 
     for (; x < width; x += lanesForward) {
       float r;
@@ -570,6 +581,7 @@ EOTF_INLINE T YcCbcCrcInverse(T Y, T v, T scaleLow, T scaleHigh, T low, T high) 
   return x;
 }
 
+#if YCCBCCRC_HWY_ENABLED
 template<class D, class V = Vec<D>>
 EOTF_INLINE V YcCbcCrcInverse(D d, V Y, V v, V scaleLow, V scaleHigh, V low, V high) {
   const V l = Mul(v, scaleLow);
@@ -581,6 +593,7 @@ EOTF_INLINE V YcCbcCrcInverse(D d, V Y, V v, V scaleLow, V scaleHigh, V low, V h
   cv = IfThenElse(And(diffh > zeros, diffh <= high), Add(h, Y), cv);
   return cv;
 }
+#endif
 
 /**
 * @brief It will be good to declare a type of transfer function
@@ -632,6 +645,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 
   const float ekg = 1.f / kg;
 
+#if YCCBCCRC_HWY_ENABLED
   const ScalableTag<uint16_t> du16;
   const Half<decltype(du16)> dhu16;
   const Rebind<T, decltype(du16)> d;
@@ -690,6 +704,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 #endif
 
   const auto A = Set(du16, maxColors);
+#endif
 
   for (int y = 0; y < height; ++y) {
     auto CbSource = reinterpret_cast<const T *>(mUSrc);
@@ -699,6 +714,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
 
     uint32_t x = 0;
 
+#if YCCBCCRC_HWY_ENABLED
     for (; x + lanes < width; x += lanes) {
 #if SPARKYUV_ALLOW_FLOAT16
       VF Y, Cb, Cr;
@@ -835,6 +851,7 @@ void YcCbcCrcToXRGB(T *SPARKYUV_RESTRICT rgbaData, const uint32_t dstStride,
       CrSource += uvLanes;
       store += lanes * components;
     }
+#endif
 
     for (; x < width; x += lanesForward) {
       const T uValue = reinterpret_cast<const T *>(CbSource)[0];

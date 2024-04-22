@@ -110,7 +110,7 @@ static float HLGOetf(float linear) {
   } else if (linear <= (1.0f / 12.0f)) {
     return ::sqrtf(3.0f * linear);
   } else {
-    return 0.17883277f * logf(12.0f * linear - 0.28466892f) + 0.55991073f;
+    return 0.17883277f * ::logf(12.0f * linear - 0.28466892f) + 0.55991073f;
   }
 }
 

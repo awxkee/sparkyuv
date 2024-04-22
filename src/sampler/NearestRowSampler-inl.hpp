@@ -23,7 +23,6 @@
 
 #include "hwy/highway.h"
 #include "ScaleRowSampler.hpp"
-#include "sampler-inl.h"
 #include "sampler.h"
 #include <cstdint>
 #include <algorithm>

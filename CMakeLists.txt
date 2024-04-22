@@ -5,7 +5,9 @@ project(yuv)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
-add_definitions(-DHWY_DISABLED_TARGETS=\(HWY_SVE|HWY_SVE2|HWY_SVE_256|HWY_SVE2_128|HWY_SCALAR\))
+add_definitions(-DHWY_DISABLED_TARGETS=\(HWY_SCALAR\))
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=armv8-a+simd+crypto+sve")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+simd+crypto+sve")
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-pthread" COMPILER_SUPPORTS_THREADS)

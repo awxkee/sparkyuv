@@ -23,12 +23,21 @@
 
 #include <hwy/highway.h>
 #include "ScaleRowSampler.hpp"
-#include "sampler.h"
-#include "sampler-inl.h"
 #include "../yuv-inl.h"
+#include "sampler.h"
 #include <cstdint>
 #include <algorithm>
 #include <cmath>
+
+#if HWY_TARGET != HWY_SVE && HWY_TARGET != HWY_SVE2 && HWY_TARGET != HWY_SVE_256 && HWY_TARGET != HWY_SVE2_128
+#define BILINEAR_ENABLE_HWY 1
+#else
+#define BILINEAR_ENABLE_HWY 0
+#endif
+
+#if BILINEAR_ENABLE_HWY
+#include "sampler-inl.h"
+#endif
 
 HWY_BEFORE_NAMESPACE();
 namespace sparkyuv::HWY_NAMESPACE {
@@ -61,6 +70,7 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
   ~BilinearRowSampler4Chan8Bit() override = default;
 
   void sample(const int row) override {
+#if BILINEAR_ENABLE_HWY
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<uint32_t, 4> dix4;
     const FixedTag<uint8_t, 4> du8x4;
@@ -82,7 +92,7 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
     const VF4 vfZeros = Zero(dfx4);
     const VI4 srcStrideV = Set(dix4, this->srcStride);
     const VF4 maxColorsV = Set(dfx4, maxColors);
-
+#endif
     auto dst8 = reinterpret_cast<uint8_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + row * this->dstStride);
     auto dst = reinterpret_cast<uint8_t *>(dst8);
 
@@ -91,6 +101,7 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
 
     uint32_t x = 0;
 
+#if BILINEAR_ENABLE_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       VI4 currentX = Set(dix4, x);
@@ -135,6 +146,7 @@ class BilinearRowSampler4Chan8Bit : public ScaleRowSampler<uint8_t> {
 
       x += components - 1;
     }
+#endif
 #endif
 
     for (; x < this->outputWidth; ++x) {
@@ -196,6 +208,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
   ~BilinearRowSamplerF16Bit() override = default;
 
   void sample(const int y) override {
+#if BILINEAR_ENABLE_HWY
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<int32_t, 4> dix4;
     const FixedTag<hwy::float16_t, 4> df16x4;
@@ -213,6 +226,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
     const VI4 maxHeight = Set(dix4, this->inputHeight - 1);
     const VF4 vfZeros = Zero(dfx4);
     const VI4 srcStrideV = Set(dix4, this->srcStride);
+#endif
 
     const auto src8 = reinterpret_cast<const uint8_t *>(this->mSource);
     auto dst16 = reinterpret_cast<uint16_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
@@ -221,6 +235,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
     uint32_t x = 0;
 
+#if BILINEAR_ENABLE_HWY
 #if !NOACCELERATED_SAMPLER
     for (; x + 8 < this->outputWidth && components == 4; ++x) {
       VI4 currentX = Set(dix4, x);
@@ -263,6 +278,7 @@ class BilinearRowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
 
       x += components - 1;
     }
+#endif
 #endif
 
     for (; x < this->outputWidth; ++x) {
@@ -459,5 +475,7 @@ class BilinearRowSampler10Bit : public ScaleRowSampler<uint32_t> {
 
 } // sparkyuv
 HWY_AFTER_NAMESPACE();
+
+#undef BILINEAR_ENABLE_HWY
 
 #endif //SPARKYUV_BILINEAR_ROW_SAMPLER

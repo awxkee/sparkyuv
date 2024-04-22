@@ -1,4 +1,4 @@
-FROM --platform=linux/ppc64le ubuntu:latest
+FROM ubuntu:latest
 
 RUN apt-get -y update && apt-get -y install build-essential ninja-build cmake
 
