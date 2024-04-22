@@ -116,6 +116,7 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
   }
 
   void sample(const int y) override {
+#if WEIGHTED_WINDOW4_HWY
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<int32_t, 4> dix4;
     const FixedTag<uint32_t, 4> dux4;
@@ -123,6 +124,9 @@ class WeightedWindow4RowSampler : public ScaleRowSampler<uint8_t> {
     using VI4 = Vec<decltype(dix4)>;
     using VF4 = Vec<decltype(dfx4)>;
     using VU8x4 = Vec<decltype(du8x4)>;
+    const VF4 vfZeros = Zero(dfx4);
+    const VF4 maxColorsV = Set(dfx4, maxColors);
+#endif
 
     auto dst = reinterpret_cast<uint8_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
 
@@ -540,12 +544,15 @@ class WeightedWindow4RowSamplerF16Bit : public ScaleRowSampler<uint16_t> {
   }
 
   void sample(const int y) override {
+#if WEIGHTED_WINDOW4_HWY
     const FixedTag<float32_t, 4> dfx4;
     const FixedTag<int32_t, 4> dix4;
     const FixedTag<hwy::float16_t, 4> df16x4;
     using VI4 = Vec<decltype(dix4)>;
     using VF4 = Vec<decltype(dfx4)>;
     using VF16x4 = Vec<decltype(df16x4)>;
+    const int mMaxWidth = this->inputWidth - 1;
+#endif
 
     const auto src8 = reinterpret_cast<const uint8_t *>(this->mSource);
     auto dst16 = reinterpret_cast<uint16_t *>(reinterpret_cast<uint8_t *>(this->mDestination) + y * this->dstStride);
