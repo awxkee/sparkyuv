@@ -16,6 +16,17 @@
 
 #ifndef SPARKYUV_SAMPLER_H_ONCE
 #define SPARKYUV_SAMPLER_H_ONCE
+
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace sparkyuv {
 using namespace std;
 
