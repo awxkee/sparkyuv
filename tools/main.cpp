@@ -317,22 +317,26 @@ int main() {
     sparkyuv::TransposeClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
   });
 
-  std::vector<uint8_t> f16Store(width * 4 * sizeof(uint16_t) * height);
-
-  sparkyuv::RGBAToRGBAF16(rgbaData.data(),
-                          rgbaStride,
-                          reinterpret_cast<uint16_t *>( f16Store.data()),
-                          width * 4 * sizeof(uint16_t),
-                          width,
-                          height);
-
-  bench(15, ANSI_COLOR_GREEN, "Fast Gaussian", [&]() {
-    sparkyuv::FastGaussianBlurRGBAF16(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
-                                  width, height, 15);
+  bench(1, ANSI_COLOR_YELLOW, "Fast Blur", [&]() {
+    sparkyuv::FastGaussianBlurRGBA(rgbaData.data(), rgbaStride, width, height, 25);
   });
-  sparkyuv::RGBAF16ToRGBA(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
-                          rgbaData.data(),
-                          rgbaStride,width,height);
+
+//  std::vector<uint8_t> f16Store(width * 4 * sizeof(uint16_t) * height);
+//
+//  sparkyuv::RGBAToRGBAF16(rgbaData.data(),
+//                          rgbaStride,
+//                          reinterpret_cast<uint16_t *>( f16Store.data()),
+//                          width * 4 * sizeof(uint16_t),
+//                          width,
+//                          height);
+//
+//  bench(15, ANSI_COLOR_GREEN, "Fast Gaussian", [&]() {
+//    sparkyuv::FastGaussianBlurRGBAF16(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
+//                                  width, height, 15);
+//  });
+//  sparkyuv::RGBAF16ToRGBA(reinterpret_cast<uint16_t *>(f16Store.data()), width * 4 * sizeof(uint16_t),
+//                          rgbaData.data(),
+//                          rgbaStride,width,height);
 
   aire::JPEGEncoder encoder(rgbaData.data(), rgbaStride, width, height);
   auto encoded = encoder.encode();

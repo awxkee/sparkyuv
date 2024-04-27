@@ -18,8 +18,8 @@
 #include "sparkyuv-internal.h"
 #include "PixelLoader.h"
 #include "concurrency.hpp"
-#include "hwy/aligned_allocator.h"
 #include "TypeSupport.h"
+#include "FastGaussianNeon.h"
 
 namespace sparkyuv {
 
@@ -32,7 +32,7 @@ void VerticalGaussianPassChannel(T *data,
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto buffer = hwy::AllocateAligned<V>(bufLength + 1);
+  V buffer[1024];
 
   for (uint32_t x = 0; x < width; ++x) {
     V dif = 0, sum = (radius * radius) >> 1;
@@ -69,7 +69,7 @@ void HorizontalGaussianPassChannel(T *data,
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto buffer = hwy::AllocateAligned<V>(bufLength + 1);
+  V buffer[1024];
 
   for (int y = 0; y < height; ++y) {
     V dif = 0, sum = (radius * radius) >> 1;
@@ -103,9 +103,9 @@ void VerticalGaussianPass(T *data, const uint32_t stride,
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+  V bufferR[1024];
+  V bufferG[1024];
+  V bufferB[1024];
 
   const int channels = getPixelTypeComponents(PixelType);
 
@@ -171,9 +171,9 @@ void HorizontalGaussianPass(T *data,
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+  V bufferR[1024];
+  V bufferG[1024];
+  V bufferB[1024];
 
   const int channels = getPixelTypeComponents(PixelType);
 
@@ -236,9 +236,9 @@ void VerticalFastGaussianPassNext(T *data, const uint32_t stride, const int widt
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+  V bufferR[1024];
+  V bufferG[1024];
+  V bufferB[1024];
 
   const int channels = getPixelTypeComponents(PixelType);
 
@@ -303,9 +303,9 @@ void HorizontalFastGaussianNext(T *data, const uint32_t stride,
   const float weight = 1.f / (static_cast<float>(radius) * static_cast<float>(radius) * static_cast<float>(radius));
 
   constexpr int bufLength = 1023;
-  auto bufferR = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferG = hwy::AllocateAligned<V>(bufLength + 1);
-  auto bufferB = hwy::AllocateAligned<V>(bufLength + 1);
+  V bufferR[1024];
+  V bufferG[1024];
+  V bufferB[1024];
 
   const int channels = getPixelTypeComponents(PixelType);
 
@@ -346,7 +346,7 @@ void HorizontalFastGaussianNext(T *data, const uint32_t stride,
       int mPNextRad = (x + 2 * radius) & bufLength;
 
       auto srcNext = reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(data) + y * stride);
-      int px = std::clamp(x + radius, 0, static_cast<int32_t>(width - 1)) * channels;
+      int px = std::clamp(x + 3 * radius / 2, 0, static_cast<int32_t>(width - 1)) * channels;
       srcNext += px;
 
       V pR, pG, pB, pA;
@@ -364,10 +364,28 @@ void HorizontalFastGaussianNext(T *data, const uint32_t stride,
   }
 }
 
+void FastGaussianBlurRGBA(uint8_t *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {
+  const int threadCount = concurrency::getThreadCounts(width, height);
+  concurrency::parallel_for_segment(threadCount, width, [&](uint32_t start, uint32_t end) {
+#if __aarch64__
+    VerticalGaussianPassRGBANeon(data, stride, width, height, radius, start, end);
+#else
+    VerticalGaussianPass<uint8_t, int, sparkyuv::PIXEL_RGBA>(data, stride, width, height, radius, start, end);
+#endif
+  });
+  concurrency::parallel_for_segment(threadCount, height, [&](uint32_t start, uint32_t end) {
+#if __aarch64__
+    HorizontalGaussianPassRGBANeon(data, stride, width, height, radius, start, end);
+#else
+    HorizontalGaussianPass<uint8_t, int, sparkyuv::PIXEL_RGBA>(data, stride, width, height, radius, start, end);
+#endif
+  });
+}
+
 #define FAST_GAUSSIAN_DECLARATION_R(pixelName, pixelType, storageType) \
     void FastGaussianBlur##pixelName(storageType *data, uint32_t stride, uint32_t width, uint32_t height, int radius) {\
       const int threadCount = concurrency::getThreadCounts(width, height);\
-      concurrency::parallel_for_segment(threadCount, width, [&](int start, int end) {\
+      concurrency::parallel_for_segment(threadCount, width, [&](int start, int end) { \
         VerticalGaussianPass<storageType, int, sparkyuv::PIXEL_##pixelType>(data, stride, width, height, radius, start, end);\
       });\
       concurrency::parallel_for_segment(threadCount, height, [&](int start, int end) {\
@@ -375,7 +393,6 @@ void HorizontalFastGaussianNext(T *data, const uint32_t stride,
       });\
     }
 
-FAST_GAUSSIAN_DECLARATION_R(RGBA, RGBA, uint8_t)
 FAST_GAUSSIAN_DECLARATION_R(RGB, RGB, uint8_t)
 #if SPARKYUV_FULL_CHANNELS
 FAST_GAUSSIAN_DECLARATION_R(ARGB, ARGB, uint8_t)

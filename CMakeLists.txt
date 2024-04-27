@@ -44,7 +44,9 @@ set(SPARKYUV_SOURCES
         src/Rotate.cpp
         src/FastGaussian.cpp
         src/FastGaussian.h
-        src/GaussianBlur.cpp)
+        src/GaussianBlur.cpp
+        src/FastGaussianNeon.cpp
+        src/FastGaussianNeon.h)
 
 set(HWY_SOURCES
         highway/hwy/aligned_allocator.cc highway/hwy/targets.cc highway/hwy/targets.cc
