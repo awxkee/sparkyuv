@@ -76,7 +76,6 @@ void VerticalGaussianPassRGBANeon(uint8_t *data,
         src[px + 2] = vget_lane_u8(p8, 2);
 
         int32x4_t bufferValue1 = vld1q_s32(reinterpret_cast<const int *>(&buffer[arrIndex][0]));
-
         int32x4_t bufferValue2 = vld1q_s32(reinterpret_cast<const int *>(&buffer[dArrIndex][0]));
         bufferValue2 = vshlq_n_s32(bufferValue2, 1);
 

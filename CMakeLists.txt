@@ -24,7 +24,6 @@ set(SPARKYUV_SOURCES
         src/ChannelLength.cpp
         src/YCbCrP16.cpp
         src/ChannelsReformat.cpp
-        src/Scale.cpp
         src/NV12Flyer.cpp
         src/NV16Flyer.cpp
         src/NV24Flyer.cpp
@@ -44,7 +43,6 @@ set(SPARKYUV_SOURCES
         src/Rotate.cpp
         src/FastGaussian.cpp
         src/FastGaussian.h
-        src/GaussianBlur.cpp
         src/FastGaussianNeon.cpp
         src/FastGaussianNeon.h)
 
@@ -53,8 +51,7 @@ set(HWY_SOURCES
         highway/hwy/nanobenchmark.cc highway/hwy/per_target.cc highway/hwy/timer.cc
         highway/hwy/abort.cc
         src/Eotf.cpp
-        src/Eotf-inl.h
-        src/GaussianBlur-inl.h)
+        src/Eotf-inl.h)
 
 if (BUILD_SHARED)
     add_library(sparkyuv SHARED ${SPARKYUV_SOURCES} ${HWY_SOURCES})

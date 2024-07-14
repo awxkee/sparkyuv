@@ -317,10 +317,6 @@ int main() {
     sparkyuv::TransposeClockwiseRGBA(rgbaData.data(), rgbaStride, transposed.data(), trnsStride, width, height);
   });
 
-  bench(1, ANSI_COLOR_YELLOW, "Fast Blur", [&]() {
-    sparkyuv::FastGaussianBlurRGBA(rgbaData.data(), rgbaStride, width, height, 25);
-  });
-
 //  std::vector<uint8_t> f16Store(width * 4 * sizeof(uint16_t) * height);
 //
 //  sparkyuv::RGBAToRGBAF16(rgbaData.data(),

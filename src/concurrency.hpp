@@ -152,7 +152,7 @@ void parallel_for_segment(const int numThreads, const uint32_t numIterations, Fu
 #if THREADS_SUPPORTED
   std::vector<std::thread> threads;
 
-  int segmentHeight = numIterations / static_cast<uint32_t >(numThreads);
+  auto segmentHeight = static_cast<uint32_t >(numIterations) / static_cast<uint32_t >(numThreads);
 
   auto parallelWorker = [&](int start, int end) {
     std::invoke(func, start, end, std::forward<Args>(args)...);
@@ -170,8 +170,8 @@ void parallel_for_segment(const int numThreads, const uint32_t numIterations, Fu
     }
   }
 
-  int start = 0;
-  int end = segmentHeight;
+  uint32_t start = 0;
+  uint32_t end = segmentHeight;
   if (numThreads == 1) {
     end = numIterations;
   }

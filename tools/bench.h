@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 static void bench(int iterations, const char *color, const char *mark, const std::function<void()> &func) {
   double totalTime = 0;
